@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartCount = document.getElementById("cartCount");
 
     // Sepet
+    localStorage.removeItem("cart");
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 // Sepeti Kaydet
 function kaydetSepet() {
