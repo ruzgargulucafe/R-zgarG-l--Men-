@@ -1,121 +1,42 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Menü | Rüzgar Gülü Cafe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menü | Rüzgar Gülü Cafe & Beach Restaurant</title>
 
-<style>
-
-body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:#eef6fb;
-}
-
-header{
-background:#0c7cc2;
-color:white;
-padding:20px;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-}
-
-.kategori{
-background:white;
-margin:15px;
-padding:18px;
-border-radius:15px;
-box-shadow:0 3px 12px rgba(0,0,0,.12);
-font-size:22px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.kategori:hover{
-background:#f3fbff;
-}
-
-footer{
-text-align:center;
-padding:25px;
-color:#666;
-}
-
-</style>
-
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
+<header class="menuHeader">
 
-🍽️ MENÜ
+    <a href="index.html" class="geri">← Ana Sayfa</a>
+
+    <h1>🍽️ MENÜ</h1>
+
+    <p>Rüzgar Gülü Cafe & Beach Restaurant</p>
 
 </header>
 
-<div class="kategori">
-    <h2>🥐 Kahvaltılar</h2>
+<main id="menuContainer">
 
-    <div class="urun">
-        <h3>Serpme Kahvaltı (2 Kişilik)</h3>
-        <p>Zengin kahvaltılık çeşitleri, peynirler, zeytin, reçeller, bal-kaymak, sıcak ürünler ve sınırsız çay.</p>
-        <span>₺1.000</span>
-    </div>
+<!-- Buraya kategoriler gelecek -->
 
-    <div class="urun">
-        <h3>Menemen</h3>
-        <span>₺200</span>
-    </div>
+</main>
 
-    <div class="urun">
-        <h3>Sucuklu Yumurta</h3>
-        <span>₺200</span>
-    </div>
+<div id="cartButton">
 
-    <div class="urun">
-        <h3>Omlet</h3>
-        <span>₺150</span>
-    </div>
+🛒 Sepet
 
-    <div class="urun">
-        <h3>Mıhlama</h3>
-        <span>₺250</span>
-    </div>
+<span id="cartCount">0</span>
+
 </div>
 
-<div class="kategori">🥪 Tost & Sandviç</div>
+<script src="script.js"></script>
 
-<div class="kategori">🍔 Burgerler</div>
-
-<div class="kategori">🍝 Makarnalar</div>
-
-<div class="kategori">🥩 Ana Yemekler</div>
-
-<div class="kategori">🥗 Salatalar</div>
-
-<div class="kategori">🍟 Atıştırmalıklar</div>
-
-<div class="kategori">🍰 Tatlılar</div>
-
-<div class="kategori">☕ Sıcak Kahveler</div>
-
-<div class="kategori">🧊 Soğuk Kahveler</div>
-
-<div class="kategori">🥤 Soğuk İçecekler</div>
-
-<div class="kategori">🍋 Limonata & Frozen</div>
-
-<div class="kategori">🥛 Milkshake</div>
-
-<footer>
-
-Rüzgar Gülü Cafe & Beach Restaurant
-
-</footer>
-
- <script src="script.js"></script>
-    
 </body>
+
 </html>
