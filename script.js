@@ -226,22 +226,21 @@ finishOrder.addEventListener("click", () => {
 }
 console.log("Masa:", masaNo.value);
 console.log("Not:", orderNote.value);
-    let mesaj = "🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
-
-mesaj += `🪑 Masa No: ${masaNo.value}\n\n`;
-
-mesaj += "📋 Sipariş:\n\n";
-
-    cart.forEach(item => {
-        mesaj += `• ${item.adet} x ${item.isim} - ₺${item.fiyat * item.adet}\n`;
-    });
-
     const toplam = cart.reduce((t, u) => t + (u.fiyat * u.adet), 0);
 
-    mesaj += `\n💰 Toplam: ₺${toplam}`;
-if (orderNote.value.trim() !== "") {
-    mesaj += `\n\n📝 Sipariş Notu:\n${orderNote.value}`;
-}
+let mesaj =
+`🍽️ Rüzgar Gülü Cafe & Beach Restaurant
+
+🪑 Masa No: ${masaNo.value}
+
+📋 Sipariş:
+
+${cart.map(item => `• ${item.adet} x ${item.isim} - ₺${item.fiyat * item.adet}`).join("\n")}
+
+💰 Toplam: ₺${toplam}
+
+📝 Sipariş Notu:
+${orderNote.value || "-"}`;
     // BURAYA KENDİ TELEFON NUMARANI YAZ
     const telefon = "905428351609";
 
