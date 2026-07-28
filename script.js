@@ -70,44 +70,40 @@ function kaydetSepet() {
     };
 
     function guncelleSepet() {
-    console.log(cart);
-        cartItems.innerHTML = "";
 
-        let toplam = 0;
+    cartItems.innerHTML = "";
 
-        cart.forEach(item => {
+    let toplam = 0;
 
-    const araToplam = item.fiyat * item.adet;
+    if (cart.length === 0) {
 
-    toplam += araToplam;
-
-    cartItems.innerHTML += `
-        <div class="urun">
-
-            <h3>${item.isim}</h3>
-
-            <p>Adet: ${item.adet}</p>
-
-            <div class="fiyat">
-                ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
-            </div>
-
-        </div>
-    `;
-
-});
-
-        if(cart.length===0){
-
-            cartItems.innerHTML="<p>Henüz ürün eklenmedi.</p>";
-
-        }
-
-
-        const toplamAdet = cart.reduce((toplam, item) => toplam + item.adet, 0);
-cartCount.textContent = toplamAdet;
-cartTotal.textContent = "₺" + toplam;
+        cartItems.innerHTML = "<p>Henüz ürün eklenmedi.</p>";
+        cartCount.textContent = "0";
+        cartTotal.textContent = "₺0";
+        return;
     }
 
-    guncelleSepet();
-});
+    cart.forEach(item => {
+
+        const araToplam = item.fiyat * item.adet;
+        toplam += araToplam;
+
+        cartItems.innerHTML += `
+            <div class="urun">
+                <h3>${item.isim}</h3>
+                <p>Adet: ${item.adet}</p>
+                <div class="fiyat">
+                    ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
+                </div>
+            </div>
+        `;
+
+    });
+
+    const toplamAdet = cart.reduce((t, item) => t + item.adet, 0);
+
+    cartCount.textContent = toplamAdet;
+    cartTotal.textContent = `₺${toplam}`;
+
+    kaydetSepet();
+}
