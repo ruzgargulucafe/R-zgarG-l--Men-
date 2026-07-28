@@ -224,8 +224,9 @@ finishOrder.addEventListener("click", () => {
     alert("Lütfen masa numarasını seçiniz.");
     return;
 }
-
-let mesaj = "🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
+console.log("Masa:", masaNo.value);
+console.log("Not:", orderNote.value);
+    let mesaj = "🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
 
 mesaj += `🪑 Masa No: ${masaNo.value}\n\n`;
 
