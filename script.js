@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ELEMENTLER
     const accordions = document.querySelectorAll(".accordion");
     const addButtons = document.querySelectorAll(".sepeteEkle");
 
@@ -10,182 +11,205 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartItems = document.getElementById("cartItems");
     const cartTotal = document.getElementById("cartTotal");
     const cartCount = document.getElementById("cartCount");
-
-    // Sepet
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-// Sepeti Kaydet
-function kaydetSepet() {
-    localStorage.setItem("cart", JSON.stringify(cart));
-}
-    
-    // Kategoriler
-    accordions.forEach(btn => {
-        btn.onclick = () => {
-            const panel = btn.nextElementSibling;
-            panel.style.display =
-                panel.style.display === "block" ? "none" : "block";
-        };
-    });
-
-    // Sepete ekle
-    addButtons.forEach(btn => {
-
-    btn.onclick = () => {
-
-        const isim = btn.dataset.urun;
-        const fiyat = Number(btn.dataset.fiyat);
-
-        const urun = cart.find(item => item.isim === isim);
-
-        if (urun) {
-
-            urun.adet++;
-
-        } else {
-
-            cart.push({
-                isim: isim,
-                fiyat: fiyat,
-                adet: 1
-            });
-
-        }
-
-        kaydetSepet();
-        guncelleSepet();
-
-    };
-
-});
-
-    // Sepeti aç
-    cartButton.onclick = () => {
-        cartPanel.classList.add("active");
-    };
-
-    // Sepeti kapat
-    closeCart.onclick = () => {
-        cartPanel.classList.remove("active");
-    };
-
-    function guncelleSepet() {
-
-    cartItems.innerHTML = "";
-
-    let toplam = 0;
-
-    if (cart.length === 0) {
-
-        cartItems.innerHTML = "<p>Henüz ürün eklenmedi.</p>";
-        cartCount.textContent = "0";
-        cartTotal.textContent = "₺0";
-        return;
-    }
-
-    cart.forEach(item => {
-
-        const araToplam = item.fiyat * item.adet;
-        toplam += araToplam;
-
-        cartItems.innerHTML += `
-<div class="urun">
-
-    <h3>${item.isim}</h3>
-
-    <div class="adetKontrol">
-
-        <button class="azalt" data-urun="${item.isim}">−</button>
-
-        <span>${item.adet}</span>
-
-        <button class="arttir" data-urun="${item.isim}">+</button>
-
-    </div>
-
-    <div class="fiyat">
-        ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
-    </div>
-
-    <button class="silUrun" data-urun="${item.isim}">
-        🗑️ Kaldır
-    </button>
-
-</div>
-`;
-
-    });
-
-    const toplamAdet = cart.reduce((t, item) => t + item.adet, 0);
-
-    cartCount.textContent = toplamAdet;
-    cartTotal.textContent = `₺${toplam}`;
-
-    kaydetSepet();
-        // Artır
-document.querySelectorAll(".arttir").forEach(btn => {
-
-    btn.onclick = () => {
-
-        const urun = cart.find(i => i.isim === btn.dataset.urun);
-
-        urun.adet++;
-
-        kaydetSepet();
-        guncelleSepet();
-
-    };
-
-});
-
-// Azalt
-document.querySelectorAll(".azalt").forEach(btn => {
-
-    btn.onclick = () => {
-
-        const urun = cart.find(i => i.isim === btn.dataset.urun);
-
-        urun.adet--;
-
-        if (urun.adet <= 0) {
-            cart = cart.filter(i => i.isim !== urun.isim);
-        }
-
-        kaydetSepet();
-        guncelleSepet();
-
-    };
-
-});
-
-// Sil
-document.querySelectorAll(".silUrun").forEach(btn => {
-
-    btn.onclick = () => {
-
-        cart = cart.filter(i => i.isim !== btn.dataset.urun);
-
-        kaydetSepet();
-        guncelleSepet();
-
-    };
-
-});
-
-} // guncelleSepet bitti
-
     const clearCart = document.getElementById("clearCart");
 
-if (clearCart) {
-    clearCart.onclick = () => {
+    // SEPET
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-        if (confirm("Sepetteki tüm ürünler silinsin mi?")) {
-            cart = [];
+    function kaydetSepet() {
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    // ACCORDION
+    accordions.forEach(btn => {
+        btn.addEventListener("click", () => {
+
+            const panel = btn.nextElementSibling;
+
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+
+        });
+    });
+
+    // SEPETE EKLE
+    addButtons.forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const isim = btn.dataset.urun;
+            const fiyat = Number(btn.dataset.fiyat);
+
+            const mevcut = cart.find(u => u.isim === isim);
+
+            if (mevcut) {
+                mevcut.adet++;
+            } else {
+                cart.push({
+                    isim,
+                    fiyat,
+                    adet: 1
+                });
+            }
+
             kaydetSepet();
             guncelleSepet();
+
+        });
+
+    });
+
+    // SEPET AÇ
+    cartButton.addEventListener("click", () => {
+        cartPanel.classList.add("active");
+    });
+
+    // SEPET KAPAT
+    closeCart.addEventListener("click", () => {
+        cartPanel.classList.remove("active");
+    });
+
+    // SEPETİ TEMİZLE
+    if (clearCart) {
+
+        clearCart.addEventListener("click", () => {
+
+            if (confirm("Sepeti temizlemek istiyor musunuz?")) {
+
+                cart = [];
+                kaydetSepet();
+                guncelleSepet();
+
+            }
+
+        });
+
+    }
+
+    // GÜNCELLE
+    function guncelleSepet() {
+
+        cartItems.innerHTML = "";
+
+        if (cart.length === 0) {
+
+            cartItems.innerHTML =
+                "<p>Henüz ürün eklenmedi.</p>";
+
+            cartCount.textContent = "0";
+            cartTotal.textContent = "₺0";
+            return;
         }
 
-    };
-}
-guncelleSepet();
+        let toplam = 0;
 
-}); // DOMContentLoaded bitti
+        cart.forEach(item => {
+
+            const araToplam = item.fiyat * item.adet;
+
+            toplam += araToplam;
+
+            cartItems.innerHTML += `
+            <div class="urun">
+
+                <h3>${item.isim}</h3>
+
+                <div class="adetKontrol">
+
+                    <button class="azalt"
+                        data-urun="${item.isim}">
+                        −
+                    </button>
+
+                    <span>${item.adet}</span>
+
+                    <button class="arttir"
+                        data-urun="${item.isim}">
+                        +
+                    </button>
+
+                </div>
+
+                <div class="fiyat">
+                    ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
+                </div>
+
+                <button class="silUrun"
+                    data-urun="${item.isim}">
+                    🗑️ Kaldır
+                </button>
+
+            </div>
+            `;
+
+        });
+
+        cartCount.textContent =
+            cart.reduce((t, u) => t + u.adet, 0);
+
+        cartTotal.textContent = `₺${toplam}`;
+
+        kaydetSepet();
+        // ARTIR
+        document.querySelectorAll(".arttir").forEach(btn => {
+
+            btn.addEventListener("click", () => {
+
+                const urun = cart.find(u => u.isim === btn.dataset.urun);
+
+                if (!urun) return;
+
+                urun.adet++;
+
+                kaydetSepet();
+                guncelleSepet();
+
+            });
+
+        });
+
+        // AZALT
+        document.querySelectorAll(".azalt").forEach(btn => {
+
+            btn.addEventListener("click", () => {
+
+                const urun = cart.find(u => u.isim === btn.dataset.urun);
+
+                if (!urun) return;
+
+                urun.adet--;
+
+                if (urun.adet <= 0) {
+                    cart = cart.filter(u => u.isim !== urun.isim);
+                }
+
+                kaydetSepet();
+                guncelleSepet();
+
+            });
+
+        });
+
+        // SİL
+        document.querySelectorAll(".silUrun").forEach(btn => {
+
+            btn.addEventListener("click", () => {
+
+                cart = cart.filter(u => u.isim !== btn.dataset.urun);
+
+                kaydetSepet();
+                guncelleSepet();
+
+            });
+
+        });
+
+    }
+
+    // SAYFA AÇILINCA
+    guncelleSepet();
+
+});
