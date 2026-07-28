@@ -1,23 +1,39 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
 
     const accordions = document.querySelectorAll(".accordion");
+    const cartCount = document.getElementById("cartCount");
+    const addButtons = document.querySelectorAll(".sepeteEkle");
 
-    accordions.forEach(function (button) {
+    let sepet = 0;
 
-        button.addEventListener("click", function () {
+    // Kategorileri aç/kapat
+    accordions.forEach(button => {
+        button.addEventListener("click", () => {
 
-            this.classList.toggle("active");
-
-            const panel = this.nextElementSibling;
+            const panel = button.nextElementSibling;
 
             if (panel.style.display === "block") {
                 panel.style.display = "none";
             } else {
                 panel.style.display = "block";
             }
+        });
+    });
+
+    // Sepete ekle
+    addButtons.forEach(button => {
+        button.addEventListener("click", () => {
+
+            sepet++;
+            cartCount.textContent = sepet;
+
+            button.textContent = "✅ Sepete Eklendi";
+
+            setTimeout(() => {
+                button.textContent = "Sepete Ekle";
+            }, 1000);
 
         });
-
     });
 
 });
