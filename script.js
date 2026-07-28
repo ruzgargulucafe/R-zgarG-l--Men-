@@ -233,7 +233,8 @@ finishOrder.addEventListener("click", () => {
     // BURAYA KENDİ TELEFON NUMARANI YAZ
     const telefon = "905428351609";
 
-    alert("Butona basıldı");
+    const url = `https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`;
+window.location.href = url;
 
 });
     guncelleSepet();
