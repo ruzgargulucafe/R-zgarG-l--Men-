@@ -105,7 +105,7 @@ function kaydetSepet() {
 
         const toplamAdet = cart.reduce((toplam, item) => toplam + item.adet, 0);
 cartCount.textContent = toplamAdet;
-
+cartTotal.textContent = "₺" + toplam;
     }
 
     guncelleSepet();
