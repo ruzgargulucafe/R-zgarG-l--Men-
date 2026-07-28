@@ -89,14 +89,30 @@ function kaydetSepet() {
         toplam += araToplam;
 
         cartItems.innerHTML += `
-            <div class="urun">
-                <h3>${item.isim}</h3>
-                <p>Adet: ${item.adet}</p>
-                <div class="fiyat">
-                    ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
-                </div>
-            </div>
-        `;
+<div class="urun">
+
+    <h3>${item.isim}</h3>
+
+    <div class="adetKontrol">
+
+        <button class="azalt" data-urun="${item.isim}">−</button>
+
+        <span>${item.adet}</span>
+
+        <button class="arttir" data-urun="${item.isim}">+</button>
+
+    </div>
+
+    <div class="fiyat">
+        ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
+    </div>
+
+    <button class="silUrun" data-urun="${item.isim}">
+        🗑️ Kaldır
+    </button>
+
+</div>
+`;
 
     });
 
