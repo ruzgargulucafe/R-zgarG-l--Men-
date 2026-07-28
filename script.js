@@ -1,39 +1,80 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const accordions = document.querySelectorAll(".accordion");
-    const cartCount = document.getElementById("cartCount");
     const addButtons = document.querySelectorAll(".sepeteEkle");
 
-    let sepet = 0;
+    const cartButton = document.getElementById("cartButton");
+    const cartPanel = document.getElementById("cartPanel");
+    const closeCart = document.getElementById("closeCart");
 
-    // Kategorileri aç/kapat
-    accordions.forEach(button => {
-        button.addEventListener("click", () => {
+    const cartItems = document.getElementById("cartItems");
+    const cartTotal = document.getElementById("cartTotal");
+    const cartCount = document.getElementById("cartCount");
 
-            const panel = button.nextElementSibling;
+    let cart = [];
 
-            if (panel.style.display === "block") {
-                panel.style.display = "none";
-            } else {
-                panel.style.display = "block";
-            }
-        });
+    // Kategoriler
+    accordions.forEach(btn => {
+        btn.onclick = () => {
+            const panel = btn.nextElementSibling;
+            panel.style.display =
+                panel.style.display === "block" ? "none" : "block";
+        };
     });
 
     // Sepete ekle
-    addButtons.forEach(button => {
-        button.addEventListener("click", () => {
+    addButtons.forEach(btn => {
 
-            sepet++;
-            cartCount.textContent = sepet;
+        btn.onclick = () => {
 
-            button.textContent = "✅ Sepete Eklendi";
+            cart.push({
+                isim: btn.dataset.urun,
+                fiyat: Number(btn.dataset.fiyat)
+            });
 
-            setTimeout(() => {
-                button.textContent = "Sepete Ekle";
-            }, 1000);
+            guncelleSepet();
+        };
+
+    });
+
+    // Sepeti aç
+    cartButton.onclick = () => {
+        cartPanel.classList.add("active");
+    };
+
+    // Sepeti kapat
+    closeCart.onclick = () => {
+        cartPanel.classList.remove("active");
+    };
+
+    function guncelleSepet() {
+
+        cartItems.innerHTML = "";
+
+        let toplam = 0;
+
+        cart.forEach(item => {
+
+            toplam += item.fiyat;
+
+            cartItems.innerHTML += `
+                <div class="urun">
+                    <h3>${item.isim}</h3>
+                    <div class="fiyat">₺${item.fiyat}</div>
+                </div>
+            `;
 
         });
-    });
+
+        if(cart.length===0){
+
+            cartItems.innerHTML="<p>Henüz ürün eklenmedi.</p>";
+
+        }
+
+        cartCount.textContent = cart.length;
+        cartTotal.textContent = "₺"+toplam;
+
+    }
 
 });
