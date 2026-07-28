@@ -76,16 +76,25 @@ function kaydetSepet() {
 
         cart.forEach(item => {
 
-            toplam += item.fiyat;
+    const araToplam = item.fiyat * item.adet;
 
-            cartItems.innerHTML += `
-                <div class="urun">
-                    <h3>${item.isim}</h3>
-                    <div class="fiyat">₺${item.fiyat}</div>
-                </div>
-            `;
+    toplam += araToplam;
 
-        });
+    cartItems.innerHTML += `
+        <div class="urun">
+
+            <h3>${item.isim}</h3>
+
+            <p>Adet: ${item.adet}</p>
+
+            <div class="fiyat">
+                ₺${item.fiyat} × ${item.adet} = ₺${araToplam}
+            </div>
+
+        </div>
+    `;
+
+});
 
         if(cart.length===0){
 
