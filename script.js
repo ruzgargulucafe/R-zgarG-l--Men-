@@ -170,7 +170,6 @@ document.querySelectorAll(".silUrun").forEach(btn => {
     };
 
 });
-    } // silUrun forEach bitti
 
 } // guncelleSepet bitti
 
