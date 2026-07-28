@@ -122,4 +122,53 @@ function kaydetSepet() {
     cartTotal.textContent = `₺${toplam}`;
 
     kaydetSepet();
+        // Artır
+document.querySelectorAll(".arttir").forEach(btn => {
+
+    btn.onclick = () => {
+
+        const urun = cart.find(i => i.isim === btn.dataset.urun);
+
+        urun.adet++;
+
+        kaydetSepet();
+        guncelleSepet();
+
+    };
+
+});
+
+// Azalt
+document.querySelectorAll(".azalt").forEach(btn => {
+
+    btn.onclick = () => {
+
+        const urun = cart.find(i => i.isim === btn.dataset.urun);
+
+        urun.adet--;
+
+        if (urun.adet <= 0) {
+            cart = cart.filter(i => i.isim !== urun.isim);
+        }
+
+        kaydetSepet();
+        guncelleSepet();
+
+    };
+
+});
+
+// Sil
+document.querySelectorAll(".silUrun").forEach(btn => {
+
+    btn.onclick = () => {
+
+        cart = cart.filter(i => i.isim !== btn.dataset.urun);
+
+        kaydetSepet();
+        guncelleSepet();
+
+    };
+
+});
 }
