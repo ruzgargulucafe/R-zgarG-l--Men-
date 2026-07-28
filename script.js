@@ -210,6 +210,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // SAYFA AÇILINCA
+    const finishOrder = document.getElementById("finishOrder");
+
+finishOrder.addEventListener("click", () => {
+
+    if (cart.length === 0) {
+        alert("Sepetiniz boş.");
+        return;
+    }
+
+    let mesaj = "🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
+    mesaj += "📋 Sipariş:\n\n";
+
+    cart.forEach(item => {
+        mesaj += `• ${item.adet} x ${item.isim} - ₺${item.fiyat * item.adet}\n`;
+    });
+
+    const toplam = cart.reduce((t, u) => t + (u.fiyat * u.adet), 0);
+
+    mesaj += `\n💰 Toplam: ₺${toplam}`;
+
+    // BURAYA KENDİ TELEFON NUMARANI YAZ
+    const telefon = "905428351609";
+
+    window.open(
+        `https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`,
+        "_blank"
+    );
+
+});
     guncelleSepet();
 
 });
