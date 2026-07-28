@@ -173,6 +173,19 @@ document.querySelectorAll(".silUrun").forEach(btn => {
 
 } // guncelleSepet bitti
 
+    const clearCart = document.getElementById("clearCart");
+
+if (clearCart) {
+    clearCart.onclick = () => {
+
+        if (confirm("Sepetteki tüm ürünler silinsin mi?")) {
+            cart = [];
+            kaydetSepet();
+            guncelleSepet();
+        }
+
+    };
+}
 guncelleSepet();
 
 }); // DOMContentLoaded bitti
