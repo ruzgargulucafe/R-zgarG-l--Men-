@@ -1,3 +1,4 @@
+localStorage.clear();
 document.addEventListener("DOMContentLoaded", () => {
 
     const accordions = document.querySelectorAll(".accordion");
