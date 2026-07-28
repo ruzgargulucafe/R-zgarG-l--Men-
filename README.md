@@ -1,2 +1,2 @@
-# R-zgarG-l--Men-
+# RuzgarGuluMenu
 Rüzgar Gülü Cafe &amp; Beach Restaurant QR Menü
