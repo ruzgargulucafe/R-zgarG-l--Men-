@@ -11,8 +11,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartTotal = document.getElementById("cartTotal");
     const cartCount = document.getElementById("cartCount");
 
-    let cart = [];
-
+    // Sepet
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+// Sepeti Kaydet
+function kaydetSepet() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+    
     // Kategoriler
     accordions.forEach(btn => {
         btn.onclick = () => {
@@ -77,4 +82,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    guncelleSepet();
 });
