@@ -30,17 +30,33 @@ function kaydetSepet() {
     // Sepete ekle
     addButtons.forEach(btn => {
 
-        btn.onclick = () => {
+    btn.onclick = () => {
+
+        const isim = btn.dataset.urun;
+        const fiyat = Number(btn.dataset.fiyat);
+
+        const urun = cart.find(item => item.isim === isim);
+
+        if (urun) {
+
+            urun.adet++;
+
+        } else {
 
             cart.push({
-                isim: btn.dataset.urun,
-                fiyat: Number(btn.dataset.fiyat)
+                isim: isim,
+                fiyat: fiyat,
+                adet: 1
             });
 
-            guncelleSepet();
-        };
+        }
 
-    });
+        kaydetSepet();
+        guncelleSepet();
+
+    };
+
+});
 
     // Sepeti aç
     cartButton.onclick = () => {
