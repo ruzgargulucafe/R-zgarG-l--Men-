@@ -1,4 +1,3 @@
-localStorage.clear();
 document.addEventListener("DOMContentLoaded", () => {
 
     const accordions = document.querySelectorAll(".accordion");
@@ -70,7 +69,7 @@ function kaydetSepet() {
     };
 
     function guncelleSepet() {
-
+    console.log(cart);
         cartItems.innerHTML = "";
 
         let toplam = 0;
@@ -103,8 +102,9 @@ function kaydetSepet() {
 
         }
 
-        cartCount.textContent = cart.length;
-        cartTotal.textContent = "₺"+toplam;
+
+        const toplamAdet = cart.reduce((toplam, item) => toplam + item.adet, 0);
+cartCount.textContent = toplamAdet;
 
     }
 
