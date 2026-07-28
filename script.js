@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const finishOrder = document.getElementById("finishOrder");
 
 finishOrder.addEventListener("click", () => {
-
+    alert("Buton çalıştı");
     if (cart.length === 0) {
         alert("Sepetiniz boş.");
         return;
