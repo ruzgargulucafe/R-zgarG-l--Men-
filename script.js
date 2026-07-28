@@ -171,4 +171,3 @@ document.querySelectorAll(".silUrun").forEach(btn => {
     };
 
 });
-}
