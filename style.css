@@ -124,3 +124,27 @@ transition:.3s;
 .menuButton:hover{
 transform:scale(1.05);
 }
+
+.urun{
+    background:#fff;
+    margin-top:15px;
+    padding:18px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.urun h3{
+    margin:0 0 10px;
+    color:#0c7cc2;
+}
+
+.urun p{
+    color:#666;
+    margin-bottom:12px;
+}
+
+.urun span{
+    font-size:22px;
+    font-weight:bold;
+    color:#00a651;
+}
