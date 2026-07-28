@@ -1,11 +1,23 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
 
-    const buttons = document.querySelectorAll(".kategori");
+    const accordions = document.querySelectorAll(".accordion");
 
-    buttons.forEach(button => {
-        button.addEventListener("click", () => {
-            button.classList.toggle("aktif");
+    accordions.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            this.classList.toggle("active");
+
+            const panel = this.nextElementSibling;
+
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+
         });
+
     });
 
 });
