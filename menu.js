@@ -76,8 +76,8 @@ function renderMenu() {
         if (categoryProducts.length === 0) return;
 
         let html = `
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white">
+            <div class="card shadow-lg border-0 rounded-4 mb-4">
+                <div class="card-header bg-success text-white rounded-top-4">
                     <h3 class="mb-0">${category.name}</h3>
                 </div>
 
@@ -87,19 +87,30 @@ function renderMenu() {
         categoryProducts.forEach(product => {
 
             html += `
-                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                    <div>
-                        <h5 class="mb-1">${product.name}</h5>
-                        <small class="text-muted">
-                            ${product.description || ""}
-                        </small>
-                    </div>
+    <div class="d-flex justify-content-between align-items-center py-3">
 
-                    <h5 class="text-success mb-0">
-                        ₺${Number(product.price).toLocaleString("tr-TR")}
-                    </h5>
-                </div>
-            `;
+        <div>
+
+            <h5 class="mb-1 fw-bold">
+                ${product.name}
+            </h5>
+
+            <small class="text-muted">
+                ${product.description || ""}
+            </small>
+
+        </div>
+
+        <span class="badge bg-success rounded-pill fs-6">
+
+            ₺${Number(product.price).toLocaleString("tr-TR")}
+
+        </span>
+
+    </div>
+
+    <hr>
+`;
 
         });
 
