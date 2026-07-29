@@ -1,424 +1,565 @@
 import { db } from "./firebase.js";
 
 import {
-    collection,
-    addDoc,
-    serverTimestamp,
-    getDocs
+collection,
+getDocs,
+addDoc,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+// =========================
+// HTML Elemanları
+// =========================
 
-    const menuContent = document.getElementById("menuContent");
+const menuContent = document.getElementById("menuContent");
 
-    const cartButton = document.getElementById("cartButton");
-    const cartPanel = document.getElementById("cartPanel");
-    const closeCart = document.getElementById("closeCart");
+const cartButton = document.getElementById("cartButton");
 
-    const cartItems = document.getElementById("cartItems");
-    const cartTotal = document.getElementById("cartTotal");
-    const cartCount = document.getElementById("cartCount");
-    const clearCart = document.getElementById("clearCart");
+const cartPanel = document.getElementById("cartPanel");
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const closeCart = document.getElementById("closeCart");
 
-    function kaydetSepet() {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }
+const cartItems = document.getElementById("cartItems");
 
-    async function menuyuYukle() {
+const cartCount = document.getElementById("cartCount");
 
-        const snapshot = await getDocs(collection(db, "products"));
+const cartTotal = document.getElementById("cartTotal");
 
-        const kategoriler = {};
+const clearCart = document.getElementById("clearCart");
 
-        snapshot.forEach((doc) => {
+const finishOrder = document.getElementById("finishOrder");
 
-            const urun = doc.data();
+const masaNo = document.getElementById("masaNo");
 
-            if (!urun.active) return;
+const orderNote = document.getElementById("orderNote");
 
-            if (!kategoriler[urun.category]) {
-                kategoriler[urun.category] = [];
-            }
+// =========================
+// Sepet
+// =========================
 
-            kategoriler[urun.category].push(urun);
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-        });
+let products = [];
 
-        menuContent.innerHTML = "";
 
-        Object.keys(kategoriler).forEach((kategori) => {
+// =========================
+// Menü Yükle
+// =========================
 
-            let html = `
+async function loadProducts() {
 
-            <section class="kategori">
+menuContent.innerHTML = `
+<h2 style="text-align:center;padding:40px;">
+Menü Yükleniyor...
+</h2>
+`;
 
-                <button class="accordion">
+try {
 
-                    ${kategori}
+const snapshot = await getDocs(collection(db,"products"));
 
-                </button>
+products = [];
 
-                <div class="panel">
+snapshot.forEach(doc=>{
 
-            `;
+const data = doc.data();
 
-            kategoriler[kategori].forEach((urun) => {
+if(data.active){
 
-                html += `
+products.push({
 
-                <div class="urun">
+id:doc.id,
 
-                    <h3>${urun.name}</h3>
-
-                    <p>${urun.description}</p>
-
-                    <div class="fiyat">
-
-                        ₺${urun.price}
-
-                    </div>
-
-                    <button
-                        class="sepeteEkle"
-                        data-urun="${urun.name}"
-                        data-fiyat="${urun.price}">
-
-                        Sepete Ekle
-
-                    </button>
-
-                </div>
-
-                `;
-
-            });
-
-            html += `
-
-                </div>
-
-            </section>
-
-            `;
-
-            menuContent.innerHTML += html;
-
-        });
-
-        menuEventleriniBagla();
-
-    }
-
-    function menuEventleriniBagla() {
-
-        document.querySelectorAll(".accordion").forEach(btn => {
-
-            btn.onclick = () => {
-
-                const panel = btn.nextElementSibling;
-
-                panel.style.display =
-                    panel.style.display === "block"
-                    ? "none"
-                    : "block";
-
-            };
-
-        });
-
-        document.querySelectorAll(".sepeteEkle").forEach(btn => {
-
-            btn.onclick = () => {
-
-                const isim = btn.dataset.urun;
-                const fiyat = Number(btn.dataset.fiyat);
-
-                const mevcut = cart.find(x => x.isim === isim);
-
-                if (mevcut) {
-
-                    mevcut.adet++;
-
-                } else {
-
-                    cart.push({
-                        isim,
-                        fiyat,
-                        adet: 1
-                    });
-
-                }
-
-                kaydetSepet();
-                guncelleSepet();
-
-            };
-
-        });
-
-    }
-                 // SEPET AÇ
-    cartButton.addEventListener("click", () => {
-        cartPanel.classList.add("active");
-    });
-
-    // SEPET KAPAT
-    closeCart.addEventListener("click", () => {
-        cartPanel.classList.remove("active");
-    });
-
-    // SEPETİ TEMİZLE
-    if (clearCart) {
-
-        clearCart.addEventListener("click", () => {
-
-            if (confirm("Sepeti temizlemek istiyor musunuz?")) {
-
-                cart = [];
-
-                kaydetSepet();
-
-                guncelleSepet();
-
-            }
-
-        });
-
-    }
-
-    function guncelleSepet() {
-
-        cartItems.innerHTML = "";
-
-        if (cart.length === 0) {
-
-            cartItems.innerHTML =
-                "<p>Henüz ürün eklenmedi.</p>";
-
-            cartCount.textContent = "0";
-            cartTotal.textContent = "₺0";
-
-            return;
-
-        }
-
-        let toplam = 0;
-
-        cart.forEach(item => {
-
-            const araToplam =
-                item.fiyat * item.adet;
-
-            toplam += araToplam;
-
-            cartItems.innerHTML += `
-
-            <div class="urun">
-
-                <h3>${item.isim}</h3>
-
-                <div class="adetKontrol">
-
-                    <button
-                        class="azalt"
-                        data-urun="${item.isim}">
-
-                        −
-
-                    </button>
-
-                    <span>${item.adet}</span>
-
-                    <button
-                        class="arttir"
-                        data-urun="${item.isim}">
-
-                        +
-
-                    </button>
-
-                </div>
-
-                <div class="fiyat">
-
-                    ₺${item.fiyat}
-                    ×
-                    ${item.adet}
-                    =
-                    ₺${araToplam}
-
-                </div>
-
-                <button
-                    class="silUrun"
-                    data-urun="${item.isim}">
-
-                    🗑️ Kaldır
-
-                </button>
-
-            </div>
-
-            `;
-
-        });
-
-        cartCount.textContent =
-            cart.reduce((t, u) => t + u.adet, 0);
-
-        cartTotal.textContent =
-            `₺${toplam}`;
-
-        kaydetSepet();
-
-        document.querySelectorAll(".arttir").forEach(btn => {
-
-            btn.onclick = () => {
-
-                const urun =
-                    cart.find(
-                        u => u.isim === btn.dataset.urun
-                    );
-
-                urun.adet++;
-
-                kaydetSepet();
-
-                guncelleSepet();
-
-            };
-
-        });
-
-        document.querySelectorAll(".azalt").forEach(btn => {
-
-            btn.onclick = () => {
-
-                const urun =
-                    cart.find(
-                        u => u.isim === btn.dataset.urun
-                    );
-
-                urun.adet--;
-
-                if (urun.adet <= 0) {
-
-                    cart =
-                        cart.filter(
-                            u => u.isim !== urun.isim
-                        );
-
-                }
-
-                kaydetSepet();
-
-                guncelleSepet();
-
-            };
-
-        });
-
-        document.querySelectorAll(".silUrun").forEach(btn => {
-
-            btn.onclick = () => {
-
-                cart =
-                    cart.filter(
-                        u => u.isim !== btn.dataset.urun
-                    );
-
-                kaydetSepet();
-
-                guncelleSepet();
-
-            };
-
-        });
-
-    }
-        // SİPARİŞ
-    const finishOrder = document.getElementById("finishOrder");
-    const masaNo = document.getElementById("masaNo");
-    const orderNote = document.getElementById("orderNote");
-
-    finishOrder.addEventListener("click", async () => {
-
-        if (cart.length === 0) {
-            alert("Sepetiniz boş.");
-            return;
-        }
-
-        if (masaNo.value === "") {
-            alert("Lütfen masa numarasını seçiniz.");
-            return;
-        }
-
-        const toplam = cart.reduce(
-            (t, u) => t + (u.fiyat * u.adet),
-            0
-        );
-
-        try {
-
-            await addDoc(collection(db, "orders"), {
-
-                masa: masaNo.value,
-                not: orderNote.value,
-                urunler: cart,
-                toplam: toplam,
-                durum: "Yeni Sipariş",
-                tarih: serverTimestamp()
-
-            });
-
-        } catch (e) {
-
-            alert(
-                "Firebase Hatası\n\n" +
-                e.message
-            );
-
-            return;
-
-        }
-
-        let mesaj =
-`🍽️ Rüzgar Gülü Cafe & Beach Restaurant
-
-🪑 Masa No: ${masaNo.value}
-
-📋 Sipariş
-
-${cart.map(item =>
-`• ${item.adet} x ${item.isim} - ₺${item.fiyat * item.adet}`
-).join("\n")}
-
-💰 Toplam: ₺${toplam}
-
-📝 Sipariş Notu:
-${orderNote.value || "-"}`;
-
-        const telefon = "905428351609";
-
-        window.location.href =
-            `https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`;
-
-        cart = [];
-
-        kaydetSepet();
-
-        guncelleSepet();
-
-        orderNote.value = "";
-
-        masaNo.value = "";
-
-    });
-
-    // SAYFA AÇILIŞI
-    guncelleSepet();
-    menuyuYukle();
+...data
 
 });
+
+}
+
+});
+
+renderMenu();
+
+}
+catch(err){
+
+console.error(err);
+
+menuContent.innerHTML=`
+<h2 style="text-align:center;color:red;padding:40px;">
+Menü yüklenemedi.
+</h2>
+`;
+
+}
+
+}
+
+
+// =========================
+// Menü Oluştur
+// =========================
+
+function renderMenu(){
+
+const kategoriler = [...new Set(products.map(x=>x.category))];
+
+let html="";
+
+kategoriler.forEach(kategori=>{
+
+html+=`
+
+<div class="category">
+
+<div class="categoryHeader">
+
+${kategori}
+
+</div>
+
+<div class="categoryBody" style="display:none;">
+
+`;
+
+products
+.filter(x=>x.category===kategori)
+.forEach(urun=>{
+
+html+=`
+
+<div class="product">
+
+<div class="productLeft">
+
+${urun.image ? `
+<img src="${urun.image}" class="productImage">
+` : ""}
+
+<h3>${urun.name}</h3>
+
+<p>${urun.description || ""}</p>
+
+<strong>₺${Number(urun.price).toLocaleString("tr-TR")}</strong>
+
+</div>
+
+<div class="productRight">
+
+<button
+class="addCart"
+data-id="${urun.id}">
+Sepete Ekle
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+html+=`
+
+</div>
+
+</div>
+
+`;
+
+});
+
+menuContent.innerHTML=html;
+// =========================
+// Accordion
+// =========================
+
+document.querySelectorAll(".categoryHeader").forEach(header=>{
+
+header.addEventListener("click",()=>{
+
+const body=header.nextElementSibling;
+
+document.querySelectorAll(".categoryBody").forEach(item=>{
+
+if(item!==body){
+
+item.style.display="none";
+
+}
+
+});
+
+body.style.display=
+body.style.display==="block"
+? "none"
+: "block";
+
+});
+
+});
+
+// =========================
+// Sepete Ekle
+// =========================
+
+document.querySelectorAll(".addCart").forEach(btn=>{
+
+btn.addEventListener("click",()=>{
+
+const id=btn.dataset.id;
+
+const urun=products.find(x=>x.id===id);
+
+if(!urun) return;
+
+const mevcut=cart.find(x=>x.id===id);
+
+if(mevcut){
+
+mevcut.adet++;
+
+}
+else{
+
+cart.push({
+
+id:urun.id,
+
+name:urun.name,
+
+price:Number(urun.price),
+
+adet:1
+
+});
+
+}
+
+saveCart();
+
+});
+
+});
+
+}
+
+// =========================
+// Sepeti Kaydet
+// =========================
+
+function saveCart(){
+
+localStorage.setItem(
+"cart",
+JSON.stringify(cart)
+);
+
+updateCart();
+
+}
+
+// =========================
+// Sepeti Güncelle
+// =========================
+
+function updateCart(){
+
+cartCount.innerText=cart.reduce(
+(toplam,x)=>toplam+x.adet,
+0
+);
+
+if(cart.length===0){
+
+cartItems.innerHTML="Henüz ürün eklenmedi.";
+
+cartTotal.innerHTML="₺0";
+
+return;
+
+}
+
+let html="";
+
+let toplam=0;
+
+cart.forEach((urun,index)=>{
+
+const tutar=urun.price*urun.adet;
+
+toplam+=tutar;
+
+html+=`
+
+<div class="cartItem">
+
+<div>
+
+<strong>${urun.name}</strong>
+
+<br>
+
+₺${urun.price.toLocaleString("tr-TR")}
+
+</div>
+
+<div class="cartButtons">
+
+<button
+class="eksi"
+data-index="${index}">
+
+−
+
+</button>
+
+<span>
+
+${urun.adet}
+
+</span>
+
+<button
+class="arti"
+data-index="${index}">
+
++
+
+</button>
+
+<button
+class="sil"
+data-index="${index}">
+
+🗑
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+cartItems.innerHTML=html;
+
+cartTotal.innerHTML=
+"₺"+
+toplam.toLocaleString("tr-TR");
+
+bindCartButtons();
+
+}
+// =========================
+// Sepet Butonları
+// =========================
+
+function bindCartButtons(){
+
+document.querySelectorAll(".arti").forEach(btn=>{
+
+btn.onclick=()=>{
+
+const index=Number(btn.dataset.index);
+
+cart[index].adet++;
+
+saveCart();
+
+};
+
+});
+
+document.querySelectorAll(".eksi").forEach(btn=>{
+
+btn.onclick=()=>{
+
+const index=Number(btn.dataset.index);
+
+cart[index].adet--;
+
+if(cart[index].adet<=0){
+
+cart.splice(index,1);
+
+}
+
+saveCart();
+
+};
+
+});
+
+document.querySelectorAll(".sil").forEach(btn=>{
+
+btn.onclick=()=>{
+
+const index=Number(btn.dataset.index);
+
+cart.splice(index,1);
+
+saveCart();
+
+};
+
+});
+
+}
+
+// =========================
+// Sepeti Temizle
+// =========================
+
+clearCart.addEventListener("click",()=>{
+
+if(!confirm("Sepet temizlensin mi?")) return;
+
+cart=[];
+
+saveCart();
+
+});
+
+// =========================
+// Sepet Paneli
+// =========================
+
+cartButton.addEventListener("click",()=>{
+
+cartPanel.classList.add("active");
+
+});
+
+closeCart.addEventListener("click",()=>{
+
+cartPanel.classList.remove("active");
+
+});
+
+// =========================
+// Siparişi Tamamla
+// =========================
+
+finishOrder.addEventListener("click",async()=>{
+
+if(cart.length===0){
+
+alert("Sepet boş.");
+
+return;
+
+}
+
+if(masaNo.value===""){
+
+alert("Lütfen masa seçiniz.");
+
+return;
+
+}
+
+const toplam=cart.reduce((t,x)=>{
+
+return t+(x.price*x.adet);
+
+},0);
+
+const siparis={
+
+masa:masaNo.value,
+
+not:orderNote.value,
+
+urunler:cart,
+
+toplam,
+
+durum:"Yeni Sipariş",
+
+tarih:serverTimestamp()
+
+};
+
+try{
+
+await addDoc(
+
+collection(db,"orders"),
+
+siparis
+
+);
+
+alert("Siparişiniz başarıyla gönderildi.");
+cart=[];
+localStorage.removeItem("cart");
+orderNote.value="";
+
+masaNo.value="";
+
+saveCart();
+
+cartPanel.classList.remove("active");
+
+// =========================
+// WhatsApp Mesajı
+// =========================
+
+let mesaj="🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
+
+mesaj+="📍 Masa: "+siparis.masa+"\n\n";
+
+mesaj+="🛒 Siparişler\n\n";
+
+siparis.urunler.forEach(item=>{
+
+mesaj+=`${item.name} x${item.adet} = ₺${(item.price*item.adet).toLocaleString("tr-TR")}\n`;
+
+});
+
+mesaj+=`\n💰 Toplam: ₺${toplam.toLocaleString("tr-TR")}`;
+
+if(siparis.not.trim()!==""){
+
+mesaj+=`\n\n📝 Not:\n${siparis.not}`;
+
+}
+
+// Telefon numarasını kendi numaranla değiştir
+const telefon="905428351609";
+
+window.open(
+`https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`,
+"_blank"
+);
+
+}
+catch(err){
+
+console.error(err);
+
+alert("Sipariş gönderilirken hata oluştu.");
+
+}
+
+});
+
+// =========================
+// Sayfa Açılışı
+// =========================
+
+updateCart();
+const params = new URLSearchParams(window.location.search);
+
+const masa = params.get("masa");
+
+if(masa){
+
+    masaNo.value = masa;
+
+}
+loadProducts();
