@@ -85,11 +85,13 @@ catch(err){
 
 console.error(err);
 
-menuContent.innerHTML=`
-<h2 style="text-align:center;color:red;padding:40px;">
-Menü yüklenemedi.
+menuContent.innerHTML = `
+<h2 style="color:red;text-align:center;padding:30px;">
+${err.message}
 </h2>
 `;
+
+}
 
 }
 
