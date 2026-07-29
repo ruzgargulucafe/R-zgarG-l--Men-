@@ -14,68 +14,98 @@ const category = document.getElementById("category");
 const saveProduct = document.getElementById("saveProduct");
 const productList = document.getElementById("productList");
 
+// Ürünleri Listele
 async function listele() {
 
-    productList.innerHTML = "";
+    productList.innerHTML = "<p>Yükleniyor...</p>";
 
-    const snapshot = await getDocs(collection(db, "products"));
+    try {
 
-    snapshot.forEach((doc) => {
+        const snapshot = await getDocs(collection(db, "products"));
 
-        const p = doc.data();
+        productList.innerHTML = "";
 
-        productList.innerHTML += `
+        if (snapshot.empty) {
+            productList.innerHTML = "<p>Henüz ürün yok.</p>";
+            return;
+        }
 
-        <div class="product">
+        snapshot.forEach((doc) => {
 
-            <h3>${p.name}</h3>
+            const p = doc.data();
 
-            <p>${p.description}</p>
+            productList.innerHTML += `
+                <div class="product">
 
-            <p><strong>Kategori:</strong> ${p.category}</p>
+                    ${p.image ? `<img src="${p.image}" class="productImage">` : ""}
 
-            <p><strong>Fiyat:</strong> ₺${p.price}</p>
+                    <h3>${p.name}</h3>
 
-        </div>
+                    <p>${p.description || ""}</p>
 
-        `;
+                    <p><strong>Kategori:</strong> ${p.category}</p>
 
-    });
+                    <p><strong>Fiyat:</strong> ₺${Number(p.price).toLocaleString("tr-TR")}</p>
 
-}
+                </div>
+            `;
 
-saveProduct.addEventListener("click", async () => {
-alert("Buton çalıştı");
-  
-    if (name.value.trim() === "") {
+        });
 
-        alert("Ürün adı boş olamaz.");
+    } catch (err) {
 
-        return;
+        productList.innerHTML =
+            `<p style="color:red;">${err.message}</p>`;
+
+        console.error(err);
 
     }
 
-    await addDoc(collection(db, "products"), {
+}
 
-        name: name.value,
-        description: description.value,
-        price: Number(price.value),
-        category: category.value,
-        active: true,
-        image: ""
+// Ürün Kaydet
+saveProduct.addEventListener("click", async () => {
 
-    });
-  alert("Belge ID: " + docRef.id);
+    if (name.value.trim() === "") {
+        alert("Ürün adı boş olamaz.");
+        return;
+    }
 
-    name.value = "";
-    description.value = "";
-    price.value = "";
+    if (price.value.trim() === "") {
+        alert("Fiyat giriniz.");
+        return;
+    }
 
-    alert("Ürün eklendi.");
-console.log("Yeni ürün kaydedildi");
-  
-    listele();
+    try {
+
+        const docRef = await addDoc(collection(db, "products"), {
+
+            name: name.value.trim(),
+            description: description.value.trim(),
+            price: Number(price.value),
+            category: category.value,
+            active: true,
+            image: ""
+
+        });
+
+        alert("Ürün eklendi.\nBelge ID: " + docRef.id);
+
+        name.value = "";
+        description.value = "";
+        price.value = "";
+
+        await listele();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("HATA:\n\n" + err.message);
+
+    }
 
 });
 
+// Sayfa Açılışı
 listele();
