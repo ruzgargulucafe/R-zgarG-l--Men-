@@ -42,9 +42,79 @@ document.getElementById("menuContent");
                 panel.style.display = "block";
             }
 
-        });
+  async function menuyuYukle() {
+
+    const snapshot = await getDocs(collection(db, "products"));
+
+    const kategoriler = {};
+
+    snapshot.forEach((doc) => {
+
+        const urun = doc.data();
+
+        if (!urun.active) return;
+
+        if (!kategoriler[urun.category]) {
+            kategoriler[urun.category] = [];
+        }
+
+        kategoriler[urun.category].push(urun);
+
     });
 
+    menuContent.innerHTML = "";
+
+    Object.keys(kategoriler).forEach((kategori) => {
+
+        let html = `
+        <section class="kategori">
+
+            <button class="accordion">
+                ${kategori}
+            </button>
+
+            <div class="panel">
+        `;
+
+        kategoriler[kategori].forEach((urun) => {
+
+            html += `
+
+            <div class="urun">
+
+                <h3>${urun.name}</h3>
+
+                <p>${urun.description}</p>
+
+                <div class="fiyat">
+                    ₺${urun.price}
+                </div>
+
+                <button
+                    class="sepeteEkle"
+                    data-urun="${urun.name}"
+                    data-fiyat="${urun.price}">
+
+                    Sepete Ekle
+
+                </button>
+
+            </div>
+
+            `;
+
+        });
+
+        html += `
+            </div>
+        </section>
+        `;
+
+        menuContent.innerHTML += html;
+
+    });
+
+}
     // SEPETE EKLE
     addButtons.forEach(btn => {
 
@@ -67,7 +137,8 @@ document.getElementById("menuContent");
 
             kaydetSepet();
             guncelleSepet();
-
+            menuyuYukle();
+            
         });
 
     });
