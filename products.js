@@ -71,7 +71,8 @@ alert("Buton çalıştı");
     price.value = "";
 
     alert("Ürün eklendi.");
-
+console.log("Yeni ürün kaydedildi");
+  
     listele();
 
 });
