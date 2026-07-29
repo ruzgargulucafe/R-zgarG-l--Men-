@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const finishOrder = document.getElementById("finishOrder");
 const masaNo = document.getElementById("masaNo");
 const orderNote = document.getElementById("orderNote");
-finishOrder.addEventListener("click", () => {
+finishOrder.addEventListener("click", async () => {
     alert("Buton çalıştı");
     if (cart.length === 0) {
         alert("Sepetiniz boş.");
@@ -235,6 +235,33 @@ finishOrder.addEventListener("click", () => {
 console.log("Masa:", masaNo.value);
 console.log("Not:", orderNote.value);
     const toplam = cart.reduce((t, u) => t + (u.fiyat * u.adet), 0);
+    try {
+
+    await addDoc(collection(db, "orders"), {
+
+        masa: masaNo.value,
+
+        not: orderNote.value,
+
+        urunler: cart,
+
+        toplam: toplam,
+
+        durum: "Yeni Sipariş",
+
+        tarih: serverTimestamp()
+
+    });
+
+} catch (e) {
+
+    console.error("Firebase kayıt hatası:", e);
+
+    alert("Sipariş kaydedilemedi.");
+
+    return;
+
+}
 
 let mesaj =
 `🍽️ Rüzgar Gülü Cafe & Beach Restaurant
@@ -254,7 +281,12 @@ ${orderNote.value || "-"}`;
 
     const url = `https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`;
 window.location.href = url;
-
+cart = [];
+kaydetSepet();
+guncelleSepet();
+orderNote.value = "";
+masaNo.value = "";
+    
 });
     guncelleSepet();
 
