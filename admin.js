@@ -4,7 +4,9 @@ import {
 collection,
 query,
 orderBy,
-onSnapshot
+onSnapshot,
+doc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const ordersDiv = document.getElementById("orders");
@@ -25,8 +27,10 @@ onSnapshot(q, (snapshot) => {
 
     }
 
-    snapshot.forEach(doc => {
+    snapshot.forEach(document => {
 
+    const siparis = document.data();
+    const id = document.id;
         const siparis = doc.data();
 
         let urunler = "";
@@ -42,27 +46,74 @@ onSnapshot(q, (snapshot) => {
 
         });
 
+        document.querySelectorAll(".durumBtn").forEach(btn => {
+
+    btn.onclick = async () => {
+
+        const ref = doc(db, "orders", btn.dataset.id);
+
+        let yeniDurum = "Yeni Sipariş";
+
+        switch(btn.dataset.durum){
+
+            case "Yeni Sipariş":
+                yeniDurum = "Hazırlanıyor";
+                break;
+
+            case "Hazırlanıyor":
+                yeniDurum = "Hazır";
+                break;
+
+            case "Hazır":
+                yeniDurum = "Teslim Edildi";
+                break;
+
+            case "Teslim Edildi":
+                yeniDurum = "Yeni Sipariş";
+                break;
+
+        }
+
+        await updateDoc(ref,{
+            durum:yeniDurum
+        });
+
+    };
+
+});
         ordersDiv.innerHTML += `
 
-        <div class="order">
+<div class="order">
 
-            <h2>🪑 Masa ${siparis.masa}</h2>
+<h2>🪑 Masa ${siparis.masa}</h2>
 
-            <ul>
+<ul>
 
-                ${urunler}
+${urunler}
 
-            </ul>
+</ul>
 
-            <p><strong>Toplam:</strong> ₺${siparis.toplam}</p>
+<p><strong>Toplam:</strong> ₺${siparis.toplam}</p>
 
-            <p><strong>Not:</strong> ${siparis.not || "-"}</p>
+<p><strong>Not:</strong> ${siparis.not || "-"}</p>
 
-            <p><strong>Durum:</strong> ${siparis.durum}</p>
+<p><strong>Durum:</strong>
+<span id="durum-${id}">
+${siparis.durum}
+</span>
+</p>
 
-        </div>
+<button class="durumBtn"
+data-id="${id}"
+data-durum="${siparis.durum}">
 
-        `;
+Durumu Değiştir
+
+</button>
+
+</div>
+
+`;
 
     });
 
