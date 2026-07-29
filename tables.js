@@ -65,7 +65,11 @@ loadTables();
    YENİ MASA
 =========================== */
 
-newTableButton.addEventListener("click", async () => {
+newTableButton.addEventListener("click", () => {
+
+    alert("Buton çalıştı");
+
+});
 
     const name = prompt("Masa adını giriniz");
 
