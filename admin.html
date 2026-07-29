@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Rüzgar Gülü Yönetim Paneli</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+
+margin:0;
+padding:20px;
+background:#f5f5f5;
+font-family:Arial,sans-serif;
+
+}
+
+h1{
+
+text-align:center;
+margin-bottom:25px;
+
+}
+
+#orders{
+
+display:flex;
+flex-direction:column;
+gap:20px;
+
+}
+
+.order{
+
+background:#fff;
+padding:18px;
+border-radius:15px;
+box-shadow:0 4px 12px rgba(0,0,0,.12);
+
+}
+
+.order h2{
+
+margin:0 0 12px;
+
+}
+
+.order p{
+
+margin:6px 0;
+
+}
+
+.order button{
+
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+
+}
+
+.prepare{
+
+background:#ff9800;
+color:#fff;
+
+}
+
+.finish{
+
+background:#4CAF50;
+color:#fff;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>📋 Gelen Siparişler</h1>
+
+<div id="orders">
+
+<p>Henüz sipariş yok...</p>
+
+</div>
+
+<script type="module" src="admin.js"></script>
+
+</body>
+
+</html>
