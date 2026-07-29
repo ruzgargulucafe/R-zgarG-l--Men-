@@ -1,13 +1,16 @@
 import { db } from "./firebase.js";
 
 import {
-    collection,
-    getDocs,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+collection,
+getDocs,
+addDoc,
+updateDoc,
+deleteDoc,
+doc,
+query,
+orderBy
+}
+from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 /* ===========================
    DOM
@@ -41,6 +44,51 @@ const newButton = document.getElementById("newProduct");
 
 let products = [];
 let editingId = null;
+/* ===========================
+   KATEGORİLERİ YÜKLE
+=========================== */
+
+async function loadCategories() {
+
+    const snapshot = await getDocs(
+
+        query(
+
+            collection(db,"categories"),
+
+            orderBy("order")
+
+        )
+
+    );
+
+    form.category.innerHTML=`
+        <option value="">
+            Kategori Seçiniz
+        </option>
+    `;
+
+    snapshot.forEach(item=>{
+
+        const category=item.data();
+
+        if(category.active){
+
+            form.category.innerHTML+=`
+
+            <option value="${category.name}">
+
+                ${category.name}
+
+            </option>
+
+            `;
+
+        }
+
+    });
+
+}
 /* ===========================
    ÜRÜNLERİ YÜKLE
 =========================== */
@@ -461,10 +509,11 @@ async function toggleProduct(id) {
    BAŞLAT
 =========================== */
 
-async function init() {
+async function init(){
+
+    await loadCategories();
 
     await loadProducts();
 
 }
-
 init();
