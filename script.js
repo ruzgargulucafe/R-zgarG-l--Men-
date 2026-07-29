@@ -561,3 +561,5 @@ if(masa){
 
 }
 loadProducts();
+
+console.log("SCRIPT SON SATIR ÇALIŞTI");
