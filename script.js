@@ -237,27 +237,32 @@ console.log("Not:", orderNote.value);
     const toplam = cart.reduce((t, u) => t + (u.fiyat * u.adet), 0);
     try {
 
-    await addDoc(collection(db, "orders"), {
+    console.log("1 - Firebase kayıt başlıyor");
+
+    const docRef = await addDoc(collection(db, "orders"), {
 
         masa: masaNo.value,
-
         not: orderNote.value,
-
         urunler: cart,
-
         toplam: toplam,
-
         durum: "Yeni Sipariş",
-
         tarih: serverTimestamp()
 
     });
 
+    console.log("2 - Başarılı");
+    console.log(docRef.id);
+
 } catch (e) {
 
-    console.error("Firebase kayıt hatası:", e);
+    console.error(e);
 
-    alert("Sipariş kaydedilemedi.");
+    alert(
+        "Firebase Hatası:\n\n" +
+        e.code +
+        "\n\n" +
+        e.message
+    );
 
     return;
 
