@@ -3,11 +3,13 @@ import { db } from "./firebase.js";
 import {
 collection,
 addDoc,
-serverTimestamp
+serverTimestamp,
+getDocs
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-
+const menuContent =
+document.getElementById("menuContent");
     // ELEMENTLER
     const accordions = document.querySelectorAll(".accordion");
     const addButtons = document.querySelectorAll(".sepeteEkle");
