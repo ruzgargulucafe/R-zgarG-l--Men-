@@ -1,1 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
 
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ürün Yönetimi</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+
+background:#f5f5f5;
+padding:20px;
+
+}
+
+h1{
+
+text-align:center;
+margin-bottom:20px;
+
+}
+
+.card{
+
+background:#fff;
+padding:20px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,.12);
+margin-bottom:20px;
+
+}
+
+input,
+textarea,
+select{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:10px;
+font-size:16px;
+
+}
+
+button{
+
+width:100%;
+padding:14px;
+background:#2196F3;
+color:#fff;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+opacity:.9;
+
+}
+
+#productList{
+
+display:flex;
+flex-direction:column;
+gap:15px;
+
+}
+
+.product{
+
+background:#fff;
+padding:15px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,.1);
+
+}
+
+.actions{
+
+display:flex;
+gap:10px;
+margin-top:10px;
+
+}
+
+.edit{
+
+background:#ff9800;
+
+}
+
+.delete{
+
+background:#f44336;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>📦 Ürün Yönetimi</h1>
+
+<div class="card">
+
+<input
+id="name"
+placeholder="Ürün Adı">
+
+<textarea
+id="description"
+placeholder="Açıklama"></textarea>
+
+<input
+id="price"
+type="number"
+placeholder="Fiyat">
+
+<select id="category">
+
+<option>Kahvaltılar</option>
+
+<option>Burgerler</option>
+
+<option>Kahveler</option>
+
+<option>İçecekler</option>
+
+<option>Tatlılar</option>
+
+</select>
+
+<button id="saveProduct">
+
+Ürünü Kaydet
+
+</button>
+
+</div>
+
+<div id="productList">
+
+</div>
+
+<script type="module" src="products.js"></script>
+
+</body>
+
+</html>
