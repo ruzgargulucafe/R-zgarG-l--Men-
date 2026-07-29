@@ -345,3 +345,74 @@ document
     }
 
 });
+// =========================
+// Aktif / Pasif Değiştir
+// =========================
+
+async function toggleActive(id){
+
+    const urun=products.find(x=>x.id===id);
+
+    if(!urun) return;
+
+    try{
+
+        await updateDoc(
+            doc(db,"products",id),
+            {
+                active:!urun.active
+            }
+        );
+
+        await loadProducts();
+
+    }catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+
+    }
+
+}
+
+// =========================
+// Dashboard Güncelle
+// =========================
+
+async function refreshDashboard(){
+
+    updateDashboard();
+
+}
+
+// =========================
+// Sayfa Açılışı
+// =========================
+
+window.addEventListener("load",async()=>{
+
+    try{
+
+        await loadProducts();
+
+        await refreshDashboard();
+
+    }catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+
+    }
+
+});
+
+// =========================
+// Global Fonksiyonlar
+// =========================
+
+window.loadProducts=loadProducts;
+window.deleteProduct=deleteProduct;
+window.openEditModal=openEditModal;
+window.toggleActive=toggleActive;
