@@ -1,10 +1,10 @@
 import { db } from "./firebase.js";
 
 import {
-collection,
-getDocs,
-addDoc,
-serverTimestamp
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 // =========================
@@ -12,25 +12,15 @@ serverTimestamp
 // =========================
 
 const menuContent = document.getElementById("menuContent");
-
 const cartButton = document.getElementById("cartButton");
-
 const cartPanel = document.getElementById("cartPanel");
-
 const closeCart = document.getElementById("closeCart");
-
 const cartItems = document.getElementById("cartItems");
-
 const cartCount = document.getElementById("cartCount");
-
 const cartTotal = document.getElementById("cartTotal");
-
 const clearCart = document.getElementById("clearCart");
-
 const finishOrder = document.getElementById("finishOrder");
-
 const masaNo = document.getElementById("masaNo");
-
 const orderNote = document.getElementById("orderNote");
 
 // =========================
@@ -38,9 +28,7 @@ const orderNote = document.getElementById("orderNote");
 // =========================
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
 let products = [];
-
 
 // =========================
 // Menü Yükle
@@ -48,50 +36,46 @@ let products = [];
 
 async function loadProducts() {
 
-menuContent.innerHTML = `
-<h2 style="text-align:center;padding:40px;">
-Menü Yükleniyor...
-</h2>
-`;
+    menuContent.innerHTML = `
+        <h2 style="text-align:center;padding:40px;">
+            Menü Yükleniyor...
+        </h2>
+    `;
 
-try {
+    try {
 
-const snapshot = await getDocs(collection(db,"products"));
+        const snapshot = await getDocs(collection(db, "products"));
 
-products = [];
+        products = [];
 
-snapshot.forEach(doc=>{
+        snapshot.forEach(doc => {
 
-const data = doc.data();
+            const data = doc.data();
 
-if(data.active){
+            if (data.active) {
 
-products.push({
+                products.push({
+                    id: doc.id,
+                    ...data
+                });
 
-id:doc.id,
+            }
 
-...data
+        });
 
-});
+        renderMenu();
 
-}
+    } catch (err) {
 
-});
+        console.error(err);
 
-renderMenu();
+        menuContent.innerHTML = `
+            <h2 style="color:red;text-align:center;padding:30px;">
+                ${err.message}
+            </h2>
+        `;
 
-}
-catch(err){
-
-console.error(err);
-
-menuContent.innerHTML = `
-<h2 style="color:red;text-align:center;padding:30px;">
-${err.message}
-</h2>
-`;
-
-}
+    }
 
 }
 
@@ -99,148 +83,127 @@ ${err.message}
 // Menü Oluştur
 // =========================
 
-function renderMenu(){
+function renderMenu() {
 
-const kategoriler = [...new Set(products.map(x=>x.category))];
+    const kategoriler = [...new Set(products.map(x => x.category))];
 
-let html="";
+    let html = "";
 
-kategoriler.forEach(kategori=>{
+    kategoriler.forEach(kategori => {
 
-html+=`
+        html += `
+            <div class="category">
 
-<div class="category">
+                <div class="categoryHeader">
+                    ${kategori}
+                </div>
 
-<div class="categoryHeader">
+                <div class="categoryBody" style="display:none;">
+                    ${products
+                        .filter(x => x.category === kategori)
+                        .map(urun => `
+                            <div class="product">
 
-${kategori}
+                                <div class="productLeft">
 
-</div>
+                                    ${urun.image ? `
+                                        <img src="${urun.image}" class="productImage">
+                                    ` : ""}
 
-<div class="categoryBody" style="display:none;">
+                                    <h3>${urun.name}</h3>
 
-`;
+                                    <p>${urun.description || ""}</p>
 
-products
-.filter(x=>x.category===kategori)
-.forEach(urun=>{
+                                    <strong>
+                                        ₺${Number(urun.price).toLocaleString("tr-TR")}
+                                    </strong>
 
-html+=`
+                                </div>
 
-<div class="product">
+                                <div class="productRight">
 
-<div class="productLeft">
+                                    <button
+                                        class="addCart"
+                                        data-id="${urun.id}">
+                                        Sepete Ekle
+                                    </button>
 
-${urun.image ? `
-<img src="${urun.image}" class="productImage">
-` : ""}
+                                </div>
 
-<h3>${urun.name}</h3>
+                            </div>
+                        `).join("")}
 
-<p>${urun.description || ""}</p>
+                </div>
 
-<strong>₺${Number(urun.price).toLocaleString("tr-TR")}</strong>
+            </div>
+        `;
 
-</div>
+    });
 
-<div class="productRight">
+    menuContent.innerHTML = html;
 
-<button
-class="addCart"
-data-id="${urun.id}">
-Sepete Ekle
-</button>
+    // =========================
+    // Accordion
+    // =========================
 
-</div>
+    document.querySelectorAll(".categoryHeader").forEach(header => {
 
-</div>
+        header.addEventListener("click", () => {
 
-`;
+            const body = header.nextElementSibling;
 
-});
+            document.querySelectorAll(".categoryBody").forEach(item => {
 
-html+=`
+                if (item !== body) {
+                    item.style.display = "none";
+                }
 
-</div>
+            });
 
-</div>
+            body.style.display =
+                body.style.display === "block"
+                    ? "none"
+                    : "block";
 
-`;
+        });
 
-});
+    });
 
-menuContent.innerHTML=html;
-// =========================
-// Accordion
-// =========================
+    // =========================
+    // Sepete Ekle
+    // =========================
 
-document.querySelectorAll(".categoryHeader").forEach(header=>{
+    document.querySelectorAll(".addCart").forEach(btn => {
 
-header.addEventListener("click",()=>{
+        btn.addEventListener("click", () => {
 
-const body=header.nextElementSibling;
+            const id = btn.dataset.id;
 
-document.querySelectorAll(".categoryBody").forEach(item=>{
+            const urun = products.find(x => x.id === id);
 
-if(item!==body){
+            if (!urun) return;
+                           const mevcut = cart.find(x => x.id === id);
 
-item.style.display="none";
+            if (mevcut) {
 
-}
+                mevcut.adet++;
 
-});
+            } else {
 
-body.style.display=
-body.style.display==="block"
-? "none"
-: "block";
+                cart.push({
+                    id: urun.id,
+                    name: urun.name,
+                    price: Number(urun.price),
+                    adet: 1
+                });
 
-});
+            }
 
-});
+            saveCart();
 
-// =========================
-// Sepete Ekle
-// =========================
+        });
 
-document.querySelectorAll(".addCart").forEach(btn=>{
-
-btn.addEventListener("click",()=>{
-
-const id=btn.dataset.id;
-
-const urun=products.find(x=>x.id===id);
-
-if(!urun) return;
-
-const mevcut=cart.find(x=>x.id===id);
-
-if(mevcut){
-
-mevcut.adet++;
-
-}
-else{
-
-cart.push({
-
-id:urun.id,
-
-name:urun.name,
-
-price:Number(urun.price),
-
-adet:1
-
-});
-
-}
-
-saveCart();
-
-});
-
-});
+    });
 
 }
 
@@ -248,14 +211,14 @@ saveCart();
 // Sepeti Kaydet
 // =========================
 
-function saveCart(){
+function saveCart() {
 
-localStorage.setItem(
-"cart",
-JSON.stringify(cart)
-);
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
 
-updateCart();
+    updateCart();
 
 }
 
@@ -263,149 +226,124 @@ updateCart();
 // Sepeti Güncelle
 // =========================
 
-function updateCart(){
+function updateCart() {
 
-cartCount.innerText=cart.reduce(
-(toplam,x)=>toplam+x.adet,
-0
-);
+    cartCount.innerText = cart.reduce(
+        (toplam, x) => toplam + x.adet,
+        0
+    );
 
-if(cart.length===0){
+    if (cart.length === 0) {
 
-cartItems.innerHTML="Henüz ürün eklenmedi.";
+        cartItems.innerHTML = "Henüz ürün eklenmedi.";
+        cartTotal.innerHTML = "₺0";
 
-cartTotal.innerHTML="₺0";
+        return;
 
-return;
+    }
 
-}
+    let html = "";
+    let toplam = 0;
 
-let html="";
+    cart.forEach((urun, index) => {
 
-let toplam=0;
+        const tutar = urun.price * urun.adet;
 
-cart.forEach((urun,index)=>{
+        toplam += tutar;
 
-const tutar=urun.price*urun.adet;
+        html += `
 
-toplam+=tutar;
+        <div class="cartItem">
 
-html+=`
+            <div>
 
-<div class="cartItem">
+                <strong>${urun.name}</strong>
 
-<div>
+                <br>
 
-<strong>${urun.name}</strong>
+                ₺${urun.price.toLocaleString("tr-TR")}
 
-<br>
+            </div>
 
-₺${urun.price.toLocaleString("tr-TR")}
+            <div class="cartButtons">
 
-</div>
+                <button class="eksi" data-index="${index}">−</button>
 
-<div class="cartButtons">
+                <span>${urun.adet}</span>
 
-<button
-class="eksi"
-data-index="${index}">
+                <button class="arti" data-index="${index}">+</button>
 
-−
+                <button class="sil" data-index="${index}">🗑</button>
 
-</button>
+            </div>
 
-<span>
+        </div>
 
-${urun.adet}
+        `;
 
-</span>
+    });
 
-<button
-class="arti"
-data-index="${index}">
+    cartItems.innerHTML = html;
 
-+
+    cartTotal.innerHTML =
+        "₺" + toplam.toLocaleString("tr-TR");
 
-</button>
-
-<button
-class="sil"
-data-index="${index}">
-
-🗑
-
-</button>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-cartItems.innerHTML=html;
-
-cartTotal.innerHTML=
-"₺"+
-toplam.toLocaleString("tr-TR");
-
-bindCartButtons();
+    bindCartButtons();
 
 }
 // =========================
 // Sepet Butonları
 // =========================
 
-function bindCartButtons(){
+function bindCartButtons() {
 
-document.querySelectorAll(".arti").forEach(btn=>{
+    document.querySelectorAll(".arti").forEach(btn => {
 
-btn.onclick=()=>{
+        btn.onclick = () => {
 
-const index=Number(btn.dataset.index);
+            const index = Number(btn.dataset.index);
 
-cart[index].adet++;
+            cart[index].adet++;
 
-saveCart();
+            saveCart();
 
-};
+        };
 
-});
+    });
 
-document.querySelectorAll(".eksi").forEach(btn=>{
+    document.querySelectorAll(".eksi").forEach(btn => {
 
-btn.onclick=()=>{
+        btn.onclick = () => {
 
-const index=Number(btn.dataset.index);
+            const index = Number(btn.dataset.index);
 
-cart[index].adet--;
+            cart[index].adet--;
 
-if(cart[index].adet<=0){
+            if (cart[index].adet <= 0) {
 
-cart.splice(index,1);
+                cart.splice(index, 1);
 
-}
+            }
 
-saveCart();
+            saveCart();
 
-};
+        };
 
-});
+    });
 
-document.querySelectorAll(".sil").forEach(btn=>{
+    document.querySelectorAll(".sil").forEach(btn => {
 
-btn.onclick=()=>{
+        btn.onclick = () => {
 
-const index=Number(btn.dataset.index);
+            const index = Number(btn.dataset.index);
 
-cart.splice(index,1);
+            cart.splice(index, 1);
 
-saveCart();
+            saveCart();
 
-};
+        };
 
-});
+    });
 
 }
 
@@ -413,13 +351,13 @@ saveCart();
 // Sepeti Temizle
 // =========================
 
-clearCart.addEventListener("click",()=>{
+clearCart.addEventListener("click", () => {
 
-if(!confirm("Sepet temizlensin mi?")) return;
+    if (!confirm("Sepet temizlensin mi?")) return;
 
-cart=[];
+    cart = [];
 
-saveCart();
+    saveCart();
 
 });
 
@@ -427,15 +365,15 @@ saveCart();
 // Sepet Paneli
 // =========================
 
-cartButton.addEventListener("click",()=>{
+cartButton.addEventListener("click", () => {
 
-cartPanel.classList.add("active");
+    cartPanel.classList.add("active");
 
 });
 
-closeCart.addEventListener("click",()=>{
+closeCart.addEventListener("click", () => {
 
-cartPanel.classList.remove("active");
+    cartPanel.classList.remove("active");
 
 });
 
@@ -443,107 +381,97 @@ cartPanel.classList.remove("active");
 // Siparişi Tamamla
 // =========================
 
-finishOrder.addEventListener("click",async()=>{
+finishOrder.addEventListener("click", async () => {
 
-if(cart.length===0){
+    if (cart.length === 0) {
 
-alert("Sepet boş.");
+        alert("Sepet boş.");
 
-return;
+        return;
 
-}
+    }
 
-if(masaNo.value===""){
+    if (masaNo.value === "") {
 
-alert("Lütfen masa seçiniz.");
+        alert("Lütfen masa seçiniz.");
 
-return;
+        return;
 
-}
+    }
 
-const toplam=cart.reduce((t,x)=>{
+    const toplam = cart.reduce((t, x) => {
 
-return t+(x.price*x.adet);
+        return t + (x.price * x.adet);
 
-},0);
+    }, 0);
 
-const siparis={
+    const siparis = {
 
-masa:masaNo.value,
+        masa: masaNo.value,
+        not: orderNote.value,
+        urunler: cart,
+        toplam,
+        durum: "Yeni Sipariş",
+        tarih: serverTimestamp()
 
-not:orderNote.value,
+    };
 
-urunler:cart,
+    try {
 
-toplam,
+        await addDoc(
+            collection(db, "orders"),
+            siparis
+        );
+        alert("Siparişiniz başarıyla gönderildi.");
 
-durum:"Yeni Sipariş",
+        cart = [];
+        localStorage.removeItem("cart");
 
-tarih:serverTimestamp()
+        orderNote.value = "";
+        masaNo.value = "";
 
-};
+        saveCart();
 
-try{
+        cartPanel.classList.remove("active");
 
-await addDoc(
+        // =========================
+        // WhatsApp Mesajı
+        // =========================
 
-collection(db,"orders"),
+        let mesaj = "🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
 
-siparis
+        mesaj += "📍 Masa: " + siparis.masa + "\n\n";
+        mesaj += "🛒 Siparişler\n\n";
 
-);
+        siparis.urunler.forEach(item => {
 
-alert("Siparişiniz başarıyla gönderildi.");
-cart=[];
-localStorage.removeItem("cart");
-orderNote.value="";
+            mesaj += `${item.name} x${item.adet} = ₺${(item.price * item.adet).toLocaleString("tr-TR")}\n`;
 
-masaNo.value="";
+        });
 
-saveCart();
+        mesaj += `\n💰 Toplam: ₺${toplam.toLocaleString("tr-TR")}`;
 
-cartPanel.classList.remove("active");
+        if (siparis.not.trim() !== "") {
 
-// =========================
-// WhatsApp Mesajı
-// =========================
+            mesaj += `\n\n📝 Not:\n${siparis.not}`;
 
-let mesaj="🍽️ Rüzgar Gülü Cafe & Beach Restaurant\n\n";
+        }
 
-mesaj+="📍 Masa: "+siparis.masa+"\n\n";
+        // Telefon numarası
+        const telefon = "905428351609";
 
-mesaj+="🛒 Siparişler\n\n";
+        window.open(
+            `https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`,
+            "_blank"
+        );
 
-siparis.urunler.forEach(item=>{
+    } catch (err) {
 
-mesaj+=`${item.name} x${item.adet} = ₺${(item.price*item.adet).toLocaleString("tr-TR")}\n`;
+        console.error(err);
 
-});
+        alert("Sipariş gönderilirken hata oluştu.");
 
-mesaj+=`\n💰 Toplam: ₺${toplam.toLocaleString("tr-TR")}`;
-
-if(siparis.not.trim()!==""){
-
-mesaj+=`\n\n📝 Not:\n${siparis.not}`;
-
-}
-
-// Telefon numarasını kendi numaranla değiştir
-const telefon="905428351609";
-
-window.open(
-`https://wa.me/${telefon}?text=${encodeURIComponent(mesaj)}`,
-"_blank"
-);
-
-}
-catch(err){
-
-console.error(err);
-
-alert("Sipariş gönderilirken hata oluştu.");
-
-}
+    }
 
 });
 
@@ -552,15 +480,16 @@ alert("Sipariş gönderilirken hata oluştu.");
 // =========================
 
 updateCart();
+
 const params = new URLSearchParams(window.location.search);
 
 const masa = params.get("masa");
 
-if(masa){
+if (masa) {
 
     masaNo.value = masa;
 
 }
-loadProducts();
 
-console.log("SCRIPT SON SATIR ÇALIŞTI");
+loadProducts();
+    
