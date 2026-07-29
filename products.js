@@ -65,6 +65,7 @@ alert("Buton çalıştı");
         image: ""
 
     });
+  alert("Belge ID: " + docRef.id);
 
     name.value = "";
     description.value = "";
