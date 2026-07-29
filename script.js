@@ -11,8 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 const menuContent =
 document.getElementById("menuContent");
     // ELEMENTLER
-    const accordions = document.querySelectorAll(".accordion");
-    const addButtons = document.querySelectorAll(".sepeteEkle");
 
     const cartButton = document.getElementById("cartButton");
     const cartPanel = document.getElementById("cartPanel");
@@ -31,37 +29,7 @@ document.getElementById("menuContent");
     }
 
     // ACCORDION
-    accordions.forEach(btn => {
-        btn.addEventListener("click", () => {
-
-            const panel = btn.nextElementSibling;
-
-            if (panel.style.display === "block") {
-                panel.style.display = "none";
-            } else {
-                panel.style.display = "block";
-            }
-
-  async function menuyuYukle() {
-
-    const snapshot = await getDocs(collection(db, "products"));
-
-    const kategoriler = {};
-
-    snapshot.forEach((doc) => {
-
-        const urun = doc.data();
-
-        if (!urun.active) return;
-
-        if (!kategoriler[urun.category]) {
-            kategoriler[urun.category] = [];
-        }
-
-        kategoriler[urun.category].push(urun);
-
-    });
-
+    
     menuContent.innerHTML = "";
 
     Object.keys(kategoriler).forEach((kategori) => {
@@ -113,32 +81,16 @@ document.getElementById("menuContent");
         menuContent.innerHTML += html;
 
     });
-
+menuEventleriniBagla();
 }
     // SEPETE EKLE
-    addButtons.forEach(btn => {
-
-        btn.addEventListener("click", () => {
-
-            const isim = btn.dataset.urun;
-            const fiyat = Number(btn.dataset.fiyat);
-
-            const mevcut = cart.find(u => u.isim === isim);
-
-            if (mevcut) {
-                mevcut.adet++;
-            } else {
-                cart.push({
-                    isim,
-                    fiyat,
-                    adet: 1
-                });
+    
             }
 
             kaydetSepet();
             guncelleSepet();
-            menuyuYukle();
             
+        
         });
 
     });
@@ -367,5 +319,53 @@ masaNo.value = "";
     
 });
     guncelleSepet();
+menuyuYukle();
+            function menuEventleriniBagla() {
 
+    // Accordion
+    document.querySelectorAll(".accordion").forEach(btn => {
+
+        btn.onclick = () => {
+
+            const panel = btn.nextElementSibling;
+
+            panel.style.display =
+                panel.style.display === "block"
+                ? "none"
+                : "block";
+
+        };
+
+    });
+
+    // Sepete Ekle
+    document.querySelectorAll(".sepeteEkle").forEach(btn => {
+
+        btn.onclick = () => {
+
+            const isim = btn.dataset.urun;
+            const fiyat = Number(btn.dataset.fiyat);
+
+            const mevcut = cart.find(u => u.isim === isim);
+
+            if (mevcut) {
+                mevcut.adet++;
+            } else {
+
+                cart.push({
+                    isim,
+                    fiyat,
+                    adet: 1
+                });
+
+            }
+
+            kaydetSepet();
+            guncelleSepet();
+
+        };
+
+    });
+
+}
 });
