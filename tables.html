@@ -6,32 +6,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Masa Yönetimi</title>
+<title>Rüzgar Gülü | Masa Yönetimi</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <link rel="stylesheet" href="admin.css">
 
 </head>
 
-<body>
+<body class="bg-light">
 
-<div class="container py-4">
+<div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="row">
 
-        <h2>🪑 Masa Yönetimi</h2>
+<!-- SOL MENÜ -->
 
-        <button class="btn btn-success" id="newTable">
+<div class="col-lg-2 bg-dark text-white min-vh-100 p-3">
 
-            + Yeni Masa
+<h3 class="text-center mb-4">
 
-        </button>
+🍃 Rüzgar Gülü
 
-    </div>
+</h3>
 
-    <div class="row" id="tableList"></div>
+<div class="list-group">
+
+<a href="dashboard.html"
+class="list-group-item list-group-item-action">
+
+🏠 Dashboard
+
+</a>
+
+<a href="products.html"
+class="list-group-item list-group-item-action">
+
+📦 Ürünler
+
+</a>
+
+<a href="categories.html"
+class="list-group-item list-group-item-action">
+
+📂 Kategoriler
+
+</a>
+
+<a href="tables.html"
+class="list-group-item list-group-item-action active">
+
+🪑 Masalar
+
+</a>
+
+<a href="admin.html"
+class="list-group-item list-group-item-action">
+
+🛒 Siparişler
+
+</a>
 
 </div>
+
+</div>
+
+<!-- İÇERİK -->
+
+<div class="col-lg-10 p-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<h2>
+
+🪑 Masa Yönetimi
+
+</h2>
+
+<button
+class="btn btn-success"
+id="newTable">
+
++ Yeni Masa
+
+</button>
+
+</div>
+
+<div
+class="row g-4"
+id="tableList">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Yeni Masa Modal -->
+
+<div
+class="modal fade"
+id="tableModal"
+tabindex="-1">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">
+
+Yeni Masa
+
+</h5>
+
+<button
+class="btn-close"
+data-bs-dismiss="modal">
+
+</button>
+
+</div>
+
+<div class="modal-body">
+
+<label class="form-label">
+
+Masa Adı
+
+</label>
+
+<input
+type="text"
+class="form-control"
+id="tableName"
+placeholder="Örn: Masa 12">
+
+</div>
+
+<div class="modal-footer">
+
+<button
+class="btn btn-secondary"
+data-bs-dismiss="modal">
+
+İptal
+
+</button>
+
+<button
+class="btn btn-success"
+id="saveTable">
+
+Kaydet
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module" src="tables.js"></script>
 
