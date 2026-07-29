@@ -391,7 +391,7 @@ async function saveProduct() {
         name: form.name.value.trim(),
         description: form.description.value.trim(),
         price: Number(form.price.value),
-        category: form.category.value.trim(),
+        category: form.category.value,
         image: form.image.value.trim(),
         active: true
     };
@@ -405,7 +405,10 @@ async function saveProduct() {
         alert("Geçerli fiyat giriniz.");
         return;
     }
-
+   if (data.category === "") {
+    alert("Kategori seçiniz.");
+    return;
+}
     try {
 
         if (editingId) {
