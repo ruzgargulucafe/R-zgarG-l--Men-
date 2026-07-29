@@ -1,127 +1,230 @@
 import { db } from "./firebase.js";
 
 import {
-collection,
-getDocs,
-addDoc,
-updateDoc,
-deleteDoc,
-doc
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-const productList=document.getElementById("productList");
-const searchProduct=document.getElementById("searchProduct");
+/* ===========================
+   DOM
+=========================== */
 
-const totalProducts=document.getElementById("totalProducts");
-const activeProducts=document.getElementById("activeProducts");
-const categoryCount=document.getElementById("categoryCount");
-const orderCount=document.getElementById("orderCount");
+const productList = document.getElementById("productList");
+const searchInput = document.getElementById("searchProduct");
 
-let products=[];
+const totalProducts = document.getElementById("totalProducts");
+const activeProducts = document.getElementById("activeProducts");
+const categoryCount = document.getElementById("categoryCount");
+const orderCount = document.getElementById("orderCount");
 
-async function loadProducts(){
+const modalElement = document.getElementById("productModal");
+const modal = new bootstrap.Modal(modalElement);
 
-const snapshot=await getDocs(collection(db,"products"));
+const form = {
+    name: document.getElementById("name"),
+    description: document.getElementById("description"),
+    price: document.getElementById("price"),
+    category: document.getElementById("category"),
+    image: document.getElementById("image")
+};
 
-products=[];
+const saveButton = document.getElementById("saveProduct");
+const newButton = document.getElementById("newProduct");
 
-snapshot.forEach((d)=>{
+/* ===========================
+   GLOBAL
+=========================== */
 
-products.push({
-id:d.id,
-...d.data()
-});
+let products = [];
+let editingId = null;
+/* ===========================
+   ÜRÜNLERİ YÜKLE
+=========================== */
 
-});
+async function loadProducts() {
 
-updateDashboard();
+    try {
 
-renderProducts(products);
+        const snapshot = await getDocs(collection(db, "products"));
+
+        products = [];
+
+        snapshot.forEach((item) => {
+
+            products.push({
+                id: item.id,
+                ...item.data()
+            });
+
+        });
+
+        updateDashboard();
+        renderProducts(products);
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Ürünler yüklenemedi.");
+
+    }
 
 }
 
-function updateDashboard(){
+/* ===========================
+   DASHBOARD
+=========================== */
 
-totalProducts.innerHTML=products.length;
+function updateDashboard() {
 
-activeProducts.innerHTML=
-products.filter(x=>x.active).length;
+    totalProducts.textContent = products.length;
 
-categoryCount.innerHTML=
-new Set(products.map(x=>x.category)).size;
+    activeProducts.textContent =
+        products.filter(p => p.active).length;
+
+    categoryCount.textContent =
+        [...new Set(products.map(p => p.category))].length;
+
+    // Şimdilik sipariş sayısı hazır değil
+    orderCount.textContent = "-";
 
 }
 
-function renderProducts(list){
+/* ===========================
+   ARAMA
+=========================== */
 
-productList.innerHTML="";
+searchInput.addEventListener("input", () => {
 
-list.forEach((urun)=>{
+    const value = searchInput.value
+        .trim()
+        .toLowerCase();
 
-productList.innerHTML+=`
+    if (value === "") {
 
-<div class="col-lg-4">
+        renderProducts(products);
+        return;
 
-<div class="card shadow h-100">
+    }
 
-${urun.image?
+    const filtered = products.filter(product => {
 
-`<img src="${urun.image}"
-class="card-img-top"
-style="height:220px;object-fit:cover;">`
+        return (
+            product.name.toLowerCase().includes(value) ||
+            (product.category || "")
+                .toLowerCase()
+                .includes(value)
+        );
 
-:""}
+    });
 
-<div class="card-body">
+    renderProducts(filtered);
 
-<h5>${urun.name}</h5>
+});
+/* ===========================
+   ÜRÜNLERİ GÖSTER
+=========================== */
 
-<p class="text-muted">
+function renderProducts(list) {
 
-${urun.description||""}
+    productList.innerHTML = "";
 
-</p>
+    if (list.length === 0) {
 
-<h4>
+        productList.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-warning text-center">
+                    Ürün bulunamadı.
+                </div>
+            </div>
+        `;
 
-₺${Number(urun.price).toLocaleString("tr-TR")}
+        return;
+    }
 
-</h4>
+    list.forEach(product => {
 
-<span class="badge bg-primary">
+        const image = product.image && product.image.trim() !== ""
+            ? product.image
+            : "https://placehold.co/600x400?text=R%C3%BCzgar+G%C3%BCl%C3%BC";
 
-${urun.category}
+        productList.innerHTML += `
 
-</span>
+        <div class="col-lg-4 col-md-6">
 
-<hr>
-                        <div class="mt-3 d-flex justify-content-between align-items-center">
+            <div class="card shadow-sm h-100">
 
-                            <span class="badge ${urun.active ? "bg-success" : "bg-secondary"}">
-                                ${urun.active ? "🟢 Aktif" : "⚪ Pasif"}
-                            </span>
+                <img
+                    src="${image}"
+                    class="card-img-top"
+                    alt="${product.name}">
 
-                            <strong class="text-primary">
-                                ₺${Number(urun.price).toLocaleString("tr-TR")}
-                            </strong>
+                <div class="card-body d-flex flex-column">
+
+                    <h5 class="fw-bold">
+                        ${product.name}
+                    </h5>
+
+                    <p class="text-muted small flex-grow-1">
+                        ${product.description || ""}
+                    </p>
+
+                    <span class="badge bg-primary mb-2">
+                        ${product.category || "-"}
+                    </span>
+
+                    <h4 class="text-success mb-3">
+                        ₺${Number(product.price).toLocaleString("tr-TR")}
+                    </h4>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                        <span class="badge ${
+                            product.active
+                                ? "bg-success"
+                                : "bg-secondary"
+                        }">
+
+                            ${
+                                product.active
+                                    ? "Aktif"
+                                    : "Pasif"
+                            }
+
+                        </span>
+
+                        <div class="form-check form-switch">
+
+                            <input
+                                class="form-check-input toggleProduct"
+                                type="checkbox"
+                                data-id="${product.id}"
+                                ${product.active ? "checked" : ""}>
 
                         </div>
 
-                        <div class="d-grid gap-2 mt-3">
+                    </div>
 
-                            <button
-                                class="btn btn-warning editProduct"
-                                data-id="${urun.id}">
-                                ✏️ Düzenle
-                            </button>
+                    <div class="d-grid gap-2">
 
-                            <button
-                                class="btn btn-danger deleteProduct"
-                                data-id="${urun.id}">
-                                🗑️ Sil
-                            </button>
+                        <button
+                            class="btn btn-warning editProduct"
+                            data-id="${product.id}">
 
-                        </div>
+                            ✏️ Düzenle
+
+                        </button>
+
+                        <button
+                            class="btn btn-danger deleteProduct"
+                            data-id="${product.id}">
+
+                            🗑️ Sil
+
+                        </button>
 
                     </div>
 
@@ -129,198 +232,152 @@ ${urun.category}
 
             </div>
 
+        </div>
+
         `;
 
     });
 
-    bindButtons();
+    bindEvents();
 
 }
+/* ===========================
+   EVENTLER
+=========================== */
 
-function bindButtons(){
+function bindEvents() {
 
-    document.querySelectorAll(".deleteProduct").forEach(btn=>{
+    // Düzenle
+    document.querySelectorAll(".editProduct").forEach(button => {
 
-        btn.onclick=()=>{
+        button.addEventListener("click", () => {
 
-            const id=btn.dataset.id;
+            openEditModal(button.dataset.id);
 
-            deleteProduct(id);
-
-        };
+        });
 
     });
 
-    document.querySelectorAll(".editProduct").forEach(btn=>{
+    // Sil
+    document.querySelectorAll(".deleteProduct").forEach(button => {
 
-        btn.onclick=()=>{
+        button.addEventListener("click", () => {
 
-            const id=btn.dataset.id;
+            deleteProduct(button.dataset.id);
 
-            openEditModal(id);
+        });
 
-        };
+    });
+
+    // Aktif / Pasif
+    document.querySelectorAll(".toggleProduct").forEach(button => {
+
+        button.addEventListener("change", () => {
+
+            toggleProduct(button.dataset.id);
+
+        });
 
     });
 
 }
 
-searchProduct.addEventListener("input",()=>{
+/* ===========================
+   FORMU TEMİZLE
+=========================== */
 
-    const text=searchProduct.value.toLowerCase();
+function clearForm() {
 
-    const sonuc=products.filter(x=>
+    editingId = null;
 
-        x.name.toLowerCase().includes(text) ||
-
-        (x.category||"").toLowerCase().includes(text)
-
-    );
-
-    renderProducts(sonuc);
-
-});
-// =========================
-// Ürün Sil
-// =========================
-
-async function deleteProduct(id){
-
-    if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")){
-        return;
-    }
-
-    try{
-
-        await deleteDoc(doc(db,"products",id));
-
-        products=products.filter(x=>x.id!==id);
-
-        updateDashboard();
-
-        renderProducts(products);
-
-        alert("Ürün silindi.");
-
-    }catch(err){
-
-        console.error(err);
-
-        alert(err.message);
-
-    }
+    form.name.value = "";
+    form.description.value = "";
+    form.price.value = "";
+    form.category.value = "";
+    form.image.value = "";
 
 }
 
-// =========================
-// Düzenleme
-// =========================
+/* ===========================
+   MODAL AÇ
+=========================== */
 
-let editingId=null;
+function openEditModal(id) {
 
-function openEditModal(id){
+    const product = products.find(p => p.id === id);
 
-    editingId=id;
+    if (!product) return;
 
-    const urun=products.find(x=>x.id===id);
+    editingId = id;
 
-    if(!urun){
-        return;
-    }
-
-    document.getElementById("name").value=urun.name||"";
-    document.getElementById("description").value=urun.description||"";
-    document.getElementById("price").value=urun.price||"";
-    document.getElementById("category").value=urun.category||"";
-    document.getElementById("image").value=urun.image||"";
-
-    const modal=new bootstrap.Modal(
-        document.getElementById("productModal")
-    );
+    form.name.value = product.name || "";
+    form.description.value = product.description || "";
+    form.price.value = product.price || "";
+    form.category.value = product.category || "";
+    form.image.value = product.image || "";
 
     modal.show();
 
 }
 
-// =========================
-// Yeni Ürün Butonu
-// =========================
+/* ===========================
+   YENİ ÜRÜN
+=========================== */
 
-document
-.getElementById("newProduct")
-.addEventListener("click",()=>{
+newButton.addEventListener("click", () => {
 
-    editingId=null;
-
-    document.getElementById("name").value="";
-    document.getElementById("description").value="";
-    document.getElementById("price").value="";
-    document.getElementById("category").value="";
-    document.getElementById("image").value="";
-
-    const modal=new bootstrap.Modal(
-        document.getElementById("productModal")
-    );
+    clearForm();
 
     modal.show();
 
 });
-// =========================
-// Ürün Kaydet
-// =========================
+/* ===========================
+   ÜRÜN KAYDET
+=========================== */
 
-document
-.getElementById("saveProduct")
-.addEventListener("click", async ()=>{
+saveButton.addEventListener("click", saveProduct);
 
-    const name=document.getElementById("name").value.trim();
-    const description=document.getElementById("description").value.trim();
-    const price=Number(document.getElementById("price").value);
-    const category=document.getElementById("category").value.trim();
-    const image=document.getElementById("image").value.trim();
+async function saveProduct() {
 
-    if(name===""){
-
-        alert("Ürün adı boş olamaz.");
-
-        return;
-
-    }
-
-    if(price<=0){
-
-        alert("Geçerli fiyat giriniz.");
-
-        return;
-
-    }
-
-    const data={
-
-        name,
-        description,
-        price,
-        category,
-        image,
-        active:true
-
+    const data = {
+        name: form.name.value.trim(),
+        description: form.description.value.trim(),
+        price: Number(form.price.value),
+        category: form.category.value.trim(),
+        image: form.image.value.trim(),
+        active: true
     };
 
-    try{
+    if (data.name === "") {
+        alert("Ürün adı giriniz.");
+        return;
+    }
 
-        if(editingId){
+    if (isNaN(data.price) || data.price <= 0) {
+        alert("Geçerli fiyat giriniz.");
+        return;
+    }
+
+    try {
+
+        if (editingId) {
+
+            const eskiUrun = products.find(p => p.id === editingId);
 
             await updateDoc(
-                doc(db,"products",editingId),
-                data
+                doc(db, "products", editingId),
+                {
+                    ...data,
+                    active: eskiUrun ? eskiUrun.active : true
+                }
             );
 
             alert("Ürün güncellendi.");
 
-        }else{
+        } else {
 
             await addDoc(
-                collection(db,"products"),
+                collection(db, "products"),
                 data
             );
 
@@ -328,91 +385,86 @@ document
 
         }
 
-        bootstrap.Modal
-        .getInstance(
-            document.getElementById("productModal")
-        )
-        .hide();
+        modal.hide();
+
+        clearForm();
 
         await loadProducts();
 
-    }catch(err){
+    } catch (err) {
 
         console.error(err);
 
-        alert(err.message);
+        alert("Kayıt sırasında hata oluştu.");
 
     }
 
-});
-// =========================
-// Aktif / Pasif Değiştir
-// =========================
+}
 
-async function toggleActive(id){
+/* ===========================
+   ÜRÜN SİL
+=========================== */
 
-    const urun=products.find(x=>x.id===id);
+async function deleteProduct(id) {
 
-    if(!urun) return;
+    if (!confirm("Bu ürünü silmek istiyor musunuz?"))
+        return;
 
-    try{
+    try {
+
+        await deleteDoc(doc(db, "products", id));
+
+        await loadProducts();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Silme işlemi başarısız.");
+
+    }
+
+}
+
+/* ===========================
+   AKTİF / PASİF
+=========================== */
+
+async function toggleProduct(id) {
+
+    const product = products.find(p => p.id === id);
+
+    if (!product) return;
+
+    try {
 
         await updateDoc(
-            doc(db,"products",id),
+            doc(db, "products", id),
             {
-                active:!urun.active
+                active: !product.active
             }
         );
 
         await loadProducts();
 
-    }catch(err){
+    } catch (err) {
 
         console.error(err);
 
-        alert(err.message);
+        alert("Durum değiştirilemedi.");
 
     }
 
 }
 
-// =========================
-// Dashboard Güncelle
-// =========================
+/* ===========================
+   BAŞLAT
+=========================== */
 
-async function refreshDashboard(){
+async function init() {
 
-    updateDashboard();
+    await loadProducts();
 
 }
 
-// =========================
-// Sayfa Açılışı
-// =========================
-
-window.addEventListener("load",async()=>{
-
-    try{
-
-        await loadProducts();
-
-        await refreshDashboard();
-
-    }catch(err){
-
-        console.error(err);
-
-        alert(err.message);
-
-    }
-
-});
-
-// =========================
-// Global Fonksiyonlar
-// =========================
-
-window.loadProducts=loadProducts;
-window.deleteProduct=deleteProduct;
-window.openEditModal=openEditModal;
-window.toggleActive=toggleActive;
+init();
