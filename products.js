@@ -95,3 +95,253 @@ ${urun.category}
 </span>
 
 <hr>
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+
+                            <span class="badge ${urun.active ? "bg-success" : "bg-secondary"}">
+                                ${urun.active ? "🟢 Aktif" : "⚪ Pasif"}
+                            </span>
+
+                            <strong class="text-primary">
+                                ₺${Number(urun.price).toLocaleString("tr-TR")}
+                            </strong>
+
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+
+                            <button
+                                class="btn btn-warning editProduct"
+                                data-id="${urun.id}">
+                                ✏️ Düzenle
+                            </button>
+
+                            <button
+                                class="btn btn-danger deleteProduct"
+                                data-id="${urun.id}">
+                                🗑️ Sil
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+    bindButtons();
+
+}
+
+function bindButtons(){
+
+    document.querySelectorAll(".deleteProduct").forEach(btn=>{
+
+        btn.onclick=()=>{
+
+            const id=btn.dataset.id;
+
+            deleteProduct(id);
+
+        };
+
+    });
+
+    document.querySelectorAll(".editProduct").forEach(btn=>{
+
+        btn.onclick=()=>{
+
+            const id=btn.dataset.id;
+
+            openEditModal(id);
+
+        };
+
+    });
+
+}
+
+searchProduct.addEventListener("input",()=>{
+
+    const text=searchProduct.value.toLowerCase();
+
+    const sonuc=products.filter(x=>
+
+        x.name.toLowerCase().includes(text) ||
+
+        (x.category||"").toLowerCase().includes(text)
+
+    );
+
+    renderProducts(sonuc);
+
+});
+// =========================
+// Ürün Sil
+// =========================
+
+async function deleteProduct(id){
+
+    if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")){
+        return;
+    }
+
+    try{
+
+        await deleteDoc(doc(db,"products",id));
+
+        products=products.filter(x=>x.id!==id);
+
+        updateDashboard();
+
+        renderProducts(products);
+
+        alert("Ürün silindi.");
+
+    }catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+
+    }
+
+}
+
+// =========================
+// Düzenleme
+// =========================
+
+let editingId=null;
+
+function openEditModal(id){
+
+    editingId=id;
+
+    const urun=products.find(x=>x.id===id);
+
+    if(!urun){
+        return;
+    }
+
+    document.getElementById("name").value=urun.name||"";
+    document.getElementById("description").value=urun.description||"";
+    document.getElementById("price").value=urun.price||"";
+    document.getElementById("category").value=urun.category||"";
+    document.getElementById("image").value=urun.image||"";
+
+    const modal=new bootstrap.Modal(
+        document.getElementById("productModal")
+    );
+
+    modal.show();
+
+}
+
+// =========================
+// Yeni Ürün Butonu
+// =========================
+
+document
+.getElementById("newProduct")
+.addEventListener("click",()=>{
+
+    editingId=null;
+
+    document.getElementById("name").value="";
+    document.getElementById("description").value="";
+    document.getElementById("price").value="";
+    document.getElementById("category").value="";
+    document.getElementById("image").value="";
+
+    const modal=new bootstrap.Modal(
+        document.getElementById("productModal")
+    );
+
+    modal.show();
+
+});
+// =========================
+// Ürün Kaydet
+// =========================
+
+document
+.getElementById("saveProduct")
+.addEventListener("click", async ()=>{
+
+    const name=document.getElementById("name").value.trim();
+    const description=document.getElementById("description").value.trim();
+    const price=Number(document.getElementById("price").value);
+    const category=document.getElementById("category").value.trim();
+    const image=document.getElementById("image").value.trim();
+
+    if(name===""){
+
+        alert("Ürün adı boş olamaz.");
+
+        return;
+
+    }
+
+    if(price<=0){
+
+        alert("Geçerli fiyat giriniz.");
+
+        return;
+
+    }
+
+    const data={
+
+        name,
+        description,
+        price,
+        category,
+        image,
+        active:true
+
+    };
+
+    try{
+
+        if(editingId){
+
+            await updateDoc(
+                doc(db,"products",editingId),
+                data
+            );
+
+            alert("Ürün güncellendi.");
+
+        }else{
+
+            await addDoc(
+                collection(db,"products"),
+                data
+            );
+
+            alert("Yeni ürün eklendi.");
+
+        }
+
+        bootstrap.Modal
+        .getInstance(
+            document.getElementById("productModal")
+        )
+        .hide();
+
+        await loadProducts();
+
+    }catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+
+    }
+
+});
