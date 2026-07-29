@@ -4,82 +4,143 @@ import {
     collection,
     getDocs,
     addDoc
-}
- from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const tableList = document.getElementById("tableList");
+
 const newTableButton = document.getElementById("newTable");
-async function loadTables(){
+const saveTableButton = document.getElementById("saveTable");
 
-    const snapshot = await getDocs(
-        collection(db,"tables")
-    );
+const tableName = document.getElementById("tableName");
 
-    tableList.innerHTML="";
+const modal = new bootstrap.Modal(
+    document.getElementById("tableModal")
+);
 
-    snapshot.forEach(doc=>{
+/* ===========================
+   MASALARI YÜKLE
+=========================== */
 
-        const table=doc.data();
+async function loadTables() {
 
-        tableList.innerHTML+=`
+    try {
 
-        <div class="col-md-4 mb-4">
+        const snapshot = await getDocs(
+            collection(db, "tables")
+        );
 
-            <div class="card shadow">
+        tableList.innerHTML = "";
 
-                <div class="card-body text-center">
+        snapshot.forEach(doc => {
 
-                    <h3>🪑 ${table.name}</h3>
+            const table = doc.data();
 
-                    <p>
+            tableList.innerHTML += `
 
-                        ${
-                            table.active
-                            ? "🟢 Aktif"
-                            : "🔴 Pasif"
-                        }
+            <div class="col-lg-4 col-md-6">
 
-                    </p>
+                <div class="card shadow border-0 rounded-4">
 
-                    <button
-                        class="btn btn-primary w-100">
+                    <div class="card-body text-center">
 
-                        QR Kod Oluştur
+                        <h3 class="mb-3">
 
-                    </button>
+                            🪑 ${table.name}
+
+                        </h3>
+
+                        <p class="mb-3">
+
+                            ${
+                                table.active
+                                ? "🟢 Aktif"
+                                : "🔴 Pasif"
+                            }
+
+                        </p>
+
+                        <div class="d-grid gap-2">
+
+                            <button
+                                class="btn btn-primary">
+
+                                📱 QR Kod
+
+                            </button>
+
+                            <button
+                                class="btn btn-warning">
+
+                                ✏️ Düzenle
+
+                            </button>
+
+                            <button
+                                class="btn btn-danger">
+
+                                🗑️ Sil
+
+                            </button>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
+            `;
 
-        `;
+        });
 
-    });
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Masalar yüklenemedi.");
+
+    }
 
 }
 
-loadTables();
 /* ===========================
    YENİ MASA
 =========================== */
 
-newTableButton.addEventListener("click", async () => {
+newTableButton.addEventListener("click", () => {
 
-    const name = prompt("Masa adını giriniz");
+    tableName.value = "";
 
-    if (!name) return;
+    modal.show();
+
+});
+
+/* ===========================
+   KAYDET
+=========================== */
+
+saveTableButton.addEventListener("click", async () => {
+
+    if (tableName.value.trim() === "") {
+
+        alert("Masa adı giriniz.");
+
+        return;
+
+    }
 
     try {
 
         await addDoc(
             collection(db, "tables"),
             {
-                name: name.trim(),
+                name: tableName.value.trim(),
                 active: true
             }
         );
+
+        modal.hide();
 
         await loadTables();
 
@@ -94,3 +155,9 @@ newTableButton.addEventListener("click", async () => {
     }
 
 });
+
+/* ===========================
+   BAŞLAT
+=========================== */
+
+loadTables();
