@@ -70,12 +70,12 @@ onSnapshot(q, (snapshot) => {
         siparis.urunler.forEach((u) => {
 
             urunler += `
-                <li>
-                    <strong>${u.adet}x</strong>
-                    ${u.isim}
-                    — ₺${u.adet * u.fiyat}
-                </li>
-            `;
+<li>
+<strong>${u.adet}x</strong>
+${u.name}
+— ₺${u.adet * u.price}
+</li>
+`;
 
         });
 
