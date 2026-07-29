@@ -1,12 +1,17 @@
-alert("1. satır çalıştı");
-
-console.log("Bootstrap:", typeof bootstrap);import { db } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
     collection,
     getDocs,
-    addDoc
+    addDoc,
+    deleteDoc,
+    updateDoc,
+    doc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+/* ===========================
+   ELEMENTLER
+=========================== */
 
 const tableList = document.getElementById("tableList");
 
@@ -15,17 +20,47 @@ const saveTableButton = document.getElementById("saveTable");
 
 const tableName = document.getElementById("tableName");
 
-let modal = null;
+const tableModal = new bootstrap.Modal(
+    document.getElementById("tableModal")
+);
 
-if (typeof bootstrap !== "undefined") {
-    modal = new bootstrap.Modal(document.getElementById("tableModal"));
-}
+const qrModal = new bootstrap.Modal(
+    document.getElementById("qrModal")
+);
 
+const qrTitle = document.getElementById("qrTitle");
+const qrCode = document.getElementById("qrcode");
+const qrLink = document.getElementById("qrLink");
+
+/* ===========================
+   DEĞİŞKENLER
+=========================== */
+
+let editId = null;
+
+/* ===========================
+   YENİ MASA
+=========================== */
+
+newTableButton.addEventListener("click", () => {
+
+    editId = null;
+
+    tableName.value = "";
+
+    document.querySelector("#tableModal .modal-title").innerText =
+        "Yeni Masa";
+
+    tableModal.show();
+
+});
 /* ===========================
    MASALARI YÜKLE
 =========================== */
 
 async function loadTables() {
+
+    tableList.innerHTML = "";
 
     try {
 
@@ -33,11 +68,10 @@ async function loadTables() {
             collection(db, "tables")
         );
 
-        tableList.innerHTML = "";
+        snapshot.forEach(item => {
 
-        snapshot.forEach(doc => {
-
-            const table = doc.data();
+            const table = item.data();
+            const id = item.id;
 
             tableList.innerHTML += `
 
@@ -45,15 +79,15 @@ async function loadTables() {
 
                 <div class="card shadow border-0 rounded-4">
 
-                    <div class="card-body text-center">
+                    <div class="card-body">
 
-                        <h3 class="mb-3">
+                        <h4 class="text-center mb-3">
 
                             🪑 ${table.name}
 
-                        </h3>
+                        </h4>
 
-                        <p class="mb-3">
+                        <p class="text-center">
 
                             ${
                                 table.active
@@ -66,21 +100,26 @@ async function loadTables() {
                         <div class="d-grid gap-2">
 
                             <button
-                                class="btn btn-primary">
+                                class="btn btn-primary qrBtn"
+                                data-id="${id}"
+                                data-name="${table.name}">
 
                                 📱 QR Kod
 
                             </button>
 
                             <button
-                                class="btn btn-warning">
+                                class="btn btn-warning editBtn"
+                                data-id="${id}"
+                                data-name="${table.name}">
 
                                 ✏️ Düzenle
 
                             </button>
 
                             <button
-                                class="btn btn-danger">
+                                class="btn btn-danger deleteBtn"
+                                data-id="${id}">
 
                                 🗑️ Sil
 
@@ -98,6 +137,8 @@ async function loadTables() {
 
         });
 
+        addEvents();
+
     } catch (err) {
 
         console.error(err);
@@ -107,63 +148,149 @@ async function loadTables() {
     }
 
 }
-
 /* ===========================
-   YENİ MASA
+   BUTON EVENTLERİ
 =========================== */
 
-newTableButton.addEventListener("click", () => {
+function addEvents() {
 
-    alert("Butona basıldı");
+    /* -----------------------
+       QR KOD
+    ----------------------- */
 
-    if (modal) {
-        tableName.value = "";
-        modal.show();
-    }
+    document.querySelectorAll(".qrBtn").forEach(btn => {
 
-});
+        btn.onclick = () => {
 
-    tableName.value = "";
+            const tableName = btn.dataset.name;
 
-    modal.show();
+            const url =
+                `${location.origin}${location.pathname.replace("tables.html","menu.html")}?table=${encodeURIComponent(tableName)}`;
 
-});
+            qrTitle.innerText = tableName;
 
+            qrLink.innerText = url;
+
+            qrCode.innerHTML = "";
+
+            new QRCode(qrCode,{
+                text:url,
+                width:250,
+                height:250
+            });
+
+            qrModal.show();
+
+        };
+
+    });
+
+    /* -----------------------
+       DÜZENLE
+    ----------------------- */
+
+    document.querySelectorAll(".editBtn").forEach(btn=>{
+
+        btn.onclick=()=>{
+
+            editId=btn.dataset.id;
+
+            tableName.value=btn.dataset.name;
+
+            document.querySelector("#tableModal .modal-title").innerText =
+                "Masayı Düzenle";
+
+            tableModal.show();
+
+        };
+
+    });
+
+    /* -----------------------
+       SİL
+    ----------------------- */
+
+    document.querySelectorAll(".deleteBtn").forEach(btn=>{
+
+        btn.onclick=async()=>{
+
+            if(!confirm("Bu masa silinsin mi?"))
+                return;
+
+            try{
+
+                await deleteDoc(
+                    doc(db,"tables",btn.dataset.id)
+                );
+
+                await loadTables();
+
+            }catch(err){
+
+                console.error(err);
+
+                alert("Masa silinemedi.");
+
+            }
+
+        };
+
+    });
+
+}
 /* ===========================
-   KAYDET
+   KAYDET (YENİ / GÜNCELLE)
 =========================== */
 
 saveTableButton.addEventListener("click", async () => {
 
-    if (tableName.value.trim() === "") {
+    const name = tableName.value.trim();
 
+    if (name === "") {
         alert("Masa adı giriniz.");
-
         return;
-
     }
 
     try {
 
-        await addDoc(
-            collection(db, "tables"),
-            {
-                name: tableName.value.trim(),
-                active: true
-            }
-        );
+        if (editId) {
 
-        modal.hide();
+            await updateDoc(
+                doc(db, "tables", editId),
+                {
+                    name: name
+                }
+            );
+
+            alert("Masa güncellendi.");
+
+        } else {
+
+            await addDoc(
+                collection(db, "tables"),
+                {
+                    name: name,
+                    active: true
+                }
+            );
+
+            alert("Masa oluşturuldu.");
+
+        }
+
+        tableModal.hide();
+
+        editId = null;
+
+        tableName.value = "";
 
         await loadTables();
-
-        alert("Masa oluşturuldu.");
 
     } catch (err) {
 
         console.error(err);
 
-        alert("Masa oluşturulamadı.");
+        alert("İşlem başarısız.");
 
     }
 
