@@ -1,5 +1,5 @@
 import { db } from "./firebase.js";
-alert("script.js çalıştı");
+
 import {
 collection,
 getDocs,
