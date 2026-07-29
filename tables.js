@@ -2,11 +2,13 @@ import { db } from "./firebase.js";
 
 import {
     collection,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    getDocs,
+    addDoc
+}
+ from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const tableList = document.getElementById("tableList");
-
+const newTableButton = document.getElementById("newTable");
 async function loadTables(){
 
     const snapshot = await getDocs(
@@ -59,3 +61,36 @@ async function loadTables(){
 }
 
 loadTables();
+/* ===========================
+   YENİ MASA
+=========================== */
+
+newTableButton.addEventListener("click", async () => {
+
+    const name = prompt("Masa adını giriniz");
+
+    if (!name) return;
+
+    try {
+
+        await addDoc(
+            collection(db, "tables"),
+            {
+                name: name.trim(),
+                active: true
+            }
+        );
+
+        await loadTables();
+
+        alert("Masa oluşturuldu.");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Masa oluşturulamadı.");
+
+    }
+
+});
