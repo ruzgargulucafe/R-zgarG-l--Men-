@@ -7,32 +7,51 @@ import {
 
 const tableList = document.getElementById("tableList");
 
-async function loadTables() {
+async function loadTables(){
 
-    const snapshot = await getDocs(collection(db, "tables"));
+    const snapshot = await getDocs(
+        collection(db,"tables")
+    );
 
-    tableList.innerHTML = "";
+    tableList.innerHTML="";
 
-    snapshot.forEach(doc => {
+    snapshot.forEach(doc=>{
 
-        const table = doc.data();
+        const table=doc.data();
 
-        tableList.innerHTML += `
-            <div class="col-md-4 mb-3">
+        tableList.innerHTML+=`
 
-                <div class="card shadow-sm">
+        <div class="col-md-4 mb-4">
 
-                    <div class="card-body text-center">
+            <div class="card shadow">
 
-                        <h3>🪑 ${table.name}</h3>
+                <div class="card-body text-center">
 
-                        <p>${table.active ? "🟢 Aktif" : "🔴 Pasif"}</p>
+                    <h3>🪑 ${table.name}</h3>
 
-                    </div>
+                    <p>
+
+                        ${
+                            table.active
+                            ? "🟢 Aktif"
+                            : "🔴 Pasif"
+                        }
+
+                    </p>
+
+                    <button
+                        class="btn btn-primary w-100">
+
+                        QR Kod Oluştur
+
+                    </button>
 
                 </div>
 
             </div>
+
+        </div>
+
         `;
 
     });
