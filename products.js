@@ -45,7 +45,8 @@ async function listele() {
 }
 
 saveProduct.addEventListener("click", async () => {
-
+alert("Buton çalıştı");
+  
     if (name.value.trim() === "") {
 
         alert("Ürün adı boş olamaz.");
