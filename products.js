@@ -1,111 +1,97 @@
 import { db } from "./firebase.js";
 
 import {
-  collection,
-  addDoc,
-  getDocs
+collection,
+getDocs,
+addDoc,
+updateDoc,
+deleteDoc,
+doc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-const name = document.getElementById("name");
-const description = document.getElementById("description");
-const price = document.getElementById("price");
-const category = document.getElementById("category");
+const productList=document.getElementById("productList");
+const searchProduct=document.getElementById("searchProduct");
 
-const saveProduct = document.getElementById("saveProduct");
-const productList = document.getElementById("productList");
+const totalProducts=document.getElementById("totalProducts");
+const activeProducts=document.getElementById("activeProducts");
+const categoryCount=document.getElementById("categoryCount");
+const orderCount=document.getElementById("orderCount");
 
-// Ürünleri Listele
-async function listele() {
+let products=[];
 
-    productList.innerHTML = "<p>Yükleniyor...</p>";
+async function loadProducts(){
 
-    try {
+const snapshot=await getDocs(collection(db,"products"));
 
-        const snapshot = await getDocs(collection(db, "products"));
+products=[];
 
-        productList.innerHTML = "";
+snapshot.forEach((d)=>{
 
-        if (snapshot.empty) {
-            productList.innerHTML = "<p>Henüz ürün yok.</p>";
-            return;
-        }
-
-        snapshot.forEach((doc) => {
-
-            const p = doc.data();
-
-            productList.innerHTML += `
-                <div class="product">
-
-                    ${p.image ? `<img src="${p.image}" class="productImage">` : ""}
-
-                    <h3>${p.name}</h3>
-
-                    <p>${p.description || ""}</p>
-
-                    <p><strong>Kategori:</strong> ${p.category}</p>
-
-                    <p><strong>Fiyat:</strong> ₺${Number(p.price).toLocaleString("tr-TR")}</p>
-
-                </div>
-            `;
-
-        });
-
-    } catch (err) {
-
-        productList.innerHTML =
-            `<p style="color:red;">${err.message}</p>`;
-
-        console.error(err);
-
-    }
-
-}
-
-// Ürün Kaydet
-saveProduct.addEventListener("click", async () => {
-
-    if (name.value.trim() === "") {
-        alert("Ürün adı boş olamaz.");
-        return;
-    }
-
-    if (price.value.trim() === "") {
-        alert("Fiyat giriniz.");
-        return;
-    }
-
-    try {
-
-        const docRef = await addDoc(collection(db, "products"), {
-
-            name: name.value.trim(),
-            description: description.value.trim(),
-            price: Number(price.value),
-            category: category.value,
-            active: true,
-            image: ""
-
-        });
-
-        alert("Ürün eklendi.\nBelge ID: " + docRef.id);
-
-        name.value = "";
-        description.value = "";
-        price.value = "";
-
-        await listele();
-
-    } catch (err) {
-
-        console.error(err);
-
-        alert("HATA:\n\n" + err.message);
-
-    }
+products.push({
+id:d.id,
+...d.data()
+});
 
 });
 
-// Sayfa Açılışı
-listele();
+updateDashboard();
+
+renderProducts(products);
+
+}
+
+function updateDashboard(){
+
+totalProducts.innerHTML=products.length;
+
+activeProducts.innerHTML=
+products.filter(x=>x.active).length;
+
+categoryCount.innerHTML=
+new Set(products.map(x=>x.category)).size;
+
+}
+
+function renderProducts(list){
+
+productList.innerHTML="";
+
+list.forEach((urun)=>{
+
+productList.innerHTML+=`
+
+<div class="col-lg-4">
+
+<div class="card shadow h-100">
+
+${urun.image?
+
+`<img src="${urun.image}"
+class="card-img-top"
+style="height:220px;object-fit:cover;">`
+
+:""}
+
+<div class="card-body">
+
+<h5>${urun.name}</h5>
+
+<p class="text-muted">
+
+${urun.description||""}
+
+</p>
+
+<h4>
+
+₺${Number(urun.price).toLocaleString("tr-TR")}
+
+</h4>
+
+<span class="badge bg-primary">
+
+${urun.category}
+
+</span>
+
+<hr>
