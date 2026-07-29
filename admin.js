@@ -31,7 +31,6 @@ onSnapshot(q, (snapshot) => {
 
     const siparis = document.data();
     const id = document.id;
-        const siparis = doc.data();
 
         let urunler = "";
 
@@ -46,7 +45,6 @@ onSnapshot(q, (snapshot) => {
 
         });
 
-        document.querySelectorAll(".durumBtn").forEach(btn => {
 
     btn.onclick = async () => {
 
@@ -117,4 +115,37 @@ Durumu Değiştir
 
     });
 
+});document.querySelectorAll(".durumBtn").forEach(btn => {
+
+    btn.onclick = async () => {
+
+        const ref = doc(db, "orders", btn.dataset.id);
+
+        let yeniDurum;
+
+        switch (btn.dataset.durum) {
+
+            case "Yeni Sipariş":
+                yeniDurum = "Hazırlanıyor";
+                break;
+
+            case "Hazırlanıyor":
+                yeniDurum = "Hazır";
+                break;
+
+            case "Hazır":
+                yeniDurum = "Teslim Edildi";
+                break;
+
+            default:
+                yeniDurum = "Yeni Sipariş";
+        }
+
+        await updateDoc(ref, {
+            durum: yeniDurum
+        });
+
+    };
+
 });
+
