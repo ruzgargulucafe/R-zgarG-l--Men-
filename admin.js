@@ -1,151 +1,106 @@
 import { db } from "./firebase.js";
 
 import {
-collection,
-query,
-orderBy,
-onSnapshot,
-doc,
-updateDoc
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const ordersDiv = document.getElementById("orders");
 
 const q = query(
-    collection(db, "orders"),
-    orderBy("tarih", "desc")
+  collection(db, "orders"),
+  orderBy("tarih", "desc")
 );
 
 onSnapshot(q, (snapshot) => {
 
-    ordersDiv.innerHTML = "";
+  ordersDiv.innerHTML = "";
 
-    if (snapshot.empty) {
+  if (snapshot.empty) {
+    ordersDiv.innerHTML = "<p>Henüz sipariş yok.</p>";
+    return;
+  }
 
-        ordersDiv.innerHTML = "<p>Henüz sipariş yok.</p>";
-        return;
-
-    }
-
-    snapshot.forEach(document => {
+  snapshot.forEach((document) => {
 
     const siparis = document.data();
     const id = document.id;
 
-        let urunler = "";
+    let urunler = "";
 
-        siparis.urunler.forEach(u => {
+    siparis.urunler.forEach((u) => {
+      urunler += `
+        <li>
+          ${u.adet} × ${u.isim}
+          (₺${u.fiyat * u.adet})
+        </li>
+      `;
+    });
 
-            urunler += `
-                <li>
-                    ${u.adet} × ${u.isim}
-                    (₺${u.fiyat * u.adet})
-                </li>
-            `;
+    ordersDiv.innerHTML += `
+      <div class="order">
 
-        });
+        <h2>🪑 Masa ${siparis.masa}</h2>
 
+        <ul>
+          ${urunler}
+        </ul>
 
-    btn.onclick = async () => {
+        <p><strong>Toplam:</strong> ₺${siparis.toplam}</p>
 
-        const ref = doc(db, "orders", btn.dataset.id);
+        <p><strong>Not:</strong> ${siparis.not || "-"}</p>
 
-        let yeniDurum = "Yeni Sipariş";
+        <p><strong>Durum:</strong> ${siparis.durum}</p>
 
-        switch(btn.dataset.durum){
+        <button
+          class="durumBtn"
+          data-id="${id}"
+          data-durum="${siparis.durum}">
+          Durumu Değiştir
+        </button>
 
-            case "Yeni Sipariş":
-                yeniDurum = "Hazırlanıyor";
-                break;
+      </div>
+    `;
 
-            case "Hazırlanıyor":
-                yeniDurum = "Hazır";
-                break;
+  });
 
-            case "Hazır":
-                yeniDurum = "Teslim Edildi";
-                break;
+  document.querySelectorAll(".durumBtn").forEach((btn) => {
 
-            case "Teslim Edildi":
-                yeniDurum = "Yeni Sipariş";
-                break;
+    btn.addEventListener("click", async () => {
 
-        }
+      const ref = doc(db, "orders", btn.dataset.id);
 
-        await updateDoc(ref,{
-            durum:yeniDurum
-        });
+      let yeniDurum;
 
-    };
+      switch (btn.dataset.durum) {
 
-});
-        ordersDiv.innerHTML += `
+        case "Yeni Sipariş":
+          yeniDurum = "Hazırlanıyor";
+          break;
 
-<div class="order">
+        case "Hazırlanıyor":
+          yeniDurum = "Hazır";
+          break;
 
-<h2>🪑 Masa ${siparis.masa}</h2>
+        case "Hazır":
+          yeniDurum = "Teslim Edildi";
+          break;
 
-<ul>
+        default:
+          yeniDurum = "Yeni Sipariş";
 
-${urunler}
+      }
 
-</ul>
-
-<p><strong>Toplam:</strong> ₺${siparis.toplam}</p>
-
-<p><strong>Not:</strong> ${siparis.not || "-"}</p>
-
-<p><strong>Durum:</strong>
-<span id="durum-${id}">
-${siparis.durum}
-</span>
-</p>
-
-<button class="durumBtn"
-data-id="${id}"
-data-durum="${siparis.durum}">
-
-Durumu Değiştir
-
-</button>
-
-</div>
-
-`;
+      await updateDoc(ref, {
+        durum: yeniDurum
+      });
 
     });
 
-});document.querySelectorAll(".durumBtn").forEach(btn => {
-
-    btn.onclick = async () => {
-
-        const ref = doc(db, "orders", btn.dataset.id);
-
-        let yeniDurum;
-
-        switch (btn.dataset.durum) {
-
-            case "Yeni Sipariş":
-                yeniDurum = "Hazırlanıyor";
-                break;
-
-            case "Hazırlanıyor":
-                yeniDurum = "Hazır";
-                break;
-
-            case "Hazır":
-                yeniDurum = "Teslim Edildi";
-                break;
-
-            default:
-                yeniDurum = "Yeni Sipariş";
-        }
-
-        await updateDoc(ref, {
-            durum: yeniDurum
-        });
-
-    };
+  });
 
 });
-
