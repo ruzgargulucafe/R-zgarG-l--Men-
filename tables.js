@@ -1,4 +1,6 @@
-import { db } from "./firebase.js";
+alert("1. satır çalıştı");
+
+console.log("Bootstrap:", typeof bootstrap);import { db } from "./firebase.js";
 
 import {
     collection,
@@ -13,9 +15,11 @@ const saveTableButton = document.getElementById("saveTable");
 
 const tableName = document.getElementById("tableName");
 
-const modal = new bootstrap.Modal(
-    document.getElementById("tableModal")
-);
+let modal = null;
+
+if (typeof bootstrap !== "undefined") {
+    modal = new bootstrap.Modal(document.getElementById("tableModal"));
+}
 
 /* ===========================
    MASALARI YÜKLE
@@ -109,6 +113,15 @@ async function loadTables() {
 =========================== */
 
 newTableButton.addEventListener("click", () => {
+
+    alert("Butona basıldı");
+
+    if (modal) {
+        tableName.value = "";
+        modal.show();
+    }
+
+});
 
     tableName.value = "";
 
