@@ -535,23 +535,45 @@ function watchOrders() {
                 <div class="card mb-3">
                     <div class="card-body">
 
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
 
-                            <h5>${badge}</h5>
+    <div>
 
-                            <strong>
-                                ₺${Number(order.total).toLocaleString("tr-TR")}
-                            </strong>
+        <h6 class="mb-1">${badge}</h6>
 
-                        </div>
+        <small class="text-muted">
+            🕒 ${time}
+        </small>
+
+    </div>
+
+    <strong class="fs-5">
+
+        ₺${Number(order.total).toLocaleString("tr-TR")}
+
+    </strong>
+
+</div>
 
                         <hr>
 
                         ${order.items.map(item => `
-                            <div>
-                                ${item.qty} x ${item.name}
-                            </div>
-                        `).join("")}
+    <div class="d-flex justify-content-between py-1">
+
+        <span>
+
+            ${item.qty} × ${item.name}
+
+        </span>
+
+        <span>
+
+            ₺${(item.qty * item.price).toLocaleString("tr-TR")}
+
+        </span>
+
+    </div>
+`).join("")}
 
                     </div>
                 </div>
@@ -592,7 +614,13 @@ async function init() {
         updateCart();
 
         watchOrders();
-
+const time = order.createdAt
+    ? order.createdAt.toDate().toLocaleTimeString("tr-TR", {
+          hour: "2-digit",
+          minute: "2-digit"
+      })
+    : "--:--";
+        
     } catch (error) {
 
         console.error(error);
