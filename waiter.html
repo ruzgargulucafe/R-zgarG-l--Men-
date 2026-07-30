@@ -26,7 +26,50 @@ text-align:center;
 margin-bottom:25px;
 
 }
+#stats{
 
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+margin-bottom:30px;
+
+}
+
+.stat{
+
+padding:18px;
+border-radius:12px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+
+}
+
+.waiting{
+
+background:#ff9800;
+
+}
+
+.calls{
+
+background:#2196f3;
+
+}
+
+.bills{
+
+background:#e91e63;
+
+}
+
+.stat strong{
+
+display:block;
+font-size:32px;
+margin-top:8px;
+
+}
 #calls{
 
 display:flex;
@@ -57,7 +100,24 @@ cursor:pointer;
 margin-top:15px;
 
 }
+#tables{
 
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+gap:15px;
+
+}
+
+.table{
+
+background:#333;
+padding:18px;
+border-radius:12px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+
+}
 </style>
 
 </head>
