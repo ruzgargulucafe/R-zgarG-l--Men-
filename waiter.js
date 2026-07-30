@@ -116,3 +116,4 @@ onSnapshot(callQuery, (snapshot) => {
     });
 
 });
+alert("waiter.js çalışıyor");
