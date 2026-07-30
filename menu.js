@@ -555,7 +555,6 @@ const time = order.createdAt
 
                 case "Teslim Edildi":
     badge = `<span class="badge bg-success">Teslim Edildi</span>`;
-    activeCount++;
     break;
 
                 default:
