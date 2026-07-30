@@ -111,10 +111,18 @@ ${urunler}
 
 <p><strong>📌 Durum:</strong> ${status}</p>
 
+${status !== "Teslim Edildi" ? `
 <button
 class="durumBtn"
 data-id="${id}"
 data-durum="${status}">
+
+${status === "Bekliyor"
+    ? "👨‍🍳 Hazırlanmaya Başla"
+    : "✅ Teslim Edildi"}
+
+</button>
+` : ""}
 
 ${status === "Bekliyor"
     ? "👨‍🍳 Hazırlanmaya Başla"
