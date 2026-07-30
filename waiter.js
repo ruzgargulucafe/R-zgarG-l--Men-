@@ -283,6 +283,19 @@ cancelBillBtn.onclick = () => {
 
 };
 
+document.querySelectorAll("input[name='payment']").forEach(radio => {
+
+    radio.addEventListener("change", () => {
+
+        splitArea.style.display =
+            radio.value === "Split" && radio.checked
+                ? "block"
+                : "none";
+
+    });
+
+});
+
 closeBillBtn.onclick = async () => {
 
     if (!selectedBillId || !selectedTable) return;
