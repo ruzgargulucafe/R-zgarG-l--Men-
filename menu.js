@@ -358,7 +358,35 @@ document.getElementById("callWaiter")
     }
 
 });
+/* ===========================
+   HESAP İSTE
+=========================== */
 
+document.getElementById("requestBill")
+.addEventListener("click", async () => {
+
+    try {
+
+        await addDoc(
+            collection(db, "billRequests"),
+            {
+                table: tableName,
+                status: "Bekliyor",
+                createdAt: serverTimestamp()
+            }
+        );
+
+        alert("💳 Hesap talebiniz garsona iletildi.");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Hesap isteği gönderilemedi.");
+
+    }
+
+});
 cartButton.addEventListener("click", () => {
 
     cartModal.show();
