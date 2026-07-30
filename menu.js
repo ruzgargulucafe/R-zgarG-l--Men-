@@ -7,7 +7,6 @@ import {
     orderBy,
     addDoc,
     serverTimestamp,
-    doc,
     onSnapshot,
     where
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
@@ -496,9 +495,10 @@ function watchOrders() {
     }
 
     const q = query(
-        collection(db, "orders"),
-        where("table", "==", tableName)
-    );
+    collection(db, "orders"),
+    where("table", "==", tableName),
+    orderBy("createdAt", "desc")
+);
 
     unsubscribeOrders = onSnapshot(q, (snapshot) => {
 
