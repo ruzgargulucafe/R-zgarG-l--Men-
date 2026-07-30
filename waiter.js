@@ -8,6 +8,10 @@ import {
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+const notificationSound = new Audio("./assets/notification.mp3");
+
+let lastCallCount = 0;
+let lastBillCount = 0;
 const billsDiv = document.getElementById("bills");
 const callsDiv = document.getElementById("calls");
 
@@ -17,7 +21,11 @@ const q = query(
 );
 
 onSnapshot(q,(snapshot)=>{
+if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
+    notificationSound.play().catch(() => {});
+}
 
+lastCallCount = snapshot.size;
     callsDiv.innerHTML="";
 
     snapshot.forEach((document)=>{
@@ -71,7 +79,11 @@ const billQuery = query(
 );
 
 onSnapshot(billQuery, (snapshot) => {
+if (lastBillCount !== 0 && snapshot.size > lastBillCount) {
+    notificationSound.play().catch(() => {});
+}
 
+lastBillCount = snapshot.size;
     billsDiv.innerHTML = "";
 
     snapshot.forEach((document) => {
