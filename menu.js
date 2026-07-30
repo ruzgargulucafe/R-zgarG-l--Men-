@@ -414,6 +414,8 @@ console.log("Sepet:", cart);
 
         status: "Bekliyor",
 
+        closed: false,
+
         createdAt: serverTimestamp()
     }
 );
@@ -525,6 +527,8 @@ function watchOrders() {
             
             const order = docSnap.data();
 
+            if (order.closed === true) return;
+            
             if (order.table !== tableName) return;
             
 const orderNo = String(order.orderNo || Date.now()).slice(-4);
@@ -550,8 +554,9 @@ const time = order.createdAt
                     break;
 
                 case "Teslim Edildi":
-                    badge = `<span class="badge bg-success">Teslim Edildi</span>`;
-                    break;
+    badge = `<span class="badge bg-success">Teslim Edildi</span>`;
+    activeCount++;
+    break;
 
                 default:
                     badge = `<span class="badge bg-secondary">${order.status}</span>`;
