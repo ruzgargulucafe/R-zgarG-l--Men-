@@ -50,7 +50,9 @@ const params = new URLSearchParams(window.location.search);
 
 const tableName =
     params.get("table") || "Bilinmeyen Masa";
+document.title = tableName;
 
+console.log("Masa Adı:", tableName);
 /* ===========================
    KATEGORİLER
 =========================== */
@@ -388,7 +390,10 @@ sendOrderBtn.addEventListener("click", async () => {
         return;
 
     }
-
+    
+console.log("Gönderilen Masa:", tableName);
+console.log("Sepet:", cart);
+    
     const total = cart.reduce(
         (sum, item) => sum + item.price * item.qty,
         0
@@ -413,6 +418,8 @@ sendOrderBtn.addEventListener("click", async () => {
     }
 );
 
+        console.log("Sipariş ID:", docRef.id);
+        
         alert("✅ Siparişiniz başarıyla alındı.");
 
         cart = [];
@@ -500,6 +507,8 @@ function watchOrders() {
         unsubscribeOrders();
     }
 
+    console.log("Siparişler dinleniyor. Masa:", tableName);
+    
     const q = query(
     collection(db, "orders"),
     where("table", "==", tableName),
@@ -513,6 +522,8 @@ function watchOrders() {
 
         snapshot.forEach(docSnap => {
 
+            console.log(docSnap.id, docSnap.data());
+            
             const order = docSnap.data();
 const orderNo = String(order.orderNo || Date.now()).slice(-4);
 
