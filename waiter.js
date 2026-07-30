@@ -359,7 +359,7 @@ onSnapshot(ordersQuery, (snapshot) => {
         tables[order.table].status = order.status;
         tables[order.table].orderCount++;
 
-        order.items.forEach((item) => {
+        (order.items || []).forEach(item => {
 
             tables[order.table].total +=
                 item.price * item.quantity;
