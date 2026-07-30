@@ -10,15 +10,12 @@ import {
     doc,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-const menuContainer = document.getElementById("menuContainer");
 
-let categories = [];
-let products = [];
 /* ===========================
-   SEPET
+   ELEMENTLER
 =========================== */
 
-let cart = [];
+const menuContainer = document.getElementById("menuContainer");
 
 const cartButton = document.getElementById("cartButton");
 const cartCount = document.getElementById("cartCount");
@@ -26,19 +23,32 @@ const cartCount = document.getElementById("cartCount");
 const cartItems = document.getElementById("cartItems");
 const cartTotal = document.getElementById("cartTotal");
 
+const sendOrderBtn = document.getElementById("sendOrder");
+const callWaiterBtn = document.getElementById("callWaiter");
+const requestBillBtn = document.getElementById("requestBill");
+
 const cartModal = new bootstrap.Modal(
     document.getElementById("cartModal")
 );
+
+const orderStatus = document.getElementById("orderStatus");
+const statusText = document.getElementById("statusText");
+
 /* ===========================
-   MASA BİLGİSİ
+   DEĞİŞKENLER
 =========================== */
+
+let categories = [];
+let products = [];
+let cart = [];
 
 const params = new URLSearchParams(window.location.search);
 
 const tableName =
     params.get("table") || "Bilinmeyen Masa";
+
 /* ===========================
-   KATEGORİLERİ YÜKLE
+   KATEGORİLER
 =========================== */
 
 async function loadCategories() {
@@ -52,14 +62,19 @@ async function loadCategories() {
 
     categories = [];
 
-    snapshot.forEach(item => {
-        categories.push(item.data());
+    snapshot.forEach(doc => {
+
+        categories.push({
+            id: doc.id,
+            ...doc.data()
+        });
+
     });
 
 }
 
 /* ===========================
-   ÜRÜNLERİ YÜKLE
+   ÜRÜNLER
 =========================== */
 
 async function loadProducts() {
@@ -70,9 +85,12 @@ async function loadProducts() {
 
     products = [];
 
-    snapshot.forEach(item => {
+    snapshot.forEach(doc => {
 
-        const product = item.data();
+        const product = {
+            id: doc.id,
+            ...doc.data()
+        };
 
         if (product.active) {
             products.push(product);
@@ -81,9 +99,8 @@ async function loadProducts() {
     });
 
 }
-
 /* ===========================
-   MENÜYÜ GÖSTER
+   MENÜYÜ OLUŞTUR
 =========================== */
 
 function renderMenu() {
@@ -101,102 +118,118 @@ function renderMenu() {
         if (categoryProducts.length === 0) return;
 
         let html = `
-            <div class="card shadow-lg border-0 rounded-4 mb-4">
-                <div class="card-header bg-success text-white rounded-top-4">
-                    <h3 class="mb-0">${category.name}</h3>
-                </div>
 
-                <div class="card-body">
+        <div class="card shadow-lg border-0 rounded-4 mb-4">
+
+            <div class="card-header bg-success text-white rounded-top-4">
+
+                <h3 class="mb-0">
+                    ${category.name}
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
         `;
 
         categoryProducts.forEach(product => {
 
             html += `
-    <div class="d-flex justify-content-between align-items-center py-3">
 
-        <div>
+            <div class="d-flex justify-content-between align-items-center py-3">
 
-            <h5 class="mb-1 fw-bold">
-                ${product.name}
-            </h5>
+                <div>
 
-            <small class="text-muted">
-                ${product.description || ""}
-            </small>
+                    <h5 class="fw-bold mb-1">
+                        ${product.name}
+                    </h5>
 
-        </div>
+                    <small class="text-muted">
+                        ${product.description || ""}
+                    </small>
 
-        <span class="badge bg-success rounded-pill fs-6">
+                </div>
 
-            ₺${Number(product.price).toLocaleString("tr-TR")}
+                <div class="text-end">
 
-        </span>
-<button
-    class="btn btn-success btn-sm mt-2 addCart"
-    data-name="${product.name}"
-    data-price="${product.price}">
+                    <span class="badge bg-success rounded-pill fs-6">
 
-    🛒 Sepete Ekle
+                        ₺${Number(product.price).toLocaleString("tr-TR")}
 
-</button>
-    </div>
+                    </span>
 
-    <hr>
-`;
+                    <br>
+
+                    <button
+                        class="btn btn-success btn-sm mt-2 addCart"
+                        data-name="${product.name}"
+                        data-price="${product.price}">
+
+                        🛒 Sepete Ekle
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            `;
 
         });
 
         html += `
-                </div>
+
             </div>
+
+        </div>
+
         `;
 
         menuContainer.innerHTML += html;
 
     });
-/* ===========================
-   SEPETE EKLE
-=========================== */
 
-document.querySelectorAll(".addCart").forEach(button => {
+    bindCartButtons();
 
-    button.addEventListener("click", () => {
-
-        const name = button.dataset.name;
-        const price = Number(button.dataset.price);
-
-        const product = cart.find(item => item.name === name);
-
-        if (product) {
-
-            product.qty++;
-
-        } else {
-
-            cart.push({
-                name,
-                price,
-                qty: 1
-            });
-
-        }
-
-        updateCart();
-
-    });
-
-});
 }
 
 /* ===========================
-   BAŞLAT
+   SEPET BUTONLARI
 =========================== */
 
-async function init() {
+function bindCartButtons() {
 
-    await loadCategories();
-    await loadProducts();
-    renderMenu();
+    document.querySelectorAll(".addCart").forEach(button => {
+
+        button.onclick = () => {
+
+            const name = button.dataset.name;
+            const price = Number(button.dataset.price);
+
+            const item = cart.find(x => x.name === name);
+
+            if (item) {
+
+                item.qty++;
+
+            } else {
+
+                cart.push({
+                    name,
+                    price,
+                    qty: 1
+                });
+
+            }
+
+            updateCart();
+
+        };
+
+    });
 
 }
 /* ===========================
@@ -209,6 +242,16 @@ function updateCart() {
     let count = 0;
 
     cartItems.innerHTML = "";
+
+    if (cart.length === 0) {
+
+        cartItems.innerHTML = `
+            <div class="text-center text-muted py-4">
+                Sepet boş.
+            </div>
+        `;
+
+    }
 
     cart.forEach((item, index) => {
 
@@ -223,18 +266,28 @@ function updateCart() {
 
                 <strong>${item.name}</strong><br>
 
-                ${item.qty} x ₺${item.price.toLocaleString("tr-TR")}
+                <small>
+                    ${item.qty} x ₺${item.price.toLocaleString("tr-TR")}
+                </small>
 
             </div>
 
-            <div>
+            <div class="d-flex align-items-center gap-2">
 
                 <button
-                    class="btn btn-sm btn-danger removeItem"
+                    class="btn btn-danger btn-sm removeItem"
                     data-index="${index}">
-
                     −
+                </button>
 
+                <span class="fw-bold">
+                    ${item.qty}
+                </span>
+
+                <button
+                    class="btn btn-success btn-sm addOne"
+                    data-index="${index}">
+                    +
                 </button>
 
             </div>
@@ -255,6 +308,10 @@ function updateCart() {
     cartButton.style.display =
         count > 0 ? "block" : "none";
 
+    /* ===========================
+       AZALT
+    =========================== */
+
     document.querySelectorAll(".removeItem").forEach(btn => {
 
         btn.onclick = () => {
@@ -264,8 +321,28 @@ function updateCart() {
             cart[i].qty--;
 
             if (cart[i].qty <= 0) {
+
                 cart.splice(i, 1);
+
             }
+
+            updateCart();
+
+        };
+
+    });
+
+    /* ===========================
+       ARTTIR
+    =========================== */
+
+    document.querySelectorAll(".addOne").forEach(btn => {
+
+        btn.onclick = () => {
+
+            const i = Number(btn.dataset.index);
+
+            cart[i].qty++;
 
             updateCart();
 
@@ -275,11 +352,20 @@ function updateCart() {
 
 }
 /* ===========================
+   SEPETİ AÇ
+=========================== */
+
+cartButton.addEventListener("click", () => {
+
+    cartModal.show();
+
+});
+
+/* ===========================
    SİPARİŞ GÖNDER
 =========================== */
 
-document.getElementById("sendOrder")
-.addEventListener("click", async () => {
+sendOrderBtn.addEventListener("click", async () => {
 
     if (cart.length === 0) {
 
@@ -290,24 +376,33 @@ document.getElementById("sendOrder")
     }
 
     const total = cart.reduce(
-        (sum, item) =>
-            sum + item.price * item.qty,
+        (sum, item) => sum + item.price * item.qty,
         0
     );
 
     try {
 
-        const docRef = await addDoc(collection(db, "orders"), {
-    table: tableName,
-    items: cart,
-    total,
-    status: "Bekliyor",
-    createdAt: serverTimestamp()
-});
+        const docRef = await addDoc(
+            collection(db, "orders"),
+            {
+                table: tableName,
+                items: [...cart],
+                total,
+                status: "Bekliyor",
+                createdAt: serverTimestamp()
+            }
+        );
 
-localStorage.setItem("lastOrderId", docRef.id);
-watchLastOrder();
-        alert("Siparişiniz alındı. Afiyet olsun 😊");
+        // Son siparişi kaydet
+        localStorage.setItem(
+            "lastOrderId",
+            docRef.id
+        );
+
+        // Canlı takibi hemen başlat
+        watchLastOrder();
+
+        alert("✅ Siparişiniz başarıyla alındı.");
 
         cart = [];
 
@@ -324,12 +419,12 @@ watchLastOrder();
     }
 
 });
+
 /* ===========================
    GARSON ÇAĞIR
 =========================== */
 
-document.getElementById("callWaiter")
-.addEventListener("click", async () => {
+callWaiterBtn.addEventListener("click", async () => {
 
     try {
 
@@ -348,17 +443,17 @@ document.getElementById("callWaiter")
 
         console.error(err);
 
-        alert("Garson çağrılırken hata oluştu.");
+        alert("Garson çağrılamadı.");
 
     }
 
 });
+
 /* ===========================
    HESAP İSTE
 =========================== */
 
-document.getElementById("requestBill")
-.addEventListener("click", async () => {
+requestBillBtn.addEventListener("click", async () => {
 
     try {
 
@@ -382,62 +477,113 @@ document.getElementById("requestBill")
     }
 
 });
-cartButton.addEventListener("click", () => {
+/* ===========================
+   SİPARİŞ TAKİBİ
+=========================== */
 
-    cartModal.show();
+let unsubscribeOrder = null;
 
-});
 function watchLastOrder() {
-alert("watchLastOrder çalıştı");
+
     const lastOrderId = localStorage.getItem("lastOrderId");
 
-    if (!lastOrderId) return;
+    if (!lastOrderId) {
 
-    const statusDiv = document.getElementById("orderStatus");
-    const statusText = document.getElementById("statusText");
+        orderStatus.style.display = "none";
 
-    onSnapshot(doc(db, "orders", lastOrderId), (docSnap) => {
+        return;
 
-        if (!docSnap.exists()) return;
+    }
 
-        statusDiv.style.display = "block";
+    // Önce eski dinlemeyi kapat
+    if (unsubscribeOrder) {
 
-        const order = docSnap.data();
+        unsubscribeOrder();
 
-        if (order.status === "Bekliyor") {
+    }
 
-            statusText.innerHTML =
-                "🟡 Siparişiniz alındı ve mutfağa iletildi.";
+    unsubscribeOrder = onSnapshot(
+        doc(db, "orders", lastOrderId),
+        (docSnap) => {
 
-        } else if (order.status === "Hazırlanıyor") {
+            if (!docSnap.exists()) {
 
-            statusText.innerHTML =
-                "👨‍🍳 Siparişiniz hazırlanıyor.";
+                orderStatus.style.display = "none";
 
-        } else if (order.status === "Teslim Edildi") {
+                return;
 
-            statusText.innerHTML =
-                "✅ Siparişiniz teslim edildi.<br>Afiyet olsun 😊";
+            }
+
+            const order = docSnap.data();
+
+            orderStatus.style.display = "block";
+
+            switch (order.status) {
+
+                case "Bekliyor":
+
+                    statusText.innerHTML =
+                        "🟡 Siparişiniz alındı ve mutfağa iletildi.";
+
+                    break;
+
+                case "Hazırlanıyor":
+
+                    statusText.innerHTML =
+                        "👨‍🍳 Siparişiniz hazırlanıyor.";
+
+                    break;
+
+                case "Teslim Edildi":
+
+                    statusText.innerHTML =
+                        "✅ Siparişiniz teslim edildi.<br><b>Afiyet olsun 😊</b>";
+
+                    break;
+
+                default:
+
+                    statusText.innerHTML =
+                        "Sipariş durumunuz güncelleniyor...";
+
+            }
+
+        },
+        (error) => {
+
+            console.error("Sipariş dinleme hatası:", error);
+
         }
-
-    });
+    );
 
 }
+
+/* ===========================
+   BAŞLAT
+=========================== */
 
 async function init() {
 
-    alert("Kategori");
+    try {
 
-    await loadCategories();
+        await loadCategories();
 
-    alert("Ürün");
+        await loadProducts();
 
-    await loadProducts();
+        renderMenu();
 
-    alert("Render");
+        updateCart();
 
-    renderMenu();
+        watchLastOrder();
 
-    alert("Bitti");
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Menü yüklenirken hata oluştu.");
+
+    }
+
 }
-watchLastOrder();
+
+init();
