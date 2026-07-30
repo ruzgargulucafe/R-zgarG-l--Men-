@@ -1,4 +1,6 @@
 import { db } from "./firebase.js";
+const CLOUD_NAME = "hklqbgmd";
+const UPLOAD_PRESET = "RuzgarGuluCafe";
 
 import {
 collection,
@@ -32,7 +34,8 @@ const form = {
     description: document.getElementById("description"),
     price: document.getElementById("price"),
     category: document.getElementById("category"),
-    image: document.getElementById("image")
+    imageFile: document.getElementById("imageFile"),
+    previewImage: document.getElementById("previewImage")
 };
 
 const saveButton = document.getElementById("saveProduct");
@@ -44,6 +47,7 @@ const newButton = document.getElementById("newProduct");
 
 let products = [];
 let editingId = null;
+let uploadedImageUrl = "";
 /* ===========================
    KATEGORİLERİ YÜKLE
 =========================== */
