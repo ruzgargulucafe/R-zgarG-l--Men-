@@ -114,9 +114,13 @@ ${urunler}
 <button
 class="durumBtn"
 data-id="${id}"
-data-durum="${status}"
+data-durum="${status}">
 
-Durumu Değiştir
+${status === "Bekliyor"
+    ? "👨‍🍳 Hazırlanmaya Başla"
+    : status === "Hazırlanıyor"
+    ? "✅ Teslim Edildi"
+    : "✔️ Tamamlandı"}
 
 </button>
 
