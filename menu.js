@@ -11,7 +11,21 @@ const menuContainer = document.getElementById("menuContainer");
 
 let categories = [];
 let products = [];
+/* ===========================
+   SEPET
+=========================== */
 
+let cart = [];
+
+const cartButton = document.getElementById("cartButton");
+const cartCount = document.getElementById("cartCount");
+
+const cartItems = document.getElementById("cartItems");
+const cartTotal = document.getElementById("cartTotal");
+
+const cartModal = new bootstrap.Modal(
+    document.getElementById("cartModal")
+);
 /* ===========================
    KATEGORİLERİ YÜKLE
 =========================== */
@@ -106,7 +120,14 @@ function renderMenu() {
             ₺${Number(product.price).toLocaleString("tr-TR")}
 
         </span>
+<button
+    class="btn btn-success btn-sm mt-2 addCart"
+    data-name="${product.name}"
+    data-price="${product.price}">
 
+    🛒 Sepete Ekle
+
+</button>
     </div>
 
     <hr>
@@ -122,7 +143,38 @@ function renderMenu() {
         menuContainer.innerHTML += html;
 
     });
+/* ===========================
+   SEPETE EKLE
+=========================== */
 
+document.querySelectorAll(".addCart").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const name = button.dataset.name;
+        const price = Number(button.dataset.price);
+
+        const product = cart.find(item => item.name === name);
+
+        if (product) {
+
+            product.qty++;
+
+        } else {
+
+            cart.push({
+                name,
+                price,
+                qty: 1
+            });
+
+        }
+
+        updateCart();
+
+    });
+
+});
 }
 
 /* ===========================
@@ -136,5 +188,84 @@ async function init() {
     renderMenu();
 
 }
+/* ===========================
+   SEPETİ GÜNCELLE
+=========================== */
 
+function updateCart() {
+
+    let total = 0;
+    let count = 0;
+
+    cartItems.innerHTML = "";
+
+    cart.forEach((item, index) => {
+
+        total += item.price * item.qty;
+        count += item.qty;
+
+        cartItems.innerHTML += `
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <strong>${item.name}</strong><br>
+
+                ${item.qty} x ₺${item.price.toLocaleString("tr-TR")}
+
+            </div>
+
+            <div>
+
+                <button
+                    class="btn btn-sm btn-danger removeItem"
+                    data-index="${index}">
+
+                    −
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        `;
+
+    });
+
+    cartCount.innerText = count;
+
+    cartTotal.innerText =
+        "₺" + total.toLocaleString("tr-TR");
+
+    cartButton.style.display =
+        count > 0 ? "block" : "none";
+
+    document.querySelectorAll(".removeItem").forEach(btn => {
+
+        btn.onclick = () => {
+
+            const i = Number(btn.dataset.index);
+
+            cart[i].qty--;
+
+            if (cart[i].qty <= 0) {
+                cart.splice(i, 1);
+            }
+
+            updateCart();
+
+        };
+
+    });
+
+}
+cartButton.addEventListener("click", () => {
+
+    cartModal.show();
+
+});
 init();
