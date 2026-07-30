@@ -424,12 +424,20 @@ alert("watchLastOrder çalıştı");
 
 }
 
-alert("1");
+async function init() {
 
-init();
+    alert("Kategori");
 
-alert("2");
+    await loadCategories();
 
+    alert("Ürün");
+
+    await loadProducts();
+
+    alert("Render");
+
+    renderMenu();
+
+    alert("Bitti");
+}
 watchLastOrder();
-
-alert("3");
