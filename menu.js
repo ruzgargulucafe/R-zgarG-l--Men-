@@ -586,4 +586,5 @@ async function init() {
 
 }
 
+alert("menu.js yüklendi");
 init();
