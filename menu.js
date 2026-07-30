@@ -4,9 +4,10 @@ import {
     collection,
     getDocs,
     query,
-    orderBy
+    orderBy,
+    addDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
 const menuContainer = document.getElementById("menuContainer");
 
 let categories = [];
@@ -26,6 +27,14 @@ const cartTotal = document.getElementById("cartTotal");
 const cartModal = new bootstrap.Modal(
     document.getElementById("cartModal")
 );
+/* ===========================
+   MASA BİLGİSİ
+=========================== */
+
+const params = new URLSearchParams(window.location.search);
+
+const tableName =
+    params.get("table") || "Bilinmeyen Masa";
 /* ===========================
    KATEGORİLERİ YÜKLE
 =========================== */
@@ -263,6 +272,63 @@ function updateCart() {
     });
 
 }
+/* ===========================
+   SİPARİŞ GÖNDER
+=========================== */
+
+document.getElementById("sendOrder")
+.addEventListener("click", async () => {
+
+    if (cart.length === 0) {
+
+        alert("Sepet boş.");
+
+        return;
+
+    }
+
+    const total = cart.reduce(
+        (sum, item) =>
+            sum + item.price * item.qty,
+        0
+    );
+
+    try {
+
+        await addDoc(
+            collection(db, "orders"),
+            {
+
+                table: tableName,
+
+                items: cart,
+
+                total: total,
+
+                status: "Bekliyor",
+
+                createdAt: serverTimestamp()
+
+            }
+        );
+
+        alert("Siparişiniz alındı. Afiyet olsun 😊");
+
+        cart = [];
+
+        updateCart();
+
+        cartModal.hide();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Sipariş gönderilemedi.");
+
+    }
+
+});
 cartButton.addEventListener("click", () => {
 
     cartModal.show();
