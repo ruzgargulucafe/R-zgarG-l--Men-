@@ -8,70 +8,95 @@ import {
     doc,
     updateDoc,
     where,
-    getDocs
+    getDocs,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
 const notificationSound = new Audio("./assets/notification.mp3");
 
 let lastCallCount = 0;
 let lastBillCount = 0;
-const billsDiv = document.getElementById("bills");
+
 const callsDiv = document.getElementById("calls");
+const billsDiv = document.getElementById("bills");
+const tablesDiv = document.getElementById("tables");
+
 const waitingCount = document.getElementById("waitingCount");
 const callCount = document.getElementById("callCount");
 const billCount = document.getElementById("billCount");
-const tablesDiv = document.getElementById("tables");
-const q = query(
-    collection(db,"calls"),
-    orderBy("createdAt","desc")
+
+const billModal = document.getElementById("billModal");
+const modalTable = document.getElementById("modalTable");
+const modalItems = document.getElementById("modalItems");
+const modalTotal = document.getElementById("modalTotal");
+
+const closeBillBtn = document.getElementById("closeBillBtn");
+const cancelBillBtn = document.getElementById("cancelBillBtn");
+
+const splitArea = document.getElementById("splitArea");
+const cashAmount = document.getElementById("cashAmount");
+const cardAmount = document.getElementById("cardAmount");
+
+let selectedBillId = null;
+let selectedTable = null;
+
+// =========================
+// GARSON ÇAĞRILARI
+// =========================
+
+const callQuery = query(
+    collection(db, "calls"),
+    orderBy("createdAt", "desc")
 );
 
-onSnapshot(q,(snapshot)=>{
-if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
-    notificationSound.play().catch(() => {});
-}
+onSnapshot(callQuery, (snapshot) => {
 
-lastCallCount = snapshot.size;
-    callsDiv.innerHTML="";
-callCount.innerText = snapshot.docs.filter(
-    d => d.data().status !== "Tamamlandı"
-).length;
-    snapshot.forEach((document)=>{
+    if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
+        notificationSound.play().catch(() => {});
+    }
 
-        const call=document.data();
-        const id=document.id;
+    lastCallCount = snapshot.size;
 
-        if(call.status==="Tamamlandı") return;
+    callsDiv.innerHTML = "";
 
-        callsDiv.innerHTML+=`
+    const activeCalls = snapshot.docs.filter(doc =>
+        doc.data().status !== "Tamamlandı"
+    );
 
-<div class="card">
+    callCount.innerText = activeCalls.length;
 
-<h2>🔔 ${call.table}</h2>
+    activeCalls.forEach((docSnap) => {
 
-<p>Garson çağırıyor.</p>
+        const call = docSnap.data();
 
-<button
-class="doneBtn"
-data-id="${id}">
+        callsDiv.innerHTML += `
+            <div class="card">
 
-✅ Tamamlandı
+                <h2>🔔 ${call.table}</h2>
 
-</button>
+                <p>Garson çağırıyor.</p>
 
-</div>
+                <button
+                    class="callDone"
+                    data-id="${docSnap.id}">
 
-`;
+                    ✅ Tamamlandı
+
+                </button>
+
+            </div>
+        `;
 
     });
 
-    document.querySelectorAll(".doneBtn").forEach((btn)=>{
+    document.querySelectorAll(".callDone").forEach((btn) => {
 
-        btn.onclick=async()=>{
+        btn.onclick = async () => {
 
             await updateDoc(
-                doc(db,"calls",btn.dataset.id),
+                doc(db, "calls", btn.dataset.id),
                 {
-                    status:"Tamamlandı"
+                    status: "Tamamlandı"
                 }
             );
 
@@ -80,122 +105,68 @@ data-id="${id}">
     });
 
 });
+
+// =========================
+// HESAP İSTEKLERİ
+// =========================
+
 const billQuery = query(
     collection(db, "billRequests"),
     orderBy("createdAt", "desc")
 );
 
 onSnapshot(billQuery, (snapshot) => {
-if (lastBillCount !== 0 && snapshot.size > lastBillCount) {
-    notificationSound.play().catch(() => {});
-}
 
-lastBillCount = snapshot.size;
-    billsDiv.innerHTML = "";
-billCount.innerText = snapshot.docs.filter(
-    d => d.data().status !== "Tamamlandı"
-).length;
-    snapshot.forEach((document) => {
-
-        const bill = document.data();
-        const id = document.id;
-
-        if (bill.status === "Tamamlandı") return;
-
-        billsDiv.innerHTML += `
-
-<div class="card">
-
-<h2>💳 ${bill.table}</h2>
-
-<p>Hesap istiyor.</p>
-
-<button
-class="billDone"
-data-id="${id}">
-
-💰 Hesap Alındı
-
-</button>
-
-</div>
-
-`;
-
-    });
-
-    document.querySelectorAll(".billDone").forEach((btn) => {
-
-        btn.onclick = async () => {
-
-    if (!confirm(`${bill.table} hesabı kapatılsın mı?`)) return;
-
-    // Hesap isteğini kapat
-    await updateDoc(
-        doc(db, "billRequests", btn.dataset.id),
-        {
-            status: "Tamamlandı"
-        }
-    );
-
-    // O masaya ait açık siparişleri bul
-    const orders = await getDocs(
-        query(
-            collection(db, "orders"),
-            where("table", "==", bill.table),
-            where("closed", "==", false)
-        )
-    );
-
-    // Hepsini kapat
-    for (const order of orders.docs) {
-
-        await updateDoc(order.ref, {
-            closed: true
-        });
-
+    if (lastBillCount !== 0 && snapshot.size > lastBillCount) {
+        notificationSound.play().catch(() => {});
     }
 
-    alert(`${bill.table} hesabı kapatıldı.`);
+    lastBillCount = snapshot.size;
 
-};
+    billsDiv.innerHTML = "";
 
-});
+    const activeBills = snapshot.docs.filter(doc =>
+        doc.data().status !== "Tamamlandı"
+    );
 
-const ordersQuery = query(
-    collection(db, "orders"),
-    where("status", "!=", "Teslim Edildi")
-);
+    billCount.innerText = activeBills.length;
 
-onSnapshot(ordersQuery, (snapshot) => {
+    activeBills.forEach((docSnap) => {
 
-    waitingCount.innerText = snapshot.size;
+        const bill = docSnap.data();
 
-    const tables = {};
+        billsDiv.innerHTML += `
+            <div class="card">
 
-    snapshot.forEach((docSnap) => {
+                <h2>💳 ${bill.table}</h2>
 
-        const order = docSnap.data();
+                <p>Hesap istiyor.</p>
 
-        tables[order.table] = order.status;
+                <button
+                    class="openBill"
+                    data-id="${docSnap.id}"
+                    data-table="${bill.table}">
+
+                    👁 Adisyon
+
+                </button>
+
+            </div>
+        `;
 
     });
 
-    tablesDiv.innerHTML = "";
+    document.querySelectorAll(".openBill").forEach((btn) => {
 
-    Object.keys(tables).sort().forEach((table) => {
+        btn.onclick = () => {
 
-        let color = "#28a745";
+            selectedBillId = btn.dataset.id;
+            selectedTable = btn.dataset.table;
 
-        if (tables[table] === "Bekliyor") color = "#ff9800";
+            alert(`${selectedTable} seçildi`);
 
-        if (tables[table] === "Hazırlanıyor") color = "#2196f3";
+        };
 
-        tablesDiv.innerHTML += `
-            <div class="table" style="background:${color}">
-                ${table}
-            </div>
-        `;
     });
 
 });
