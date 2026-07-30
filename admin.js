@@ -148,11 +148,13 @@ ${status === "Bekliyor"
         yeniDurum = "Teslim Edildi";
         break;
 
+    case "Teslim Edildi":
+        return; // Artık değişmesin
+
     default:
-        yeniDurum = "Bekliyor";
+        return;
 
 }
-
 await updateDoc(ref, {
     status: yeniDurum
 });
