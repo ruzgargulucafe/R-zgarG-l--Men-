@@ -8,7 +8,7 @@ import {
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
+const billsDiv = document.getElementById("bills");
 const callsDiv = document.getElementById("calls");
 
 const q = query(
@@ -57,6 +57,60 @@ data-id="${id}">
                 doc(db,"calls",btn.dataset.id),
                 {
                     status:"Tamamlandı"
+                }
+            );
+
+        };
+
+    });
+
+});
+const billQuery = query(
+    collection(db, "billRequests"),
+    orderBy("createdAt", "desc")
+);
+
+onSnapshot(billQuery, (snapshot) => {
+
+    billsDiv.innerHTML = "";
+
+    snapshot.forEach((document) => {
+
+        const bill = document.data();
+        const id = document.id;
+
+        if (bill.status === "Tamamlandı") return;
+
+        billsDiv.innerHTML += `
+
+<div class="card">
+
+<h2>💳 ${bill.table}</h2>
+
+<p>Hesap istiyor.</p>
+
+<button
+class="billDone"
+data-id="${id}">
+
+💰 Hesap Alındı
+
+</button>
+
+</div>
+
+`;
+
+    });
+
+    document.querySelectorAll(".billDone").forEach((btn) => {
+
+        btn.onclick = async () => {
+
+            await updateDoc(
+                doc(db, "billRequests", btn.dataset.id),
+                {
+                    status: "Tamamlandı"
                 }
             );
 
