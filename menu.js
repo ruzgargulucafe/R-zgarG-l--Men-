@@ -511,7 +511,6 @@ function watchOrders() {
     
     const q = query(
     collection(db, "orders"),
-    where("table", "==", tableName),
     orderBy("createdAt", "desc")
 );
 
@@ -525,6 +524,9 @@ function watchOrders() {
             console.log(docSnap.id, docSnap.data());
             
             const order = docSnap.data();
+
+            if (order.table !== tableName) return;
+            
 const orderNo = String(order.orderNo || Date.now()).slice(-4);
 
 const time = order.createdAt
