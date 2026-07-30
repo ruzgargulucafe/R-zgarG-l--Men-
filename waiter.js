@@ -1,5 +1,4 @@
 alert("waiter.js çalışıyor");
-
 const testQuery = query(collection(db, "calls"));
 
 onSnapshot(
