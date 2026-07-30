@@ -6,7 +6,9 @@ import {
     query,
     orderBy,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    doc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 const menuContainer = document.getElementById("menuContainer");
 
