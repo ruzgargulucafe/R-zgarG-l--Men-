@@ -47,14 +47,356 @@ let selectedTable = null;
 let selectedOrders = [];
 
 console.log("✅ waiter.js başarıyla yüklendi.");
-const q = query(collection(db, "calls"));
 
-onSnapshot(
-    q,
-    (snapshot) => {
-        alert("Calls = " + snapshot.size);
-    },
-    (error) => {
-        alert("FIREBASE HATASI:\n" + error.message);
-    }
+// ===================================================
+// GARSON ÇAĞRILARI
+// ===================================================
+
+const callQuery = query(
+    collection(db, "calls"),
+    orderBy("createdAt", "desc")
 );
+
+onSnapshot(callQuery, (snapshot) => {
+
+    if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
+        notificationSound.play().catch(() => {});
+    }
+
+    lastCallCount = snapshot.size;
+
+    callsDiv.innerHTML = "";
+
+    let activeCalls = 0;
+
+    snapshot.forEach((docSnap) => {
+
+        const call = docSnap.data();
+
+        if (call.status === "Tamamlandı") return;
+
+        activeCalls++;
+
+        callsDiv.innerHTML += `
+            <div class="card">
+
+                <h2>🔔 ${call.table}</h2>
+
+                <p>Garson çağırıyor.</p>
+
+                <button
+                    class="callDone"
+                    data-id="${docSnap.id}">
+
+                    ✅ Tamamlandı
+
+                </button>
+
+            </div>
+        `;
+
+    });
+
+    callCount.innerText = activeCalls;
+
+    document.querySelectorAll(".callDone").forEach((btn) => {
+
+        btn.onclick = async () => {
+
+            await updateDoc(
+                doc(db, "calls", btn.dataset.id),
+                {
+                    status: "Tamamlandı"
+                }
+            );
+
+        };
+
+    });
+
+});
+
+// ===================================================
+// HESAP İSTEKLERİ
+// ===================================================
+
+const billQuery = query(
+    collection(db, "billRequests"),
+    orderBy("createdAt", "desc")
+);
+
+onSnapshot(billQuery, (snapshot) => {
+
+    if (lastBillCount !== 0 && snapshot.size > lastBillCount) {
+        notificationSound.play().catch(() => {});
+    }
+
+    lastBillCount = snapshot.size;
+
+    billsDiv.innerHTML = "";
+
+    let activeBills = 0;
+
+    snapshot.forEach((docSnap) => {
+
+        const bill = docSnap.data();
+
+        if (bill.status === "Tamamlandı") return;
+
+        activeBills++;
+
+        billsDiv.innerHTML += `
+            <div class="card">
+
+                <h2>💳 ${bill.table}</h2>
+
+                <p>Hesap istiyor.</p>
+
+                <button
+                    class="openBill"
+                    data-id="${docSnap.id}"
+                    data-table="${bill.table}">
+
+                    👁 Adisyonu Aç
+
+                </button>
+
+            </div>
+        `;
+
+    });
+
+    billCount.innerText = activeBills;
+
+    document.querySelectorAll(".openBill").forEach((btn) => {
+
+        btn.onclick = async () => {
+
+            selectedBillId = btn.dataset.id;
+            selectedTable = btn.dataset.table;
+
+            billModal.style.display = "flex";
+
+            modalTable.innerText = selectedTable;
+            await loadBill(selectedTable);
+
+        };
+
+    });
+
+});
+
+// ===================================================
+// ADİSYONU YÜKLE
+// ===================================================
+
+async function loadBill(tableName) {
+
+    modalItems.innerHTML = "";
+    modalTotal.innerText = "₺0";
+
+    const orders = await getDocs(
+        query(
+            collection(db, "orders"),
+            where("table", "==", tableName),
+            where("closed", "==", false)
+        )
+    );
+
+    selectedOrders = [];
+
+    let total = 0;
+
+    const grouped = {};
+
+    orders.forEach((docSnap) => {
+
+        const order = docSnap.data();
+
+        selectedOrders.push(docSnap);
+
+        order.items.forEach((item) => {
+
+            if (!grouped[item.name]) {
+
+                grouped[item.name] = {
+                    qty: 0,
+                    price: item.price
+                };
+
+            }
+
+            grouped[item.name].qty += item.quantity;
+
+            total += item.price * item.quantity;
+
+        });
+
+    });
+
+    Object.keys(grouped).forEach((name) => {
+
+        const item = grouped[name];
+
+        modalItems.innerHTML += `
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                padding:10px 0;
+                border-bottom:1px solid #444;">
+
+                <span>${item.qty} x ${name}</span>
+
+                <strong>
+                    ₺${(item.qty * item.price).toFixed(2)}
+                </strong>
+
+            </div>
+
+        `;
+
+    });
+
+    selectedTotal = total;
+
+    modalTotal.innerText = "₺" + total.toFixed(2);
+
+}
+
+// ===================================================
+// HESABI KAPAT
+// ===================================================
+
+cancelBillBtn.onclick = () => {
+
+    billModal.style.display = "none";
+
+};
+
+closeBillBtn.onclick = async () => {
+
+    if (!selectedBillId || !selectedTable) return;
+
+    const paymentType =
+        document.querySelector("input[name='payment']:checked").value;
+
+    // Bill isteğini kapat
+    await updateDoc(
+        doc(db, "billRequests", selectedBillId),
+        {
+            status: "Tamamlandı"
+        }
+    );
+
+    // Açık siparişleri kapat
+    for (const orderDoc of selectedOrders) {
+
+        await updateDoc(orderDoc.ref, {
+
+            closed: true,
+
+            paymentType,
+
+            paidAt: serverTimestamp()
+
+        });
+
+    }
+
+    billModal.style.display = "none";
+
+    alert(`${selectedTable} hesabı kapatıldı.`);
+
+};
+
+// ===================================================
+// MASALAR
+// ===================================================
+
+const ordersQuery = query(
+    collection(db, "orders"),
+    where("closed", "==", false)
+);
+
+onSnapshot(ordersQuery, (snapshot) => {
+
+    waitingCount.innerText = snapshot.size;
+
+    const tables = {};
+
+    snapshot.forEach((docSnap) => {
+
+        const order = docSnap.data();
+
+        if (!tables[order.table]) {
+
+            tables[order.table] = {
+
+                total: 0,
+                status: order.status,
+                orderCount: 0
+
+            };
+
+        }
+
+        tables[order.table].status = order.status;
+        tables[order.table].orderCount++;
+
+        order.items.forEach((item) => {
+
+            tables[order.table].total +=
+                item.price * item.quantity;
+
+        });
+
+    });
+
+    tablesDiv.innerHTML = "";
+
+    Object.keys(tables)
+        .sort()
+        .forEach((table) => {
+
+            const info = tables[table];
+
+            let color = "#28a745";
+
+            if (info.status === "Bekliyor")
+                color = "#ff9800";
+
+            if (info.status === "Hazırlanıyor")
+                color = "#2196f3";
+
+            tablesDiv.innerHTML += `
+
+            <div
+                class="table"
+                style="
+                    background:${color};
+                    padding:18px;
+                    border-radius:12px;
+                ">
+
+                <h3>${table}</h3>
+
+                <div>
+                    ${info.orderCount} Sipariş
+                </div>
+
+                <div style="margin-top:8px;font-weight:bold;">
+                    ₺${info.total.toFixed(2)}
+                </div>
+
+                <div style="margin-top:8px;font-size:14px;">
+                    ${info.status}
+                </div>
+
+            </div>
+
+            `;
+
+        });
+
+});
