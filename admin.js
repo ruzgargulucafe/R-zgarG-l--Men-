@@ -13,7 +13,7 @@ const ordersDiv = document.getElementById("orders");
 
 const q = query(
     collection(db, "orders"),
-    orderBy("tarih", "desc")
+    orderBy("createdAt", "desc")
 );
 
 let ilkYukleme = true;
@@ -46,44 +46,43 @@ onSnapshot(q, (snapshot) => {
 
         const siparis = document.data();
         const id = document.id;
-
+const items = siparis.items || [];
+const status = siparis.status || "Bekliyor";
         let durumClass = "yeni";
 
-        switch (siparis.durum) {
+        switch (status) {
 
-            case "Hazırlanıyor":
-                durumClass = "hazirlaniyor";
-                break;
+    case "Hazırlanıyor":
+        durumClass = "hazirlaniyor";
+        break;
 
-            case "Hazır":
-                durumClass = "hazir";
-                break;
+    case "Teslim Edildi":
+        durumClass = "teslim";
+        break;
 
-            case "Teslim Edildi":
-                durumClass = "teslim";
-                break;
-
-        }
+    default:
+        durumClass = "yeni";
+}
 
         let urunler = "";
 
-        siparis.urunler.forEach((u) => {
+items.forEach((u) => {
 
-            urunler += `
+    urunler += `
 <li>
-<strong>${u.adet}x</strong>
+<strong>${u.qty}x</strong>
 ${u.name}
-— ₺${u.adet * u.price}
+— ₺${(u.qty * u.price).toLocaleString("tr-TR")}
 </li>
 `;
 
-        });
+});
 
         let saat = "-";
 
-        if (siparis.tarih?.toDate) {
+        if (siparis.createdAt?.toDate) {
 
-            saat = siparis.tarih
+            saat = siparis.createdAt
                 .toDate()
                 .toLocaleTimeString("tr-TR", {
                     hour: "2-digit",
@@ -96,7 +95,7 @@ ${u.name}
 
 <div class="order ${durumClass}">
 
-<h2>🪑 Masa ${siparis.masa}</h2>
+<h2>🪑 ${siparis.table}</h2>
 
 <p><strong>🕒 Saat:</strong> ${saat}</p>
 
@@ -106,16 +105,16 @@ ${urunler}
 
 </ul>
 
-<p><strong>💰 Toplam:</strong> ₺${siparis.toplam}</p>
+<p><strong>💰 Toplam:</strong> ₺${Number(siparis.total).toLocaleString("tr-TR")}</p>
 
 <p><strong>📝 Not:</strong> ${siparis.not || "-"}</p>
 
-<p><strong>📌 Durum:</strong> ${siparis.durum}</p>
+<p><strong>📌 Durum:</strong> ${status}</p>
 
 <button
 class="durumBtn"
 data-id="${id}"
-data-durum="${siparis.durum}">
+data-durum="${status}"
 
 Durumu Değiştir
 
@@ -137,26 +136,22 @@ Durumu Değiştir
 
             switch (btn.dataset.durum) {
 
-                case "Yeni Sipariş":
-                    yeniDurum = "Hazırlanıyor";
-                    break;
+    case "Bekliyor":
+        yeniDurum = "Hazırlanıyor";
+        break;
 
-                case "Hazırlanıyor":
-                    yeniDurum = "Hazır";
-                    break;
+    case "Hazırlanıyor":
+        yeniDurum = "Teslim Edildi";
+        break;
 
-                case "Hazır":
-                    yeniDurum = "Teslim Edildi";
-                    break;
+    default:
+        yeniDurum = "Bekliyor";
 
-                default:
-                    yeniDurum = "Yeni Sipariş";
+}
 
-            }
-
-            await updateDoc(ref, {
-                durum: yeniDurum
-            });
+await updateDoc(ref, {
+    status: yeniDurum
+});
 
         });
 
