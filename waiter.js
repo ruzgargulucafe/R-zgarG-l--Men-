@@ -47,3 +47,72 @@ let selectedTotal = 0;
 
 // Test
 console.log("Waiter.js yüklendi.");
+
+// =====================================
+// GARSON ÇAĞRILARI
+// =====================================
+
+const callQuery = query(
+    collection(db, "calls"),
+    orderBy("createdAt", "desc")
+);
+
+onSnapshot(callQuery, (snapshot) => {
+
+    // Yeni çağrı sesi
+    if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
+        notificationSound.play().catch(() => {});
+    }
+
+    lastCallCount = snapshot.size;
+
+    callsDiv.innerHTML = "";
+
+    let activeCount = 0;
+
+    snapshot.forEach((docSnap) => {
+
+        const call = docSnap.data();
+
+        if (call.status === "Tamamlandı") return;
+
+        activeCount++;
+
+        callsDiv.innerHTML += `
+            <div class="card">
+
+                <h2>🔔 ${call.table}</h2>
+
+                <p>Garson çağırıyor.</p>
+
+                <button
+                    class="callDone"
+                    data-id="${docSnap.id}">
+
+                    ✅ Tamamlandı
+
+                </button>
+
+            </div>
+        `;
+
+    });
+
+    callCount.innerText = activeCount;
+
+    document.querySelectorAll(".callDone").forEach((btn) => {
+
+        btn.onclick = async () => {
+
+            await updateDoc(
+                doc(db, "calls", btn.dataset.id),
+                {
+                    status: "Tamamlandı"
+                }
+            );
+
+        };
+
+    });
+
+});
