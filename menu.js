@@ -306,7 +306,7 @@ document.getElementById("sendOrder")
 });
 
 localStorage.setItem("lastOrderId", docRef.id);
-
+watchLastOrder();
         alert("Siparişiniz alındı. Afiyet olsun 😊");
 
         cart = [];
