@@ -6,7 +6,8 @@ import {
     orderBy,
     onSnapshot,
     doc,
-    updateDoc
+    updateDoc,
+    where
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 const notificationSound = new Audio("./assets/notification.mp3");
 
@@ -14,7 +15,10 @@ let lastCallCount = 0;
 let lastBillCount = 0;
 const billsDiv = document.getElementById("bills");
 const callsDiv = document.getElementById("calls");
-
+const waitingCount = document.getElementById("waitingCount");
+const callCount = document.getElementById("callCount");
+const billCount = document.getElementById("billCount");
+const tablesDiv = document.getElementById("tables");
 const q = query(
     collection(db,"calls"),
     orderBy("createdAt","desc")
@@ -27,7 +31,9 @@ if (lastCallCount !== 0 && snapshot.size > lastCallCount) {
 
 lastCallCount = snapshot.size;
     callsDiv.innerHTML="";
-
+callCount.innerText = snapshot.docs.filter(
+    d => d.data().status !== "Tamamlandı"
+).length;
     snapshot.forEach((document)=>{
 
         const call=document.data();
@@ -85,7 +91,9 @@ if (lastBillCount !== 0 && snapshot.size > lastBillCount) {
 
 lastBillCount = snapshot.size;
     billsDiv.innerHTML = "";
-
+billCount.innerText = snapshot.docs.filter(
+    d => d.data().status !== "Tamamlandı"
+).length;
     snapshot.forEach((document) => {
 
         const bill = document.data();
@@ -128,6 +136,44 @@ data-id="${id}">
 
         };
 
+    });
+
+});
+
+const ordersQuery = query(
+    collection(db, "orders"),
+    where("status", "!=", "Teslim Edildi")
+);
+
+onSnapshot(ordersQuery, (snapshot) => {
+
+    waitingCount.innerText = snapshot.size;
+
+    const tables = {};
+
+    snapshot.forEach((docSnap) => {
+
+        const order = docSnap.data();
+
+        tables[order.table] = order.status;
+
+    });
+
+    tablesDiv.innerHTML = "";
+
+    Object.keys(tables).sort().forEach((table) => {
+
+        let color = "#28a745";
+
+        if (tables[table] === "Bekliyor") color = "#ff9800";
+
+        if (tables[table] === "Hazırlanıyor") color = "#2196f3";
+
+        tablesDiv.innerHTML += `
+            <div class="table" style="background:${color}">
+                ${table}
+            </div>
+        `;
     });
 
 });
