@@ -329,9 +329,40 @@ document.getElementById("sendOrder")
     }
 
 });
+/* ===========================
+   GARSON ÇAĞIR
+=========================== */
+
+document.getElementById("callWaiter")
+.addEventListener("click", async () => {
+
+    try {
+
+        await addDoc(
+            collection(db, "calls"),
+            {
+                table: tableName,
+                status: "Bekliyor",
+                createdAt: serverTimestamp()
+            }
+        );
+
+        alert("🔔 Garsona haber verildi.");
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert("Garson çağrılırken hata oluştu.");
+
+    }
+
+});
+
 cartButton.addEventListener("click", () => {
 
     cartModal.show();
 
 });
+
 init();
