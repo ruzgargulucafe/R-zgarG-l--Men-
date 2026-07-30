@@ -397,15 +397,21 @@ sendOrderBtn.addEventListener("click", async () => {
     try {
 
         const docRef = await addDoc(
-            collection(db, "orders"),
-            {
-                table: tableName,
-                items: [...cart],
-                total,
-                status: "Bekliyor",
-                createdAt: serverTimestamp()
-            }
-        );
+    collection(db, "orders"),
+    {
+        orderNo: Math.floor(Date.now() / 1000),
+
+        table: tableName,
+
+        items: [...cart],
+
+        total,
+
+        status: "Bekliyor",
+
+        createdAt: serverTimestamp()
+    }
+);
 
         alert("✅ Siparişiniz başarıyla alındı.");
 
@@ -508,7 +514,14 @@ function watchOrders() {
         snapshot.forEach(docSnap => {
 
             const order = docSnap.data();
+const orderNo = String(order.orderNo || Date.now()).slice(-4);
 
+const time = order.createdAt
+    ? order.createdAt.toDate().toLocaleTimeString("tr-TR", {
+        hour: "2-digit",
+        minute: "2-digit"
+    })
+    : "--:--";
             let badge = "";
 
             switch (order.status) {
@@ -539,7 +552,9 @@ function watchOrders() {
 
     <div>
 
-        <h6 class="mb-1">${badge}</h6>
+        <h6 class="mb-1">
+    #${orderNo} ${badge}
+</h6>
 
         <small class="text-muted">
             🕒 ${time}
@@ -614,13 +629,7 @@ async function init() {
         updateCart();
 
         watchOrders();
-const time = order.createdAt
-    ? order.createdAt.toDate().toLocaleTimeString("tr-TR", {
-          hour: "2-digit",
-          minute: "2-digit"
-      })
-    : "--:--";
-        
+
     } catch (error) {
 
         console.error(error);
