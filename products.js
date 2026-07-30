@@ -396,24 +396,13 @@ function clearForm() {
     form.description.value = "";
     form.price.value = "";
     form.category.value = "";
-    uploadedImageUrl = product.image || "";
 
-if (uploadedImageUrl) {
+    form.imageFile.value = "";
 
-    form.previewImage.src = uploadedImageUrl;
-
-    form.previewImage.style.display = "block";
-
-} else {
-
+    form.previewImage.src = "";
     form.previewImage.style.display = "none";
 
-}
-form.previewImage.src = "";
-
-form.previewImage.style.display = "none";
-
-uploadedImageUrl = "";
+    uploadedImageUrl = "";
 
 }
 
@@ -433,7 +422,21 @@ function openEditModal(id) {
     form.description.value = product.description || "";
     form.price.value = product.price || "";
     form.category.value = product.category || "";
-    form.image.value = product.image || "";
+    uploadedImageUrl = product.image || "";
+
+if (uploadedImageUrl) {
+
+    form.previewImage.src = uploadedImageUrl;
+    form.previewImage.style.display = "block";
+
+} else {
+
+    form.previewImage.src = "";
+    form.previewImage.style.display = "none";
+
+}
+
+form.imageFile.value = "";
 
     modal.show();
 
