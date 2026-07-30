@@ -159,6 +159,97 @@ font-weight:bold;
 <h2>🪑 Masalar</h2>
 
 <div id="tables"></div>
+
+  <!-- Adisyon Modal -->
+<div id="billModal"
+     style="display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.75);
+            z-index:9999;
+            justify-content:center;
+            align-items:center;">
+
+    <div style="
+        background:#2b2b2b;
+        width:min(700px,95%);
+        max-height:90vh;
+        overflow:auto;
+        border-radius:18px;
+        padding:25px;">
+
+        <h2 id="modalTable">Masa</h2>
+
+        <div id="modalItems"></div>
+
+        <hr>
+
+        <h2 style="text-align:right">
+            Toplam:
+            <span id="modalTotal">₺0</span>
+        </h2>
+
+        <hr>
+
+        <h3>Ödeme Şekli</h3>
+
+        <label>
+            <input type="radio"
+                   name="payment"
+                   value="Nakit"
+                   checked>
+            Nakit
+        </label>
+
+        <br><br>
+
+        <label>
+            <input type="radio"
+                   name="payment"
+                   value="Kart">
+            Kredi Kartı
+        </label>
+
+        <br><br>
+
+        <label>
+            <input type="radio"
+                   name="payment"
+                   value="Split">
+            Split
+        </label>
+
+        <div id="splitArea" style="display:none;margin-top:20px;">
+
+            <input
+                id="cashAmount"
+                type="number"
+                placeholder="Nakit"
+                style="width:100%;padding:12px;margin-bottom:10px;">
+
+            <input
+                id="cardAmount"
+                type="number"
+                placeholder="Kart"
+                style="width:100%;padding:12px;">
+
+        </div>
+
+        <br>
+
+        <button id="closeBillBtn"
+                style="background:#28a745">
+            💰 Hesabı Kapat
+        </button>
+
+        <button id="cancelBillBtn"
+                style="background:#666">
+            İptal
+        </button>
+
+    </div>
+
+</div>
   
 <script type="module" src="waiter.js"></script>
 
