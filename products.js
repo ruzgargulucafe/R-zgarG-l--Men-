@@ -49,6 +49,21 @@ let products = [];
 let editingId = null;
 let uploadedImageUrl = "";
 /* ===========================
+   FOTOĞRAF ÖNİZLEME
+=========================== */
+
+form.imageFile.addEventListener("change", () => {
+
+    const file = form.imageFile.files[0];
+
+    if (!file) return;
+
+    form.previewImage.src = URL.createObjectURL(file);
+
+    form.previewImage.style.display = "block";
+
+});
+/* ===========================
    KATEGORİLERİ YÜKLE
 =========================== */
 
@@ -331,6 +346,41 @@ function bindEvents() {
         });
 
     });
+
+}
+
+/* ===========================
+   CLOUDINARY YÜKLE
+=========================== */
+
+async function uploadImage(file){
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    const response = await fetch(
+
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+
+        {
+            method:"POST",
+            body:formData
+        }
+
+    );
+
+    const result = await response.json();
+
+    if(!result.secure_url){
+
+        throw new Error("Fotoğraf yüklenemedi.");
+
+    }
+
+    return result.secure_url;
 
 }
 
