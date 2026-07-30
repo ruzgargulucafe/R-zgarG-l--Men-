@@ -332,6 +332,9 @@ closeBillBtn.onclick = async () => {
     );
 
     // Açık siparişleri kapat
+
+    console.log("selectedOrders:", selectedOrders);
+    
     for (const orderDoc of selectedOrders) {
 
         await updateDoc(orderDoc.ref, {
