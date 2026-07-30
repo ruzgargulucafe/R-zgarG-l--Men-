@@ -388,7 +388,7 @@ cartButton.addEventListener("click", () => {
 
 });
 function watchLastOrder() {
-
+alert("watchLastOrder çalıştı");
     const lastOrderId = localStorage.getItem("lastOrderId");
 
     if (!lastOrderId) return;
