@@ -8,7 +8,8 @@ import {
     addDoc,
     serverTimestamp,
     doc,
-    onSnapshot
+    onSnapshot,
+    where
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 /* ===========================
@@ -31,9 +32,13 @@ const cartModal = new bootstrap.Modal(
     document.getElementById("cartModal")
 );
 
-const orderStatus = document.getElementById("orderStatus");
-const statusText = document.getElementById("statusText");
+const ordersButton = document.getElementById("ordersButton");
+const ordersCount = document.getElementById("ordersCount");
+const ordersContainer = document.getElementById("ordersContainer");
 
+const ordersModal = new bootstrap.Modal(
+    document.getElementById("ordersModal")
+);
 /* ===========================
    DEĞİŞKENLER
 =========================== */
@@ -360,7 +365,17 @@ cartButton.addEventListener("click", () => {
     cartModal.show();
 
 });
+/* ===========================
 
+   SİPARİŞLERİ AÇ
+
+=========================== */
+
+ordersButton.addEventListener("click", () => {
+
+    ordersModal.show();
+
+});
 /* ===========================
    SİPARİŞ GÖNDER
 =========================== */
@@ -392,15 +407,6 @@ sendOrderBtn.addEventListener("click", async () => {
                 createdAt: serverTimestamp()
             }
         );
-
-        // Son siparişi kaydet
-        localStorage.setItem(
-            "lastOrderId",
-            docRef.id
-        );
-
-        // Canlı takibi hemen başlat
-        watchLastOrder();
 
         alert("✅ Siparişiniz başarıyla alındı.");
 
@@ -481,83 +487,94 @@ requestBillBtn.addEventListener("click", async () => {
    SİPARİŞ TAKİBİ
 =========================== */
 
-let unsubscribeOrder = null;
+let unsubscribeOrders = null;
 
-function watchLastOrder() {
+function watchOrders() {
 
-    const lastOrderId = localStorage.getItem("lastOrderId");
-
-    if (!lastOrderId) {
-
-        orderStatus.style.display = "none";
-
-        return;
-
+    if (unsubscribeOrders) {
+        unsubscribeOrders();
     }
 
-    // Önce eski dinlemeyi kapat
-    if (unsubscribeOrder) {
+    const q = query(
+        collection(db, "orders"),
+        where("table", "==", tableName)
+    );
 
-        unsubscribeOrder();
+    unsubscribeOrders = onSnapshot(q, (snapshot) => {
 
-    }
+        let html = "";
+        let activeCount = 0;
 
-    unsubscribeOrder = onSnapshot(
-        doc(db, "orders", lastOrderId),
-        (docSnap) => {
-
-            if (!docSnap.exists()) {
-
-                orderStatus.style.display = "none";
-
-                return;
-
-            }
+        snapshot.forEach(docSnap => {
 
             const order = docSnap.data();
 
-            orderStatus.style.display = "block";
+            let badge = "";
 
             switch (order.status) {
 
                 case "Bekliyor":
-
-                    statusText.innerHTML =
-                        "🟡 Siparişiniz alındı ve mutfağa iletildi.";
-
+                    badge = `<span class="badge bg-warning">Bekliyor</span>`;
+                    activeCount++;
                     break;
 
                 case "Hazırlanıyor":
-
-                    statusText.innerHTML =
-                        "👨‍🍳 Siparişiniz hazırlanıyor.";
-
+                    badge = `<span class="badge bg-primary">Hazırlanıyor</span>`;
+                    activeCount++;
                     break;
 
                 case "Teslim Edildi":
-
-                    statusText.innerHTML =
-                        "✅ Siparişiniz teslim edildi.<br><b>Afiyet olsun 😊</b>";
-
+                    badge = `<span class="badge bg-success">Teslim Edildi</span>`;
                     break;
 
                 default:
-
-                    statusText.innerHTML =
-                        "Sipariş durumunuz güncelleniyor...";
-
+                    badge = `<span class="badge bg-secondary">${order.status}</span>`;
             }
 
-        },
-        (error) => {
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
 
-            console.error("Sipariş dinleme hatası:", error);
+                        <div class="d-flex justify-content-between">
+
+                            <h5>${badge}</h5>
+
+                            <strong>
+                                ₺${Number(order.total).toLocaleString("tr-TR")}
+                            </strong>
+
+                        </div>
+
+                        <hr>
+
+                        ${order.items.map(item => `
+                            <div>
+                                ${item.qty} x ${item.name}
+                            </div>
+                        `).join("")}
+
+                    </div>
+                </div>
+            `;
+
+        });
+
+        if (html === "") {
+
+            html = `
+                <div class="text-center text-muted">
+                    Henüz siparişiniz bulunmuyor.
+                </div>
+            `;
 
         }
-    );
+
+        ordersContainer.innerHTML = html;
+        ordersCount.innerText = activeCount;
+
+    });
 
 }
-
 /* ===========================
    BAŞLAT
 =========================== */
@@ -574,7 +591,7 @@ async function init() {
 
         updateCart();
 
-        watchLastOrder();
+        watchOrders();
 
     } catch (error) {
 
@@ -586,5 +603,4 @@ async function init() {
 
 }
 
-alert("menu.js yüklendi");
 init();
