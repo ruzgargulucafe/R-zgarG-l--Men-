@@ -227,9 +227,9 @@ async function loadBill(tableName) {
 
             }
 
-            grouped[item.name].qty += item.quantity;
+            grouped[item.name].qty += item.qty;
 
-            total += item.price * item.quantity;
+total += item.price * item.qty;
 
         });
 
