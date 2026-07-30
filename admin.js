@@ -124,14 +124,6 @@ ${status === "Bekliyor"
 </button>
 ` : ""}
 
-${status === "Bekliyor"
-    ? "👨‍🍳 Hazırlanmaya Başla"
-    : status === "Hazırlanıyor"
-    ? "✅ Teslim Edildi"
-    : "✔️ Tamamlandı"}
-
-</button>
-
 </div>
 
 `;
