@@ -262,15 +262,29 @@ Kategori Seçiniz
 
                 <div class="mt-3">
 
-                    <label class="form-label">
-                        Fotoğraf URL
-                    </label>
+    <label class="form-label">
+        Ürün Fotoğrafı
+    </label>
 
-                    <input
-                        id="image"
-                        class="form-control">
+    <input
+        type="file"
+        id="imageFile"
+        class="form-control"
+        accept="image/*">
 
-                </div>
+</div>
+
+<div class="text-center mt-3">
+
+    <img
+        id="previewImage"
+        src=""
+        style="display:none;
+               max-width:220px;
+               border-radius:12px;
+               border:1px solid #ddd;">
+
+</div>
 
             </div>
 
