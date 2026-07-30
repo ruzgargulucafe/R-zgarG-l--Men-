@@ -216,7 +216,7 @@ async function loadBill(tableName) {
 
         selectedOrders.push(docSnap);
 
-        order.items.forEach((item) => {
+        (order.items || []).forEach((item) => {
 
             if (!grouped[item.name]) {
 
@@ -281,6 +281,11 @@ cancelBillBtn.onclick = () => {
     modalItems.innerHTML = "";
     modalTotal.innerText = "₺0";
 
+    document.querySelector("input[value='Nakit']").checked = true;
+splitArea.style.display = "none";
+cashAmount.value = "";
+cardAmount.value = "";
+    
 };
 
 document.querySelectorAll("input[name='payment']").forEach(radio => {
@@ -351,6 +356,12 @@ selectedTotal = 0;
 
 modalItems.innerHTML = "";
 modalTotal.innerText = "₺0";
+
+    document.querySelector("input[value='Nakit']").checked = true;
+splitArea.style.display = "none";
+cashAmount.value = "";
+cardAmount.value = "";
+    
 };
 
 // ===================================================
@@ -389,10 +400,10 @@ onSnapshot(ordersQuery, (snapshot) => {
 
         (order.items || []).forEach(item => {
 
-            tables[order.table].total +=
-                item.price * item.quantity;
+    tables[order.table].total +=
+        item.price * item.qty;
 
-        });
+});
 
     });
 
