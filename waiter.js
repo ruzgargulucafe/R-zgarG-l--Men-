@@ -47,3 +47,14 @@ let selectedTable = null;
 let selectedOrders = [];
 
 console.log("✅ waiter.js başarıyla yüklendi.");
+const q = query(collection(db, "calls"));
+
+onSnapshot(
+    q,
+    (snapshot) => {
+        alert("Calls = " + snapshot.size);
+    },
+    (error) => {
+        alert("FIREBASE HATASI:\n" + error.message);
+    }
+);
