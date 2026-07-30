@@ -7,7 +7,8 @@ import {
     onSnapshot,
     doc,
     updateDoc,
-    where
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 const notificationSound = new Audio("./assets/notification.mp3");
 
@@ -127,16 +128,37 @@ data-id="${id}">
 
         btn.onclick = async () => {
 
-            await updateDoc(
-                doc(db, "billRequests", btn.dataset.id),
-                {
-                    status: "Tamamlandı"
-                }
-            );
+    if (!confirm(`${bill.table} hesabı kapatılsın mı?`)) return;
 
-        };
+    // Hesap isteğini kapat
+    await updateDoc(
+        doc(db, "billRequests", btn.dataset.id),
+        {
+            status: "Tamamlandı"
+        }
+    );
 
-    });
+    // O masaya ait açık siparişleri bul
+    const orders = await getDocs(
+        query(
+            collection(db, "orders"),
+            where("table", "==", bill.table),
+            where("closed", "==", false)
+        )
+    );
+
+    // Hepsini kapat
+    for (const order of orders.docs) {
+
+        await updateDoc(order.ref, {
+            closed: true
+        });
+
+    }
+
+    alert(`${bill.table} hesabı kapatıldı.`);
+
+};
 
 });
 
