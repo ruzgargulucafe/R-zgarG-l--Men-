@@ -49,7 +49,84 @@
     </div>
 
 </div>
+<!-- Sepet Butonu -->
 
+<button
+    id="cartButton"
+    class="btn btn-success rounded-pill shadow position-fixed"
+    style="
+        right:20px;
+        bottom:20px;
+        z-index:9999;
+        display:none;
+    ">
+
+    🛒 Sepet
+    (<span id="cartCount">0</span>)
+
+</button>
+
+<!-- Sepet Modal -->
+
+<div class="modal fade" id="cartModal" tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    🛒 Sipariş Sepeti
+
+                </h5>
+
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div
+                class="modal-body"
+                id="cartItems">
+
+                Sepet boş.
+
+            </div>
+
+            <div class="modal-footer">
+
+                <h4 class="me-auto">
+
+                    Toplam:
+                    <span id="cartTotal">
+
+                        0 ₺
+
+                    </span>
+
+                </h4>
+
+                <button
+                    class="btn btn-success"
+                    id="sendOrder">
+
+                    Siparişi Gönder
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="menu.js"></script>
 
 </body>
