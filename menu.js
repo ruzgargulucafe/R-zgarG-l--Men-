@@ -424,5 +424,12 @@ alert("watchLastOrder çalıştı");
 
 }
 
+alert("1");
+
 init();
+
+alert("2");
+
 watchLastOrder();
+
+alert("3");
