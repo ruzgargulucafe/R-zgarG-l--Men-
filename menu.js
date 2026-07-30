@@ -295,22 +295,15 @@ document.getElementById("sendOrder")
 
     try {
 
-        await addDoc(
-            collection(db, "orders"),
-            {
+        const docRef = await addDoc(collection(db, "orders"), {
+    table: tableName,
+    items: cart,
+    total,
+    status: "Bekliyor",
+    createdAt: serverTimestamp()
+});
 
-                table: tableName,
-
-                items: cart,
-
-                total: total,
-
-                status: "Bekliyor",
-
-                createdAt: serverTimestamp()
-
-            }
-        );
+localStorage.setItem("lastOrderId", docRef.id);
 
         alert("Siparişiniz alındı. Afiyet olsun 😊");
 
