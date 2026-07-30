@@ -170,3 +170,4 @@ onSnapshot(billQuery, (snapshot) => {
     });
 
 });
+console.log("waiter.js çalıştı");
