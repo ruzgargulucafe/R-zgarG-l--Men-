@@ -45,6 +45,7 @@ const cardAmount = document.getElementById("cardAmount");
 let selectedBillId = null;
 let selectedTable = null;
 let selectedOrders = [];
+let selectedTotal = 0;
 
 console.log("✅ waiter.js başarıyla yüklendi.");
 
@@ -272,6 +273,14 @@ cancelBillBtn.onclick = () => {
 
     billModal.style.display = "none";
 
+    selectedBillId = null;
+    selectedTable = null;
+    selectedOrders = [];
+    selectedTotal = 0;
+
+    modalItems.innerHTML = "";
+    modalTotal.innerText = "₺0";
+
 };
 
 closeBillBtn.onclick = async () => {
@@ -307,7 +316,13 @@ closeBillBtn.onclick = async () => {
     billModal.style.display = "none";
 
     alert(`${selectedTable} hesabı kapatıldı.`);
+selectedBillId = null;
+selectedTable = null;
+selectedOrders = [];
+selectedTotal = 0;
 
+modalItems.innerHTML = "";
+modalTotal.innerText = "₺0";
 };
 
 // ===================================================
