@@ -303,6 +303,21 @@ closeBillBtn.onclick = async () => {
     const paymentType =
         document.querySelector("input[name='payment']:checked").value;
 
+    if (paymentType === "Split") {
+
+    const cash = Number(document.getElementById("cashAmount").value || 0);
+    const card = Number(document.getElementById("cardAmount").value || 0);
+
+    if (cash + card !== selectedTotal) {
+
+        alert("Nakit + Kart toplamı hesap tutarı ile aynı olmalıdır.");
+
+        return;
+
+    }
+
+}
+    
     // Bill isteğini kapat
     await updateDoc(
         doc(db, "billRequests", selectedBillId),
