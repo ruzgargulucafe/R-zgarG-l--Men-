@@ -8,7 +8,9 @@ import {
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+const notificationSound = new Audio("./assets/notification.mp3");
 
+let lastOrderCount = 0;
 const ordersDiv = document.getElementById("orders");
 
 const q = query(
@@ -16,7 +18,13 @@ const q = query(
     orderBy("createdAt", "desc")
 );
 onSnapshot(q, (snapshot) => {
+if (lastOrderCount !== 0 && snapshot.size > lastOrderCount) {
 
+    notificationSound.play().catch(() => {});
+
+}
+
+lastOrderCount = snapshot.size;
     ordersDiv.innerHTML = "";
 
     snapshot.forEach((document) => {
