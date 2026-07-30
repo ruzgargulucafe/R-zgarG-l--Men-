@@ -396,7 +396,24 @@ function clearForm() {
     form.description.value = "";
     form.price.value = "";
     form.category.value = "";
-    form.image.value = "";
+    uploadedImageUrl = product.image || "";
+
+if (uploadedImageUrl) {
+
+    form.previewImage.src = uploadedImageUrl;
+
+    form.previewImage.style.display = "block";
+
+} else {
+
+    form.previewImage.style.display = "none";
+
+}
+form.previewImage.src = "";
+
+form.previewImage.style.display = "none";
+
+uploadedImageUrl = "";
 
 }
 
@@ -441,14 +458,22 @@ saveButton.addEventListener("click", saveProduct);
 
 async function saveProduct() {
 
-    const data = {
-        name: form.name.value.trim(),
-        description: form.description.value.trim(),
-        price: Number(form.price.value),
-        category: form.category.value,
-        image: form.image.value.trim(),
-        active: true
-    };
+    let imageUrl = uploadedImageUrl;
+
+if (form.imageFile.files.length > 0) {
+
+    imageUrl = await uploadImage(form.imageFile.files[0]);
+
+}
+
+const data = {
+    name: form.name.value.trim(),
+    description: form.description.value.trim(),
+    price: Number(form.price.value),
+    category: form.category.value,
+    image: imageUrl,
+    active: true
+};
 
     if (data.name === "") {
         alert("Ürün adı giriniz.");
