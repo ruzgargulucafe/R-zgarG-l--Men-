@@ -387,5 +387,42 @@ cartButton.addEventListener("click", () => {
     cartModal.show();
 
 });
+function watchLastOrder() {
+
+    const lastOrderId = localStorage.getItem("lastOrderId");
+
+    if (!lastOrderId) return;
+
+    const statusDiv = document.getElementById("orderStatus");
+    const statusText = document.getElementById("statusText");
+
+    onSnapshot(doc(db, "orders", lastOrderId), (docSnap) => {
+
+        if (!docSnap.exists()) return;
+
+        statusDiv.style.display = "block";
+
+        const order = docSnap.data();
+
+        if (order.status === "Bekliyor") {
+
+            statusText.innerHTML =
+                "🟡 Siparişiniz alındı ve mutfağa iletildi.";
+
+        } else if (order.status === "Hazırlanıyor") {
+
+            statusText.innerHTML =
+                "👨‍🍳 Siparişiniz hazırlanıyor.";
+
+        } else if (order.status === "Teslim Edildi") {
+
+            statusText.innerHTML =
+                "✅ Siparişiniz teslim edildi.<br>Afiyet olsun 😊";
+        }
+
+    });
+
+}
 
 init();
+watchLastOrder();
