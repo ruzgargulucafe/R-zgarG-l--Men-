@@ -81,58 +81,73 @@
 
 </button>
 
-<!-- 🔔 Garson -->
+<!-- İşlemler Menüsü -->
 
-<button
-    id="callWaiter"
-    class="btn btn-warning rounded-pill shadow position-fixed"
+<div
+    id="actionMenu"
     style="
+        position:fixed;
         right:20px;
         bottom:90px;
         z-index:9999;
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        gap:10px;
     ">
 
-    🔔 Garson Çağır
+    <div
+        id="actionItems"
+        style="
+            display:none;
+            flex-direction:column;
+            gap:10px;
+            margin-bottom:10px;
+        ">
 
-</button>
+        <button
+            id="ordersButton"
+            class="btn btn-info rounded-pill shadow">
 
-<!-- 💳 Hesap -->
+            📦 Siparişlerim
 
-<button
-    id="requestBill"
-    class="btn btn-primary rounded-pill shadow position-fixed"
-    style="
-        right:20px;
-        bottom:160px;
-        z-index:9999;
-    ">
+            <span
+                id="ordersCount"
+                class="badge bg-danger ms-2">
 
-    💳 Hesap İste
+                0
 
-</button>
+            </span>
 
-<!-- 📦 Siparişler -->
+        </button>
 
-<button
-    id="ordersButton"
-    class="btn btn-info rounded-pill shadow position-fixed"
-    style="
-        right:20px;
-        bottom:230px;
-        z-index:9999;
-    ">
+        <button
+            id="requestBill"
+            class="btn btn-primary rounded-pill shadow">
 
-    📦 Siparişlerim
+            💳 Hesap İste
 
-    <span
-        id="ordersCount"
-        class="badge bg-danger ms-2">
+        </button>
 
-        0
+        <button
+            id="callWaiter"
+            class="btn btn-warning rounded-pill shadow">
 
-    </span>
+            🔔 Garson Çağır
 
-</button>    
+        </button>
+
+    </div>
+
+    <button
+        id="menuToggle"
+        class="btn btn-dark rounded-pill shadow">
+
+        ☰ İşlemler
+
+    </button>
+
+</div>
 <!-- ===========================
      SEPET MODAL
 =========================== -->
