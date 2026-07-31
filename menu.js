@@ -143,47 +143,57 @@ function renderMenu() {
 
             html += `
 
-            <div class="d-flex justify-content-between align-items-center py-3">
+<div class="d-flex align-items-start py-3">
 
-                <div>
+    <img
+        src="${product.image || 'https://placehold.co/120x120'}"
+        alt="${product.name}"
+        style="
+            width:90px;
+            height:90px;
+            object-fit:cover;
+            border-radius:12px;
+            margin-right:15px;
+        ">
 
-                    <h5 class="fw-bold mb-1">
-                        ${product.name}
-                    </h5>
+    <div class="flex-grow-1">
 
-                    <small class="text-muted">
-                        ${product.description || ""}
-                    </small>
+        <h5 class="fw-bold mb-1">
+            ${product.name}
+        </h5>
 
-                </div>
+        <small class="text-muted">
+            ${product.description || ""}
+        </small>
 
-                <div class="text-end">
+    </div>
 
-                    <span class="badge bg-success rounded-pill fs-6">
+    <div class="text-end">
 
-                        ₺${Number(product.price).toLocaleString("tr-TR")}
+        <span class="badge bg-success rounded-pill fs-6">
 
-                    </span>
+            ₺${Number(product.price).toLocaleString("tr-TR")}
 
-                    <br>
+        </span>
 
-                    <button
-                        class="btn btn-success btn-sm mt-2 addCart"
-                        data-name="${product.name}"
-                        data-price="${product.price}">
+        <br>
 
-                        🛒 Sepete Ekle
+        <button
+            class="btn btn-success btn-sm mt-2 addCart"
+            data-name="${product.name}"
+            data-price="${product.price}">
 
-                    </button>
+            🛒 Sepete Ekle
 
-                </div>
+        </button>
 
-            </div>
+    </div>
 
-            <hr>
+</div>
 
-            `;
+<hr>
 
+`;
         });
 
         html += `
