@@ -229,17 +229,20 @@ function bindCartButtons() {
 
             if (item) {
 
-                item.qty++;
+    item.qty++;
 
-            } else {
+} else {
 
-                cart.push({
-                    name,
-                    price,
-                    qty: 1
-                });
+    const product = products.find(p => p.name === name);
 
-            }
+    cart.push({
+        name,
+        price,
+        qty: 1,
+        vat: product?.vat || 20
+    });
+
+}
 
             updateCart();
 
