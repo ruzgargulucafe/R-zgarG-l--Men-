@@ -209,6 +209,7 @@ async function loadBill(tableName) {
     let total = 0;
 
     const grouped = {};
+    const vatGroups = {};
 
     orders.forEach((docSnap) => {
 
@@ -221,15 +222,27 @@ async function loadBill(tableName) {
             if (!grouped[item.name]) {
 
                 grouped[item.name] = {
-                    qty: 0,
-                    price: item.price
-                };
+    qty: 0,
+    price: item.price,
+    vat: item.vat || 20
+};
 
             }
 
             grouped[item.name].qty += item.qty;
 
 total += item.price * item.qty;
+
+const lineTotal = item.price * item.qty;
+
+const vatAmount =
+    lineTotal - (lineTotal / (1 + (item.vat || 20) / 100));
+
+if (!vatGroups[item.vat || 20]) {
+    vatGroups[item.vat || 20] = 0;
+}
+
+vatGroups[item.vat || 20] += vatAmount;
 
         });
 
@@ -258,6 +271,28 @@ total += item.price * item.qty;
         `;
 
     });
+
+    modalItems.innerHTML += `
+<hr>
+<h4 style="margin-top:15px;">KDV Dağılımı</h4>
+`;
+
+Object.keys(vatGroups).sort().forEach(rate => {
+
+    modalItems.innerHTML += `
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        padding:6px 0;">
+
+        <span>KDV %${rate}</span>
+
+        <strong>₺${vatGroups[rate].toFixed(2)}</strong>
+
+    </div>
+    `;
+
+});
 
     selectedTotal = total;
 
