@@ -671,3 +671,20 @@ async function init() {
 }
 
 init();
+
+const menuToggle = document.getElementById("menuToggle");
+const actionItems = document.getElementById("actionItems");
+
+menuToggle.onclick = () => {
+
+    if (actionItems.style.display === "flex") {
+
+        actionItems.style.display = "none";
+
+    } else {
+
+        actionItems.style.display = "flex";
+
+    }
+
+};
