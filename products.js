@@ -34,6 +34,7 @@ const form = {
     description: document.getElementById("description"),
     price: document.getElementById("price"),
     category: document.getElementById("category"),
+    vat: document.getElementById("vat"),
     imageFile: document.getElementById("imageFile"),
     previewImage: document.getElementById("previewImage")
 };
@@ -396,6 +397,7 @@ function clearForm() {
     form.description.value = "";
     form.price.value = "";
     form.category.value = "";
+    form.vat.value = "20";
 
     form.imageFile.value = "";
 
@@ -422,6 +424,8 @@ function openEditModal(id) {
     form.description.value = product.description || "";
     form.price.value = product.price || "";
     form.category.value = product.category || "";
+    form.vat.value = product.vat || "20";
+   
     uploadedImageUrl = product.image || "";
 
 if (uploadedImageUrl) {
@@ -474,6 +478,7 @@ const data = {
     description: form.description.value.trim(),
     price: Number(form.price.value),
     category: form.category.value,
+    vat: Number(form.vat.value),
     image: imageUrl,
     active: true
 };
