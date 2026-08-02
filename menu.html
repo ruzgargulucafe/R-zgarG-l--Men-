@@ -64,43 +64,45 @@
 
 <div class="fabMenu">
 
-    <button id="fabMain" class="fabMain">
+    <div class="fabItems" id="fabItems">
 
-        ☰
+    <button id="ordersButton" class="fabBtn">
+
+        <span class="fabLabel">Siparişlerim</span>
+
+        📦
+
+        <span id="ordersCount" class="fabBadge">0</span>
 
     </button>
 
-    <div class="fabItems" id="fabItems">
+    <button id="requestBill" class="fabBtn">
 
-        <button id="ordersButton" class="fabBtn">
+        <span class="fabLabel">Hesap İste</span>
 
-            📦
+        💳
 
-            <span id="ordersCount">0</span>
+    </button>
 
-        </button>
+    <button id="callWaiter" class="fabBtn">
 
-        <button id="requestBill" class="fabBtn">
+        <span class="fabLabel">Garson Çağır</span>
 
-            💳
+        🔔
 
-        </button>
+    </button>
 
-        <button id="callWaiter" class="fabBtn">
+    <button id="cartButton" class="fabBtn">
 
-            🔔
+        <span class="fabLabel">Sepet</span>
 
-        </button>
+        🛒
 
-        <button id="cartButton" class="fabBtn">
+        <span id="cartCount" class="fabBadge">0</span>
 
-            🛒
+    </button>
 
-            <span id="cartCount">0</span>
-
-        </button>
-
-    </div>
+</div>
 
 </div>
 <!-- ===========================
@@ -225,3 +227,90 @@
 
 </html>
     
+/*=========================================
+FAB YAZILARI
+=========================================*/
+
+.fabBtn{
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+gap:10px;
+
+overflow:visible;
+
+}
+
+.fabLabel{
+
+position:absolute;
+
+right:75px;
+
+white-space:nowrap;
+
+background:rgba(0,0,0,.82);
+
+color:#fff;
+
+padding:6px 12px;
+
+border-radius:20px;
+
+font-size:13px;
+
+font-weight:500;
+
+opacity:0;
+
+transform:translateX(10px);
+
+transition:.25s;
+
+pointer-events:none;
+
+}
+
+.fabBtn:hover .fabLabel{
+
+opacity:1;
+
+transform:translateX(0);
+
+}
+
+.fabBadge{
+
+position:absolute;
+
+top:-5px;
+
+right:-5px;
+
+background:#e53935;
+
+color:#fff;
+
+font-size:11px;
+
+font-weight:700;
+
+min-width:18px;
+
+height:18px;
+
+padding:0 5px;
+
+border-radius:999px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+}
