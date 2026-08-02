@@ -43,7 +43,15 @@ const ordersModal = new bootstrap.Modal(
    FLOATING MENU
 =========================== */
 
-const fabMain = document.getElementById("fabMain");
+<div class="fabMenu">
+
+    <button id="fabMain" class="fabMain">
+
+        ☰
+
+    </button>
+
+    <div class="fabItems" id="fabItems">
 const fabItems = document.getElementById("fabItems");
 
 fabMain.addEventListener("click", () => {
@@ -695,20 +703,3 @@ async function init() {
 }
 
 init();
-
-const menuToggle = document.getElementById("menuToggle");
-const actionItems = document.getElementById("actionItems");
-
-menuToggle.onclick = () => {
-
-    if (actionItems.style.display === "flex") {
-
-        actionItems.style.display = "none";
-
-    } else {
-
-        actionItems.style.display = "flex";
-
-    }
-
-};
