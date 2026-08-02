@@ -1,1 +1,404 @@
+/* ========================================
+   RÜZGAR GÜLÜ CAFE
+   PREMIUM HOME PAGE
+======================================== */
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",Arial,sans-serif;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+
+    min-height:100vh;
+
+    color:#222;
+
+    background:
+    linear-gradient(
+        180deg,
+        #f8fdff 0%,
+        #eaf8ff 20%,
+        #d5f1ff 45%,
+        #b9e6ff 100%
+    );
+
+    overflow-x:hidden;
+
+}
+
+/* Arka plan ışıkları */
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    width:650px;
+    height:650px;
+
+    border-radius:50%;
+
+    background:rgba(0,180,255,.15);
+
+    top:-250px;
+    left:-200px;
+
+    filter:blur(90px);
+
+    z-index:-2;
+
+}
+
+body::after{
+
+    content:"";
+
+    position:fixed;
+
+    width:600px;
+    height:600px;
+
+    border-radius:50%;
+
+    background:rgba(0,150,200,.12);
+
+    bottom:-250px;
+    right:-200px;
+
+    filter:blur(90px);
+
+    z-index:-2;
+
+}
+
+/* HERO */
+
+.hero{
+
+    position:relative;
+
+    overflow:hidden;
+
+    min-height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    padding:40px 25px;
+
+    color:white;
+
+    background:
+    linear-gradient(
+        rgba(0,70,110,.35),
+        rgba(0,30,50,.55)
+    ),
+    url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000")
+    center center / cover;
+
+}
+
+/* Hafif kararma */
+
+.hero::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+    linear-gradient(
+        transparent,
+        rgba(255,255,255,.10)
+    );
+
+}
+/* ========================================
+   LOGO
+======================================== */
+
+.logo{
+
+    width:180px;
+
+    height:180px;
+
+    border-radius:50%;
+
+    background:white;
+
+    padding:12px;
+
+    object-fit:contain;
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.25),
+        0 0 60px rgba(255,255,255,.45);
+
+    animation:floatLogo 4s ease-in-out infinite;
+
+    z-index:2;
+
+}
+
+/* ========================================
+   YAZILAR
+======================================== */
+
+.hero h1{
+
+    margin-top:30px;
+
+    font-size:56px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+
+    text-shadow:0 6px 18px rgba(0,0,0,.35);
+
+    z-index:2;
+
+}
+
+.hero h3{
+
+    margin-top:12px;
+
+    font-size:30px;
+
+    font-weight:300;
+
+    opacity:.98;
+
+    z-index:2;
+
+}
+
+.hero p{
+
+    margin-top:22px;
+
+    max-width:550px;
+
+    font-size:22px;
+
+    line-height:36px;
+
+    opacity:.95;
+
+    z-index:2;
+
+}
+
+/* ========================================
+   MENÜ BUTONU
+======================================== */
+
+.menuButton{
+
+    margin-top:45px;
+
+    display:inline-block;
+
+    padding:18px 45px;
+
+    border-radius:60px;
+
+    text-decoration:none;
+
+    color:#0077b6;
+
+    background:white;
+
+    font-size:22px;
+
+    font-weight:700;
+
+    box-shadow:0 18px 35px rgba(0,0,0,.18);
+
+    transition:.35s;
+
+    z-index:2;
+
+}
+
+.menuButton:hover{
+
+    transform:translateY(-4px) scale(1.03);
+
+    background:#f6fdff;
+
+}
+
+/* ========================================
+   LOGO ANİMASYONU
+======================================== */
+
+@keyframes floatLogo{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-10px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
+
+}
+/* ========================================
+   PREMIUM KARTLAR
+======================================== */
+
+.card{
+
+    width:min(92%,560px);
+
+    margin:25px auto;
+
+    padding:28px;
+
+    border-radius:28px;
+
+    background:rgba(255,255,255,.88);
+
+    backdrop-filter:blur(18px);
+
+    -webkit-backdrop-filter:blur(18px);
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.12);
+
+    transition:.35s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:
+        0 25px 50px rgba(0,0,0,.18);
+
+}
+
+/* ========================================
+   BUTONLAR
+======================================== */
+
+.btn{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    width:100%;
+
+    padding:18px;
+
+    margin:14px 0;
+
+    border-radius:18px;
+
+    text-decoration:none;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    color:white;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00a6d6,
+        #0077b6
+    );
+
+    transition:.30s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-3px);
+
+    background:
+    linear-gradient(
+        135deg,
+        #0096c7,
+        #005f99
+    );
+
+}
+
+/* ========================================
+   BİLGİ KARTI
+======================================== */
+
+.info{
+
+    text-align:center;
+
+    font-size:18px;
+
+    line-height:32px;
+
+}
+
+.info b{
+
+    display:block;
+
+    font-size:22px;
+
+    margin-bottom:10px;
+
+    color:#0077b6;
+
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+footer{
+
+    text-align:center;
+
+    color:#666;
+
+    padding:35px;
+
+    font-size:15px;
+
+}
