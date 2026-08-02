@@ -60,90 +60,47 @@
 
 </div>
     
-<!-- SABİT BUTONLAR -->
+<!-- FLOATING MENU -->
 
-<!-- 🛒 Sepet -->
+<div class="fabMenu">
 
-<button
-    id="cartButton"
-    class="btn btn-success rounded-pill shadow position-fixed"
-    style="
-        right:20px;
-        bottom:20px;
-        z-index:9999;
-        display:none;
-    ">
+    <button id="fabMain" class="fabMain">
 
-    🛒 Sepet
-    (<span id="cartCount">0</span>)
+        ☰
 
-</button>
+    </button>
 
-<!-- İşlemler Menüsü -->
+    <div class="fabItems" id="fabItems">
 
-<div
-    id="actionMenu"
-    style="
-        position:fixed;
-        right:20px;
-        bottom:90px;
-        z-index:9999;
-        display:flex;
-        flex-direction:column;
-        align-items:flex-end;
-        gap:10px;
-    ">
+        <button id="ordersButton" class="fabBtn">
 
-    <div
-        id="actionItems"
-        style="
-            display:none;
-            flex-direction:column;
-            gap:10px;
-            margin-bottom:10px;
-        ">
+            📦
 
-        <button
-            id="ordersButton"
-            class="btn btn-info rounded-pill shadow">
-
-            📦 Siparişlerim
-
-            <span
-                id="ordersCount"
-                class="badge bg-danger ms-2">
-
-                0
-
-            </span>
+            <span id="ordersCount">0</span>
 
         </button>
 
-        <button
-            id="requestBill"
-            class="btn btn-primary rounded-pill shadow">
+        <button id="requestBill" class="fabBtn">
 
-            💳 Hesap İste
+            💳
 
         </button>
 
-        <button
-            id="callWaiter"
-            class="btn btn-warning rounded-pill shadow">
+        <button id="callWaiter" class="fabBtn">
 
-            🔔 Garson Çağır
+            🔔
+
+        </button>
+
+        <button id="cartButton" class="fabBtn">
+
+            🛒
+
+            <span id="cartCount">0</span>
 
         </button>
 
     </div>
-
-    <button
-        id="menuToggle"
-        class="btn btn-dark rounded-pill shadow">
-
-        ☰ İşlemler
-
-    </button>
 
 </div>
 <!-- ===========================
