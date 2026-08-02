@@ -100,19 +100,6 @@ text-align:center;
 
 }
 
-background:
-
-linear-gradient(
-rgba(0,50,80,.30),
-rgba(0,0,0,.45)
-),
-
-url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=2000");
-
-background-size:cover;
-
-background-position:center;
-
 .hero-overlay{
 
 color:white;
@@ -704,25 +691,6 @@ transform:scale(1.08);
 
 }
 
-.fabBtn span{
-
-position:absolute;
-
-top:-5px;
-
-right:-5px;
-
-background:red;
-
-color:white;
-
-font-size:12px;
-
-padding:2px 6px;
-
-border-radius:20px;
-
-}
 /*=========================================
 FAB YAZILARI
 =========================================*/
