@@ -638,7 +638,7 @@ transform:rotate(90deg);
 
 display:flex;
 
-flex-direction:column;
+flex-direction:column-reverse;
 
 gap:12px;
 
@@ -650,7 +650,7 @@ pointer-events:none;
 
 transform:translateY(20px);
 
-transition:.3s;
+transition:.35s;
 
 }
 
