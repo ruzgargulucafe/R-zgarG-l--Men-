@@ -435,3 +435,83 @@ margin-bottom:10px;
     opacity:.95;
 
 }
+
+/* =========================
+   ANA SAYFA KARTLARI
+========================= */
+
+.card{
+
+    width:min(92%,550px);
+
+    margin:25px auto;
+
+    background:rgba(255,255,255,.92);
+
+    backdrop-filter:blur(12px);
+
+    border-radius:28px;
+
+    padding:25px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.10);
+
+}
+
+.btn{
+
+    display:block;
+
+    width:100%;
+
+    margin:14px 0;
+
+    padding:18px;
+
+    text-align:center;
+
+    text-decoration:none;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    color:white;
+
+    background:linear-gradient(135deg,#00a6d6,#0077b6);
+
+    border-radius:18px;
+
+    transition:.3s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-3px);
+
+    background:linear-gradient(135deg,#0096c7,#005f99);
+
+}
+
+.info{
+
+    text-align:center;
+
+    line-height:30px;
+
+    font-size:18px;
+
+}
+
+footer{
+
+    text-align:center;
+
+    padding:30px;
+
+    color:#666;
+
+    font-size:15px;
+
+}
