@@ -3,6 +3,26 @@ RÜZGAR GÜLÜ MENU V2
 PREMIUM BEACH EDITION
 ==================================================*/
 
+:root{
+
+    --primary:#0077b6;
+    --primary-light:#00b4d8;
+    --secondary:#0099cc;
+
+    --success:#00a651;
+    --success-light:#00c853;
+
+    --danger:#e53935;
+
+    --text:#222;
+    --white:#ffffff;
+
+    --radius:24px;
+
+    --shadow:0 12px 30px rgba(0,0,0,.08);
+
+}
+
 *{
 
 margin:0;
@@ -70,6 +90,16 @@ margin-bottom:35px;
 box-shadow:
 0 20px 45px rgba(0,0,0,.18);
 
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+text-align:center;
+
+}
+
 background:
 
 linear-gradient(
@@ -82,16 +112,6 @@ url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=2000");
 background-size:cover;
 
 background-position:center;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-text-align:center;
-
-}
 
 .hero-overlay{
 
@@ -220,6 +240,8 @@ box-shadow:0 12px 30px rgba(0,0,0,.08);
 
 transition:.30s;
 
+animation:productUp .45s ease;
+
 }
 
 .product:hover{
@@ -248,6 +270,8 @@ flex-shrink:0;
 
 box-shadow:0 8px 20px rgba(0,0,0,.15);
 
+transition:.35s;
+  
 }
 
 /*==================================================
@@ -415,12 +439,6 @@ font-size:15px;
 ÜRÜN RESMİ HOVER
 ==================================================*/
 
-.productImage{
-
-transition:.35s;
-
-}
-
 .product:hover .productImage{
 
 transform:scale(1.06);
@@ -430,14 +448,6 @@ transform:scale(1.06);
 RÜZGAR GÜLÜ MENU V2
 FINAL
 ==================================================*/
-
-/* Ürün giriş animasyonu */
-
-.product{
-
-animation:productUp .45s ease;
-
-}
 
 @keyframes productUp{
 
@@ -716,20 +726,6 @@ border-radius:20px;
 /*=========================================
 FAB YAZILARI
 =========================================*/
-
-.fabBtn{
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-gap:10px;
-
-overflow:visible;
-
-}
 
 .fabLabel{
 
