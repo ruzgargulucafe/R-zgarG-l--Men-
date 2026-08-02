@@ -43,33 +43,19 @@ const ordersModal = new bootstrap.Modal(
    FLOATING MENU
 =========================== */
 
-<div class="fabMenu">
-
-    <button id="fabMain" class="fabMain">
-
-        ☰
-
-    </button>
-
-    <div class="fabItems" id="fabItems">
+const fabMain = document.getElementById("fabMain");
 const fabItems = document.getElementById("fabItems");
 
 fabMain.addEventListener("click", () => {
 
     fabItems.classList.toggle("active");
 
-    if (fabItems.classList.contains("active")) {
-
-        fabMain.innerHTML = "✕";
-
-    } else {
-
-        fabMain.innerHTML = "☰";
-
-    }
+    fabMain.innerHTML =
+        fabItems.classList.contains("active")
+            ? "✕"
+            : "☰";
 
 });
-
 /* ===========================
    DEĞİŞKENLER
 =========================== */
