@@ -38,6 +38,30 @@ const ordersContainer = document.getElementById("ordersContainer");
 const ordersModal = new bootstrap.Modal(
     document.getElementById("ordersModal")
 );
+
+/* ===========================
+   FLOATING MENU
+=========================== */
+
+const fabMain = document.getElementById("fabMain");
+const fabItems = document.getElementById("fabItems");
+
+fabMain.addEventListener("click", () => {
+
+    fabItems.classList.toggle("active");
+
+    if (fabItems.classList.contains("active")) {
+
+        fabMain.innerHTML = "✕";
+
+    } else {
+
+        fabMain.innerHTML = "☰";
+
+    }
+
+});
+
 /* ===========================
    DEĞİŞKENLER
 =========================== */
