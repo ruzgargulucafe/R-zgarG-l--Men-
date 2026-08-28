@@ -3,6 +3,21 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
+import { db } from "./firebase.js";
+
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+/* ===========================
+   AUTH KONTROL
+=========================== */
+
 const auth = getAuth();
 
 onAuthStateChanged(auth, (user) => {
@@ -10,35 +25,37 @@ onAuthStateChanged(auth, (user) => {
   if (!user) {
     alert("Giriş yapmalısın!");
     window.location.href = "login.html";
+    return;
   }
 
+  console.log("Admin giriş yaptı:", user.email);
+
+  startAdminPanel(); // 🔥 sadece login sonrası başlat
+
 });
-import { db } from "./firebase.js";
 
-import {
-    collection,
-    query,
-    orderBy,
-    onSnapshot,
-    doc,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+/* ===========================
+   ADMIN PANEL BAŞLAT
+=========================== */
 
-const ordersDiv = document.getElementById("orders");
+function startAdminPanel() {
 
-const q = query(
+  const ordersDiv = document.getElementById("orders");
+
+  const q = query(
     collection(db, "orders"),
     orderBy("createdAt", "desc")
-);
+  );
 
-let ilkYukleme = true;
+  let ilkYukleme = true;
 
-onSnapshot(q, (snapshot) => {
+  onSnapshot(q, (snapshot) => {
 
+    // 🔔 Yeni sipariş sesi
     if (!ilkYukleme && snapshot.docChanges().some(c => c.type === "added")) {
 
-        const ses = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-        ses.play().catch(() => {});
+      const ses = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+      ses.play().catch(() => {});
 
     }
 
@@ -48,134 +65,161 @@ onSnapshot(q, (snapshot) => {
 
     if (snapshot.empty) {
 
-        ordersDiv.innerHTML = `
+      ordersDiv.innerHTML = `
         <div id="bos">
-            Henüz sipariş yok...
+          Henüz sipariş yok...
         </div>
-        `;
-
-        return;
+      `;
+      return;
     }
 
     snapshot.forEach((document) => {
 
-        const siparis = document.data();
-        const id = document.id;
-const items = siparis.items || [];
-const status = siparis.status || "Bekliyor";
-        let durumClass = "yeni";
+      const siparis = document.data();
+      const id = document.id;
 
-        switch (status) {
+      const items = siparis.items || [];
+      const status = siparis.status || "Bekliyor";
 
-    case "Hazırlanıyor":
-        durumClass = "hazirlaniyor";
-        break;
+      /* ===========================
+         DURUM RENK
+      =========================== */
 
-    case "Teslim Edildi":
-        durumClass = "teslim";
-        break;
+      let durumClass = "yeni";
 
-    default:
-        durumClass = "yeni";
-}
+      switch (status) {
+        case "Hazırlanıyor":
+          durumClass = "hazirlaniyor";
+          break;
 
-        let urunler = "";
+        case "Teslim Edildi":
+          durumClass = "teslim";
+          break;
 
-items.forEach((u) => {
+        default:
+          durumClass = "yeni";
+      }
 
-    urunler += `
-<li>
-<strong>${u.qty}x</strong>
-${u.name}
-— ₺${(u.qty * u.price).toLocaleString("tr-TR")}
-</li>
-`;
+      /* ===========================
+         ÜRÜNLER
+      =========================== */
 
-});
+      let urunler = "";
 
-        let saat = "-";
+      items.forEach((u) => {
+        urunler += `
+        <li>
+          <strong>${u.qty}x</strong>
+          ${u.name}
+          — ₺${(u.qty * u.price).toLocaleString("tr-TR")}
+        </li>
+        `;
+      });
 
-        if (siparis.createdAt?.toDate) {
+      /* ===========================
+         SAAT
+      =========================== */
 
-            saat = siparis.createdAt
-                .toDate()
-                .toLocaleTimeString("tr-TR", {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                });
+      let saat = "-";
 
-        }
+      if (siparis.createdAt?.toDate) {
+        saat = siparis.createdAt.toDate().toLocaleTimeString("tr-TR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
 
-        ordersDiv.innerHTML += `
+      /* ===========================
+         HTML
+      =========================== */
 
-<div class="order ${durumClass}">
+      ordersDiv.innerHTML += `
 
-<h2>🪑 ${siparis.table}</h2>
+      <div class="order ${durumClass}">
 
-<p><strong>🕒 Saat:</strong> ${saat}</p>
+        <h2>🪑 ${siparis.table}</h2>
 
-<ul>
+        <p><strong>🕒 Saat:</strong> ${saat}</p>
 
-${urunler}
+        <ul>
+          ${urunler}
+        </ul>
 
-</ul>
+        <p><strong>💰 Toplam:</strong> ₺${Number(siparis.total).toLocaleString("tr-TR")}</p>
 
-<p><strong>💰 Toplam:</strong> ₺${Number(siparis.total).toLocaleString("tr-TR")}</p>
+        <p><strong>📌 Durum:</strong> ${status}</p>
 
-<p><strong>📝 Not:</strong> ${siparis.not || "-"}</p>
+        ${status !== "Teslim Edildi" ? `
+        <button
+          class="durumBtn"
+          data-id="${id}"
+          data-status="${status}">
 
-<p><strong>📌 Durum:</strong> ${status}</p>
+          ${status === "Bekliyor"
+            ? "👨‍🍳 Hazırlanmaya Başla"
+            : "✅ Teslim Edildi"}
 
-${status !== "Teslim Edildi" ? `
-<button
-class="durumBtn"
-data-id="${id}"
-data-durum="${status}">
+        </button>
+        ` : ""}
 
-${status === "Bekliyor"
-    ? "👨‍🍳 Hazırlanmaya Başla"
-    : "✅ Teslim Edildi"}
+      </div>
 
-</button>
-` : ""}
-
-</div>
-
-`;
+      `;
 
     });
 
-    document.querySelectorAll(".durumBtn").forEach((btn) => {
+    bindButtons();
 
-        btn.addEventListener("click", async () => {
-
-            const ref = doc(db, "orders", btn.dataset.id);
-
-            let yeniDurum;
-
-            switch (btn.dataset.durum) {
-
-    case "Bekliyor":
-        yeniDurum = "Hazırlanıyor";
-        break;
-
-    case "Hazırlanıyor":
-        yeniDurum = "Teslim Edildi";
-        break;
-
-    case "Teslim Edildi":
-        return; // Artık değişmesin
-
-    default:
-        return;
+  });
 
 }
-await updateDoc(ref, {
-    status: yeniDurum
-});
 
+/* ===========================
+   BUTON EVENT
+=========================== */
+
+function bindButtons() {
+
+  document.querySelectorAll(".durumBtn").forEach((btn) => {
+
+    btn.addEventListener("click", async () => {
+
+      const id = btn.dataset.id;
+      const current = btn.dataset.status;
+
+      let yeniDurum;
+
+      switch (current) {
+
+        case "Bekliyor":
+          yeniDurum = "Hazırlanıyor";
+          break;
+
+        case "Hazırlanıyor":
+          yeniDurum = "Teslim Edildi";
+          break;
+
+        default:
+          return;
+
+      }
+
+      try {
+
+        await updateDoc(doc(db, "orders", id), {
+          status: yeniDurum,
+          closed: yeniDurum === "Teslim Edildi"
         });
 
+      } catch (err) {
+
+        console.error(err);
+        alert("Durum güncellenemedi (yetki kontrol et)");
+
+      }
+
     });
 
-});
+  });
+
+}
