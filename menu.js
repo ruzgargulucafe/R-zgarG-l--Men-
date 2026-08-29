@@ -116,7 +116,9 @@ async function loadProducts() {
             ...doc.data()
         };
 
-        products.push(product);
+        if (product.active !== false) {
+    products.push(product);
+}
 
     });
 
