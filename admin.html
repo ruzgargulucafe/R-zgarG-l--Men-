@@ -4,281 +4,259 @@
 <meta charset="UTF-8">
 <title>Admin Panel</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-body{background:#f4f6f9;}
-.sidebar{
-width:220px;
-height:100vh;
-background:#222;
-color:white;
-position:fixed;
+body {
+  margin: 0;
+  font-family: Arial;
+  display: flex;
 }
-.sidebar button{
-width:100%;
-border:none;
-padding:15px;
-background:none;
-color:white;
-text-align:left;
+
+.sidebar {
+  width: 220px;
+  background: #111;
+  color: white;
+  height: 100vh;
+  padding: 20px;
 }
-.sidebar button:hover{background:#444;}
-.content{
-margin-left:220px;
-padding:20px;
+
+.sidebar button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: none;
+  background: #333;
+  color: white;
+  cursor: pointer;
 }
-.section{display:none;}
-.section.active{display:block;}
-.topbar{
-background:#111;
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
+
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+input, select {
+  padding: 8px;
+  margin: 5px 0;
+  width: 100%;
+}
+
+button.action {
+  padding: 10px;
+  background: green;
+  color: white;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100px;
 }
 </style>
-
 </head>
+
 <body>
 
-<!-- TOP -->
-<div class="topbar">
-<h4>⚙️ Admin Panel</h4>
-<button onclick="logout()" class="btn btn-danger">Çıkış</button>
-</div>
-
-<!-- MENU -->
 <div class="sidebar">
-<button onclick="show('orders')">📋 Siparişler</button>
-<button onclick="show('products')">📦 Ürünler</button>
-<button onclick="show('categories')">📂 Kategoriler</button>
-<button onclick="show('tables')">🪑 Masalar</button>
-<button onclick="show('finance')">💰 Ciro</button>
+  <h3>Admin</h3>
+  <button onclick="showPage('masa')">Masalar</button>
+  <button onclick="showPage('kategori')">Kategoriler</button>
+  <button onclick="showPage('urun')">Ürünler</button>
+  <button onclick="showPage('siparis')">Siparişler</button>
+  <button onclick="showPage('ciro')">Ciro</button>
+  <button onclick="logout()">Çıkış</button>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
 
-<div id="orders" class="section active">
-<h3>Siparişler</h3>
-<div id="ordersList"></div>
+<div class="topbar">
+  <h2 id="title">Masalar</h2>
 </div>
 
-<div id="products" class="section">
-<h3>Ürün Ekle</h3>
-
-<input id="pName" class="form-control mb-2" placeholder="Ürün adı">
-<input id="pDesc" class="form-control mb-2" placeholder="Açıklama">
-<input id="pPrice" class="form-control mb-2" placeholder="Fiyat">
-<input id="pVat" class="form-control mb-2" placeholder="KDV %">
-<input id="pImage" class="form-control mb-2" placeholder="Resim URL">
-
-<select id="pCategory" class="form-control mb-2"></select>
-
-<select id="pVatType" class="form-control mb-2">
-<option value="included">KDV Dahil</option>
-<option value="excluded">KDV Hariç</option>
-</select>
-
-<button onclick="addProduct()" class="btn btn-success">Ekle</button>
-
-<hr>
-<div id="productList"></div>
-</div>
-
-<div id="categories" class="section">
-<h3>Kategori</h3>
-
-<input id="cName" class="form-control mb-2" placeholder="Kategori adı">
-<button onclick="addCategory()" class="btn btn-warning">Ekle</button>
-
-<div id="categoryList"></div>
-</div>
-
-<div id="tables" class="section">
-<h3>Masalar</h3>
-
-<input id="tName" class="form-control mb-2" placeholder="Masa adı">
-<button onclick="addTable()" class="btn btn-primary">Ekle</button>
-
-<div id="tableList"></div>
-</div>
-
-<div id="finance" class="section">
-<h3>Ciro</h3>
-<p>Günlük: <span id="daily">0</span></p>
-<p>Haftalık: <span id="weekly">0</span></p>
-<p>Aylık: <span id="monthly">0</span></p>
-</div>
+<div id="page"></div>
 
 </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script type="module">
 
-<script>
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
   projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.firebasestorage.app",
+  storageBucket: "ruzgarguluqr.appspot.com",
   messagingSenderId: "1034312304751",
   appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth();
 
-const db = firebase.firestore();
-const auth = firebase.auth();
-</script>
-
-<script>
-
-/* AUTH */
-auth.onAuthStateChanged(user=>{
-if(!user){
-location.href="login.html";
-}else{
-start();
-}
+// 🔐 LOGIN KONTROL
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "index.html";
+  }
 });
 
-function logout(){
-auth.signOut();
-location.href="login.html";
+// 🚪 LOGOUT
+window.logout = () => {
+  signOut(auth);
+};
+
+// SAYFA DEĞİŞTİR
+window.showPage = (page) => {
+  document.getElementById("title").innerText = page.toUpperCase();
+
+  if (page === "masa") loadMasa();
+  if (page === "kategori") loadKategori();
+  if (page === "urun") loadUrun();
+  if (page === "siparis") loadSiparis();
+  if (page === "ciro") loadCiro();
+};
+
+// ================= MASA =================
+function loadMasa() {
+  document.getElementById("page").innerHTML = `
+    <input id="masaAd" placeholder="Masa adı">
+    <button class="action" onclick="masaEkle()">Ekle</button>
+    <div id="qr"></div>
+  `;
 }
 
-/* NAV */
-function show(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+window.masaEkle = async () => {
+  const masa = document.getElementById("masaAd").value;
+
+  const link = `https://ruzgargulucafe.github.io/menu.html?table=${encodeURIComponent(masa)}`;
+
+  QRCode.toCanvas(link, function (err, canvas) {
+    document.getElementById("qr").innerHTML = "";
+    document.getElementById("qr").appendChild(canvas);
+  });
+};
+
+// ================= KATEGORİ =================
+async function loadKategori() {
+  let html = `
+    <input id="katAd" placeholder="Kategori adı">
+    <button class="action" onclick="kategoriEkle()">Ekle</button>
+    <hr>
+  `;
+
+  const snap = await getDocs(collection(db, "categories"));
+
+  snap.forEach(docu => {
+    html += `<div>
+      ${docu.data().name}
+      <button onclick="kategoriSil('${docu.id}')">Sil</button>
+    </div>`;
+  });
+
+  document.getElementById("page").innerHTML = html;
 }
 
-/* START */
-function start(){
-loadProducts();
-loadCategories();
-loadTables();
-loadOrders();
-loadFinance();
+window.kategoriEkle = async () => {
+  const name = document.getElementById("katAd").value;
+  await addDoc(collection(db, "categories"), { name });
+  showPage("kategori");
+};
+
+window.kategoriSil = async (id) => {
+  await deleteDoc(doc(db, "categories", id));
+  showPage("kategori");
+};
+
+// ================= ÜRÜN =================
+async function loadUrun() {
+  let html = `
+    <input id="urunAd" placeholder="Ürün adı">
+    <input id="fiyat" placeholder="Fiyat">
+    <input id="kdv" placeholder="KDV %">
+    <input id="resim" placeholder="Resim URL">
+    <select id="kdvTip">
+      <option value="dahil">KDV Dahil</option>
+      <option value="haric">KDV Hariç</option>
+    </select>
+    <button class="action" onclick="urunEkle()">Ekle</button>
+    <hr>
+  `;
+
+  const snap = await getDocs(collection(db, "products"));
+
+  snap.forEach(d => {
+    const p = d.data();
+    html += `<div>
+      <img src="${p.image}">
+      ${p.name} - ${p.price}₺
+      <button onclick="urunSil('${d.id}')">Sil</button>
+    </div>`;
+  });
+
+  document.getElementById("page").innerHTML = html;
 }
 
-/* PRODUCT */
-function addProduct(){
-db.collection("products").add({
-name:pName.value,
-description:pDesc.value,
-price:Number(pPrice.value),
-vat:Number(pVat.value),
-image:pImage.value,
-category:pCategory.value,
-vatType:pVatType.value,
-active:true
-});
+window.urunEkle = async () => {
+  await addDoc(collection(db, "products"), {
+    name: document.getElementById("urunAd").value,
+    price: Number(document.getElementById("fiyat").value),
+    kdv: Number(document.getElementById("kdv").value),
+    type: document.getElementById("kdvTip").value,
+    image: document.getElementById("resim").value
+  });
+
+  showPage("urun");
+};
+
+window.urunSil = async (id) => {
+  await deleteDoc(doc(db, "products", id));
+  showPage("urun");
+};
+
+// ================= SİPARİŞ =================
+async function loadSiparis() {
+  let html = "";
+
+  const snap = await getDocs(collection(db, "orders"));
+
+  snap.forEach(d => {
+    const o = d.data();
+    html += `<div>
+      Masa: ${o.table} - ${o.total}₺
+    </div>`;
+  });
+
+  document.getElementById("page").innerHTML = html;
 }
 
-function loadProducts(){
-db.collection("products").onSnapshot(s=>{
-productList.innerHTML="";
-s.forEach(d=>{
-const p=d.data();
-productList.innerHTML+=`
-<div>${p.name} - ₺${p.price}
-<button onclick="deleteProduct('${d.id}')">Sil</button></div>`;
-});
-});
+// ================= CİRO =================
+async function loadCiro() {
+  let total = 0;
+
+  const snap = await getDocs(collection(db, "orders"));
+
+  snap.forEach(d => {
+    total += d.data().total || 0;
+  });
+
+  document.getElementById("page").innerHTML = `
+    <h3>Toplam Ciro: ${total}₺</h3>
+  `;
 }
 
-function deleteProduct(id){
-db.collection("products").doc(id).delete();
-}
-
-/* CATEGORY */
-function addCategory(){
-db.collection("categories").add({
-name:cName.value,
-active:true,
-order:Date.now()
-});
-}
-
-function loadCategories(){
-db.collection("categories").onSnapshot(s=>{
-categoryList.innerHTML="";
-pCategory.innerHTML="";
-s.forEach(d=>{
-const c=d.data();
-
-categoryList.innerHTML+=`<div>${c.name}</div>`;
-pCategory.innerHTML+=`<option>${c.name}</option>`;
-});
-});
-}
-
-/* TABLE */
-function addTable(){
-db.collection("tables").add({name:tName.value});
-
-const link = `menu.html?table=${tName.value}`;
-alert("QR LINK: "+link);
-}
-
-function loadTables(){
-db.collection("tables").onSnapshot(s=>{
-tableList.innerHTML="";
-s.forEach(d=>{
-const t=d.data();
-tableList.innerHTML+=`<div>${t.name}</div>`;
-});
-});
-}
-
-/* ORDERS */
-function loadOrders(){
-db.collection("orders").orderBy("createdAt","desc")
-.onSnapshot(s=>{
-ordersList.innerHTML="";
-s.forEach(d=>{
-const o=d.data();
-
-ordersList.innerHTML+=`
-<div class="card p-2 mb-2">
-Masa: ${o.table}<br>
-₺${o.total}
-</div>`;
-});
-});
-}
-
-/* FINANCE */
-function loadFinance(){
-db.collection("orders").get().then(s=>{
-let daily=0,weekly=0,monthly=0;
-
-const now=new Date();
-
-s.forEach(d=>{
-const o=d.data();
-if(!o.createdAt)return;
-
-const date=o.createdAt.toDate();
-
-const diff=(now-date)/(1000*60*60*24);
-
-if(diff<1) daily+=o.total;
-if(diff<7) weekly+=o.total;
-if(date.getMonth()==now.getMonth()) monthly+=o.total;
-});
-
-daily.innerText="₺"+daily;
-weekly.innerText="₺"+weekly;
-monthly.innerText="₺"+monthly;
-
-});
-}
+// başlangıç
+showPage("masa");
 
 </script>
 
