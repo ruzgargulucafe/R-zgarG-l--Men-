@@ -17,7 +17,10 @@ onAuthStateChanged,
 signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-/* AUTH */
+/* =========================
+   AUTH
+========================= */
+
 onAuthStateChanged(auth, user=>{
 if(!user){
 location.href="login.html";
@@ -26,19 +29,32 @@ start();
 }
 });
 
-/* LOGOUT */
+/* =========================
+   LOGOUT
+========================= */
+
 window.logout = async ()=>{
 await signOut(auth);
 location.href="login.html";
 };
 
-/* SAYFA GEÇİŞ */
+/* =========================
+   SAYFA GEÇİŞ
+========================= */
+
 window.show = (id)=>{
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+
+const el = document.getElementById(id);
+if(el){
+el.classList.add("active");
+}
 };
 
-/* BAŞLAT */
+/* =========================
+   BAŞLAT
+========================= */
+
 function start(){
 watchOrders();
 loadProducts();
@@ -52,6 +68,7 @@ loadFinance();
 ========================= */
 
 function watchOrders(){
+
 const q=query(collection(db,"orders"),orderBy("createdAt","desc"));
 
 onSnapshot(q,snap=>{
@@ -64,8 +81,15 @@ html+=`
 <div class="card p-3 mb-2">
 <h5>${o.table}</h5>
 <p>₺${o.total}</p>
-<button onclick="updateStatus('${d.id}','Hazırlanıyor')" class="btn btn-warning btn-sm">Hazırla</button>
-<button onclick="updateStatus('${d.id}','Teslim Edildi')" class="btn btn-success btn-sm">Teslim</button>
+
+<button onclick="updateStatus('${d.id}','Hazırlanıyor')" class="btn btn-warning btn-sm">
+Hazırla
+</button>
+
+<button onclick="updateStatus('${d.id}','Teslim Edildi')" class="btn btn-success btn-sm">
+Teslim
+</button>
+
 </div>
 `;
 });
@@ -86,14 +110,22 @@ window.addProduct=async()=>{
 const name=document.getElementById("pName").value;
 const price=Number(document.getElementById("pPrice").value);
 
+if(!name || !price){
+alert("Ürün adı ve fiyat gir!");
+return;
+}
+
 await addDoc(collection(db,"products"),{
-name,price,active:true
+name,
+price,
+active:true
 });
 
 loadProducts();
 };
 
 async function loadProducts(){
+
 const snap=await getDocs(collection(db,"products"));
 
 let html="";
@@ -104,7 +136,11 @@ const p=d.data();
 html+=`
 <div class="card p-2 d-flex justify-content-between mb-2">
 ${p.name} - ₺${p.price}
-<button onclick="deleteProduct('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+
+<button onclick="deleteProduct('${d.id}')" class="btn btn-danger btn-sm">
+Sil
+</button>
+
 </div>
 `;
 });
@@ -122,7 +158,13 @@ loadProducts();
 ========================= */
 
 window.addCategory=async()=>{
+
 const name=document.getElementById("cName").value;
+
+if(!name){
+alert("Kategori adı gir!");
+return;
+}
 
 await addDoc(collection(db,"categories"),{
 name,
@@ -134,6 +176,7 @@ loadCategories();
 };
 
 async function loadCategories(){
+
 const snap=await getDocs(collection(db,"categories"));
 
 let html="";
@@ -156,7 +199,13 @@ document.getElementById("categoryList").innerHTML=html;
 ========================= */
 
 window.addTable=async()=>{
+
 const name=document.getElementById("tableName").value;
+
+if(!name){
+alert("Masa adı gir!");
+return;
+}
 
 await addDoc(collection(db,"tables"),{name});
 
@@ -164,6 +213,7 @@ loadTables();
 };
 
 async function loadTables(){
+
 const snap=await getDocs(collection(db,"tables"));
 
 let html="";
@@ -175,10 +225,20 @@ const qr=`https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.na
 
 html+=`
 <div class="card p-2 mb-2">
+
 ${t.name}
+
 <br>
-<a target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qr}">QR</a>
-<button onclick="deleteTable('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+
+<a target="_blank"
+href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qr}">
+QR
+</a>
+
+<button onclick="deleteTable('${d.id}')" class="btn btn-danger btn-sm">
+Sil
+</button>
+
 </div>
 `;
 });
@@ -196,6 +256,7 @@ loadTables();
 ========================= */
 
 async function loadFinance(){
+
 const snap=await getDocs(collection(db,"orders"));
 
 let daily=0;
@@ -222,12 +283,23 @@ monthly+=o.total;
 document.getElementById("daily").innerText="₺"+daily;
 document.getElementById("monthly").innerText="₺"+monthly;
 }
+
 /* =========================
-   BUTON EVENT FIX (iPhone)
+   BUTON FIX (KRİTİK)
 ========================= */
 
-document.getElementById("btnOrders").onclick = () => show("orders");
-document.getElementById("btnProducts").onclick = () => show("products");
-document.getElementById("btnCategories").onclick = () => show("categories");
-document.getElementById("btnTables").onclick = () => show("tables");
-document.getElementById("btnFinance").onclick = () => show("finance");
+window.addEventListener("DOMContentLoaded", () => {
+
+const btnOrders = document.getElementById("btnOrders");
+const btnProducts = document.getElementById("btnProducts");
+const btnCategories = document.getElementById("btnCategories");
+const btnTables = document.getElementById("btnTables");
+const btnFinance = document.getElementById("btnFinance");
+
+if(btnOrders) btnOrders.onclick = () => show("orders");
+if(btnProducts) btnProducts.onclick = () => show("products");
+if(btnCategories) btnCategories.onclick = () => show("categories");
+if(btnTables) btnTables.onclick = () => show("tables");
+if(btnFinance) btnFinance.onclick = () => show("finance");
+
+});
