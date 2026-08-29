@@ -1,36 +1,55 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { auth } from "./firebase.js";
 
 import {
-  getAuth,
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
-  authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.firebasestorage.app",
-  messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
-};
+const loginBtn = document.getElementById("loginBtn");
+const errorDiv = document.getElementById("error");
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+loginBtn.onclick = async () => {
 
-document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  // BOŞ KONTROL
+  if (!email || !password) {
+    errorDiv.innerText = "Email ve şifre gir!";
+    return;
+  }
 
   try {
+
     await signInWithEmailAndPassword(auth, email, password);
 
     alert("Giriş başarılı ✅");
+
+    // ADMIN'E GÖNDER
     window.location.href = "admin.html";
 
   } catch (error) {
+
     console.log(error);
-    document.getElementById("error").innerText = error.message;
+
+    // HATA MESAJINI DÜZGÜN GÖSTER
+    switch (error.code) {
+
+      case "auth/user-not-found":
+        errorDiv.innerText = "Kullanıcı bulunamadı";
+        break;
+
+      case "auth/wrong-password":
+        errorDiv.innerText = "Şifre yanlış";
+        break;
+
+      case "auth/invalid-email":
+        errorDiv.innerText = "Geçersiz email";
+        break;
+
+      default:
+        errorDiv.innerText = "Giriş başarısız ❌";
+    }
+
   }
 
 };
