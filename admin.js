@@ -1,164 +1,127 @@
-import { db, auth } from "./firebase.js";
+import { db, auth, storage } from "./firebase.js";
 
 import {
-collection,
-addDoc,
-getDocs,
-doc,
-deleteDoc
+collection, addDoc, getDocs, doc, deleteDoc,
+onSnapshot, query, orderBy, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-import {
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
 /* AUTH */
-onAuthStateChanged(auth, user=>{
-if(!user) location.href="login.html";
+onAuthStateChanged(auth,u=>{
+if(!u) location.href="login.html";
 else start();
 });
 
 /* LOGOUT */
-window.logout = async ()=>{
-await signOut(auth);
-location.href="login.html";
-};
+window.logout=()=>signOut(auth);
 
-/* SAYFA */
-window.show = (id)=>{
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+/* NAV */
+window.show=id=>{
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
 };
 
 /* START */
 function start(){
+show("products");
 loadProducts();
 loadCategories();
 loadTables();
+watchOrders();
 }
 
-/* =========================
-   KATEGORİ
-========================= */
+/* ÜRÜN EKLE */
+addProductBtn.onclick=async()=>{
+let url="";
+if(pImage.files[0]){
+const r=ref(storage,"products/"+Date.now());
+await uploadBytes(r,pImage.files[0]);
+url=await getDownloadURL(r);
+}
 
-window.addCategory = async ()=>{
-const name = document.getElementById("cName").value;
-
-await addDoc(collection(db,"categories"),{
-name,
+await addDoc(collection(db,"products"),{
+name:pName.value,
+price:Number(pPrice.value),
+category:pCategory.value,
+vat:Number(pKdv.value),
+image:url,
 active:true
 });
 
+loadProducts();
+};
+
+/* ÜRÜN LİSTE */
+async function loadProducts(){
+const snap=await getDocs(collection(db,"products"));
+let html="";
+snap.forEach(d=>{
+const p=d.data();
+html+=`<div>${p.name} ₺${p.price}</div>`;
+});
+productList.innerHTML=html;
+}
+
+/* KATEGORİ */
+addCategoryBtn.onclick=async()=>{
+await addDoc(collection(db,"categories"),{
+name:cName.value,
+active:true
+});
 loadCategories();
 };
 
 async function loadCategories(){
-const snap = await getDocs(collection(db,"categories"));
-
+const snap=await getDocs(collection(db,"categories"));
 let html="";
-let options="";
-
 snap.forEach(d=>{
-const c=d.data();
-
-html+=`<div>${c.name}</div>`;
-options+=`<option>${c.name}</option>`;
+html+=`<div>${d.data().name}</div>`;
 });
-
-document.getElementById("categoryList").innerHTML=html;
-document.getElementById("pCategory").innerHTML=options;
+categoryList.innerHTML=html;
 }
 
-/* =========================
-   ÜRÜN
-========================= */
-
-window.addProduct = async ()=>{
-
-const name=document.getElementById("pName").value;
-const price=Number(document.getElementById("pPrice").value);
-const description=document.getElementById("pDesc").value;
-const kdv=Number(document.getElementById("pKdv").value);
-const image=document.getElementById("pImage").value;
-const category=document.getElementById("pCategory").value;
-
-await addDoc(collection(db,"products"),{
-name,
-price,
-description,
-kdv,
-image,
-category,
-active:true
+/* MASA */
+addTableBtn.onclick=async()=>{
+await addDoc(collection(db,"tables"),{
+name:tableName.value
 });
-
-loadProducts();
-};
-
-async function loadProducts(){
-const snap = await getDocs(collection(db,"products"));
-
-let html="";
-
-snap.forEach(d=>{
-const p=d.data();
-
-html+=`
-<div class="card p-2 mb-2">
-${p.name} - ₺${p.price}
-<br>${p.description || ""}
-<br>KDV: %${p.kdv || 0}
-<br><img src="${p.image}" width="80">
-<button onclick="deleteProduct('${d.id}')">Sil</button>
-</div>
-`;
-});
-
-document.getElementById("productList").innerHTML=html;
-}
-
-window.deleteProduct = async(id)=>{
-await deleteDoc(doc(db,"products",id));
-loadProducts();
-};
-
-/* =========================
-   MASA
-========================= */
-
-window.addTable = async ()=>{
-const name=document.getElementById("tableName").value;
-
-await addDoc(collection(db,"tables"),{name});
-
 loadTables();
 };
 
 async function loadTables(){
 const snap=await getDocs(collection(db,"tables"));
-
 let html="";
-
 snap.forEach(d=>{
 const t=d.data();
+const qr=`menu.html?table=${t.name}`;
+html+=`<div>${t.name} <a href="https://api.qrserver.com/v1/create-qr-code/?data=${qr}" target="_blank">QR</a></div>`;
+});
+tableList.innerHTML=html;
+}
 
-const qr=`https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.name}`;
+/* SİPARİŞ */
+function watchOrders(){
+const q=query(collection(db,"orders"),orderBy("createdAt","desc"));
 
+onSnapshot(q,snap=>{
+let html="";
+snap.forEach(d=>{
+const o=d.data();
 html+=`
-<div class="card p-2 mb-2">
-${t.name}
-<br>
-<a target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qr}">QR</a>
-<button onclick="deleteTable('${d.id}')">Sil</button>
+<div>
+${o.table} ₺${o.total}
+<button onclick="updateStatus('${d.id}','Hazır')">Hazır</button>
+<button onclick="updateStatus('${d.id}','Teslim')">Teslim</button>
 </div>
 `;
 });
-
-document.getElementById("tableList").innerHTML=html;
+ordersList.innerHTML=html;
+});
 }
 
-window.deleteTable = async(id)=>{
-await deleteDoc(doc(db,"tables",id));
-loadTables();
+window.updateStatus=async(id,s)=>{
+await updateDoc(doc(db,"orders",id),{status:s});
 };
