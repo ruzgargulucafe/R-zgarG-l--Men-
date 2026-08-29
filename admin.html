@@ -128,12 +128,45 @@ window.showPage = (page) => {
 };
 
 // ================= MASA =================
-function loadMasa() {
+async function loadMasa() {
+
   document.getElementById("page").innerHTML = `
     <input id="masaAd" placeholder="Masa adı">
-    <button class="action" onclick="masaEkle()">Ekle</button>
-    <div id="qr"></div>
+    <button id="masaBtn" class="action">Ekle</button>
+    <hr>
+    <div id="masaList"></div>
   `;
+
+  // 🔥 BUTON EVENT (iphone fix)
+  document.getElementById("masaBtn").onclick = masaEkle;
+
+  const snap = await getDocs(collection(db, "tables"));
+
+  let html = "";
+
+  snap.forEach(docu => {
+    const t = docu.data();
+
+    html += `
+      <div style="margin-bottom:20px;">
+        <b>${t.name}</b>
+        <div id="qr-${docu.id}"></div>
+      </div>
+    `;
+  });
+
+  document.getElementById("masaList").innerHTML = html;
+
+  // 🔥 QR OLUŞTUR
+  snap.forEach(docu => {
+    const t = docu.data();
+
+    const link = `https://ruzgargulucafe.github.io/menu.html?table=${encodeURIComponent(t.name)}`;
+
+    QRCode.toCanvas(link, function (err, canvas) {
+      document.getElementById(`qr-${docu.id}`).appendChild(canvas);
+    });
+  });
 }
 
 window.masaEkle = async () => {
