@@ -1,226 +1,220 @@
-import { auth, db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-
-import { db } from "./firebase.js";
-
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc
+collection,
+addDoc,
+getDocs,
+onSnapshot,
+query,
+orderBy,
+doc,
+updateDoc,
+deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-/* ===========================
-   AUTH KONTROL
-=========================== */
+import {
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-const auth = getAuth();
-
-onAuthStateChanged(auth, (user) => {
-
-  if (!user) {
-    alert("Giriş yapmalısın!");
-    window.location.href = "login.html";
-    return;
-  }
-
-  console.log("Admin giriş yaptı:", user.email);
-
-  startAdminPanel(); // 🔥 sadece login sonrası başlat
-
+/* AUTH */
+onAuthStateChanged(auth, user=>{
+if(!user){
+location.href="login.html";
+}else{
+start();
+}
 });
 
-/* ===========================
-   ADMIN PANEL BAŞLAT
-=========================== */
+/* LOGOUT */
+window.logout = ()=>{
+signOut(auth);
+};
 
-function startAdminPanel() {
+/* BAŞLAT */
+function start(){
+watchOrders();
+loadProducts();
+loadTables();
+loadFinance();
+loadDebts();
+}
 
-  const ordersDiv = document.getElementById("orders");
+/* =========================
+   SİPARİŞ
+========================= */
 
-  const q = query(
-    collection(db, "orders"),
-    orderBy("createdAt", "desc")
-  );
+function watchOrders(){
+const q=query(collection(db,"orders"),orderBy("createdAt","desc"));
 
-  let ilkYukleme = true;
+onSnapshot(q,snap=>{
+let html="";
 
-  onSnapshot(q, (snapshot) => {
+snap.forEach(d=>{
+const o=d.data();
 
-    // 🔔 Yeni sipariş sesi
-    if (!ilkYukleme && snapshot.docChanges().some(c => c.type === "added")) {
+html+=`
+<div class="card p-3">
+<h5>${o.table}</h5>
+<p>₺${o.total}</p>
+<button onclick="updateStatus('${d.id}','Hazırlanıyor')" class="btn btn-warning">Hazırla</button>
+<button onclick="updateStatus('${d.id}','Teslim Edildi')" class="btn btn-success">Teslim</button>
+</div>
+`;
+});
 
-      const ses = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
-      ses.play().catch(() => {});
+document.getElementById("ordersList").innerHTML=html;
+});
+}
 
-    }
+window.updateStatus=async(id,status)=>{
+await updateDoc(doc(db,"orders",id),{status});
+};
 
-    ilkYukleme = false;
+/* =========================
+   ÜRÜN
+========================= */
 
-    ordersDiv.innerHTML = "";
+window.addProduct=async()=>{
+const name=document.getElementById("pName").value;
+const price=Number(document.getElementById("pPrice").value);
 
-    if (snapshot.empty) {
+await addDoc(collection(db,"products"),{
+name,price,active:true
+});
 
-      ordersDiv.innerHTML = `
-        <div id="bos">
-          Henüz sipariş yok...
-        </div>
-      `;
-      return;
-    }
+loadProducts();
+};
 
-    snapshot.forEach((document) => {
+async function loadProducts(){
+const snap=await getDocs(collection(db,"products"));
 
-      const siparis = document.data();
-      const id = document.id;
+let html="";
 
-      const items = siparis.items || [];
-      const status = siparis.status || "Bekliyor";
+snap.forEach(d=>{
+const p=d.data();
 
-      /* ===========================
-         DURUM RENK
-      =========================== */
+html+=`
+<div class="card p-2 d-flex justify-content-between">
+${p.name} - ₺${p.price}
+<button onclick="deleteProduct('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+</div>
+`;
+});
 
-      let durumClass = "yeni";
+document.getElementById("productList").innerHTML=html;
+}
 
-      switch (status) {
-        case "Hazırlanıyor":
-          durumClass = "hazirlaniyor";
-          break;
+window.deleteProduct=async(id)=>{
+await deleteDoc(doc(db,"products",id));
+loadProducts();
+};
 
-        case "Teslim Edildi":
-          durumClass = "teslim";
-          break;
+/* =========================
+   MASA
+========================= */
 
-        default:
-          durumClass = "yeni";
-      }
+window.addTable=async()=>{
+const name=document.getElementById("tableName").value;
 
-      /* ===========================
-         ÜRÜNLER
-      =========================== */
+await addDoc(collection(db,"tables"),{name});
 
-      let urunler = "";
+loadTables();
+};
 
-      items.forEach((u) => {
-        urunler += `
-        <li>
-          <strong>${u.qty}x</strong>
-          ${u.name}
-          — ₺${(u.qty * u.price).toLocaleString("tr-TR")}
-        </li>
-        `;
-      });
+async function loadTables(){
+const snap=await getDocs(collection(db,"tables"));
 
-      /* ===========================
-         SAAT
-      =========================== */
+let html="";
 
-      let saat = "-";
+snap.forEach(d=>{
+const t=d.data();
 
-      if (siparis.createdAt?.toDate) {
-        saat = siparis.createdAt.toDate().toLocaleTimeString("tr-TR", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-      }
+const qrLink=`https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.name}`;
 
-      /* ===========================
-         HTML
-      =========================== */
+html+=`
+<div class="card p-2">
+${t.name}
+<br>
+<a href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrLink}" target="_blank">QR Gör</a>
+<button onclick="deleteTable('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+</div>
+`;
+});
 
-      ordersDiv.innerHTML += `
+document.getElementById("tableList").innerHTML=html;
+}
 
-      <div class="order ${durumClass}">
+window.deleteTable=async(id)=>{
+await deleteDoc(doc(db,"tables",id));
+loadTables();
+};
 
-        <h2>🪑 ${siparis.table}</h2>
+/* =========================
+   CİRO
+========================= */
 
-        <p><strong>🕒 Saat:</strong> ${saat}</p>
+async function loadFinance(){
 
-        <ul>
-          ${urunler}
-        </ul>
+const snap=await getDocs(collection(db,"orders"));
 
-        <p><strong>💰 Toplam:</strong> ₺${Number(siparis.total).toLocaleString("tr-TR")}</p>
+let daily=0;
+let monthly=0;
 
-        <p><strong>📌 Durum:</strong> ${status}</p>
+const today=new Date().toDateString();
+const month=new Date().getMonth();
 
-        ${status !== "Teslim Edildi" ? `
-        <button
-          class="durumBtn"
-          data-id="${id}"
-          data-status="${status}">
+snap.forEach(d=>{
+const o=d.data();
+if(!o.createdAt)return;
 
-          ${status === "Bekliyor"
-            ? "👨‍🍳 Hazırlanmaya Başla"
-            : "✅ Teslim Edildi"}
+const date=o.createdAt.toDate();
 
-        </button>
-        ` : ""}
+if(date.toDateString()===today){
+daily+=o.total;
+}
 
-      </div>
+if(date.getMonth()===month){
+monthly+=o.total;
+}
+});
 
-      `;
-
-    });
-
-    bindButtons();
-
-  });
+document.getElementById("daily").innerText="₺"+daily;
+document.getElementById("monthly").innerText="₺"+monthly;
 
 }
 
-/* ===========================
-   BUTON EVENT
-=========================== */
+/* =========================
+   BORÇ
+========================= */
 
-function bindButtons() {
+window.addDebt=async()=>{
+const name=document.getElementById("dName").value;
+const amount=Number(document.getElementById("dAmount").value);
+const date=document.getElementById("dDate").value;
 
-  document.querySelectorAll(".durumBtn").forEach((btn) => {
+await addDoc(collection(db,"debts"),{
+name,amount,date
+});
 
-    btn.addEventListener("click", async () => {
+loadDebts();
+};
 
-      const id = btn.dataset.id;
-      const current = btn.dataset.status;
+async function loadDebts(){
+const snap=await getDocs(collection(db,"debts"));
 
-      let yeniDurum;
+let html="";
 
-      switch (current) {
+snap.forEach(d=>{
+const debt=d.data();
 
-        case "Bekliyor":
-          yeniDurum = "Hazırlanıyor";
-          break;
+html+=`
+<div class="card p-2">
+${debt.name} - ₺${debt.amount}
+<br>Vade: ${debt.date}
+</div>
+`;
+});
 
-        case "Hazırlanıyor":
-          yeniDurum = "Teslim Edildi";
-          break;
-
-        default:
-          return;
-
-      }
-
-      try {
-
-        await updateDoc(doc(db, "orders", id), {
-          status: yeniDurum,
-          closed: yeniDurum === "Teslim Edildi"
-        });
-
-      } catch (err) {
-
-        console.error(err);
-        alert("Durum güncellenemedi (yetki kontrol et)");
-
-      }
-
-    });
-
-  });
-
+document.getElementById("debtList").innerHTML=html;
 }
