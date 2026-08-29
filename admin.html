@@ -139,12 +139,21 @@ function loadMasa() {
 window.masaEkle = async () => {
   const masa = document.getElementById("masaAd").value;
 
-  const link = `https://ruzgargulucafe.github.io/menu.html?table=${encodeURIComponent(masa)}`;
+  if (!masa) {
+    alert("Masa adı gir");
+    return;
+  }
 
-  QRCode.toCanvas(link, function (err, canvas) {
-    document.getElementById("qr").innerHTML = "";
-    document.getElementById("qr").appendChild(canvas);
+  // 🔥 FIREBASE'E KAYDET
+  await addDoc(collection(db, "tables"), {
+    name: masa
   });
+
+  // input temizle
+  document.getElementById("masaAd").value = "";
+
+  // listeyi yeniden yükle
+  loadMasa();
 };
 
 // ================= KATEGORİ =================
