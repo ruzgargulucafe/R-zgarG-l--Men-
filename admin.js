@@ -222,3 +222,12 @@ monthly+=o.total;
 document.getElementById("daily").innerText="₺"+daily;
 document.getElementById("monthly").innerText="₺"+monthly;
 }
+/* =========================
+   BUTON EVENT FIX (iPhone)
+========================= */
+
+document.getElementById("btnOrders").onclick = () => show("orders");
+document.getElementById("btnProducts").onclick = () => show("products");
+document.getElementById("btnCategories").onclick = () => show("categories");
+document.getElementById("btnTables").onclick = () => show("tables");
+document.getElementById("btnFinance").onclick = () => show("finance");
