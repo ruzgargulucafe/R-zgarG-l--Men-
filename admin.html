@@ -1,44 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
 <body>
 
-<h2>ADMIN PANEL</h2>
+<h2>🔐 Admin Giriş</h2>
 
-<button onclick="show('products')">Ürün</button>
-<button onclick="show('categories')">Kategori</button>
-<button onclick="show('tables')">Masa</button>
-<button onclick="show('orders')">Sipariş</button>
-<button onclick="show('finance')">Ciro</button>
-<button onclick="logout()">Çıkış</button>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Şifre">
+<button onclick="login()">Giriş</button>
 
-<div id="products" class="section">
-<input id="pName">
-<input id="pPrice">
-<input id="pCategory">
-<input id="pKdv">
-<input type="file" id="pImage">
-<button id="addProductBtn">Ekle</button>
-<div id="productList"></div>
-</div>
+<hr>
 
-<div id="categories" class="section">
-<input id="cName">
-<button id="addCategoryBtn">Ekle</button>
-<div id="categoryList"></div>
-</div>
+<h2>📦 Ürün Yönetimi</h2>
 
-<div id="tables" class="section">
-<input id="tableName">
-<button id="addTableBtn">Ekle</button>
-<div id="tableList"></div>
-</div>
+<input id="name" placeholder="Ürün adı">
+<input id="price" placeholder="Fiyat">
+<button onclick="addProduct()">Ekle</button>
 
-<div id="orders" class="section">
-<div id="ordersList"></div>
-</div>
+<div id="products"></div>
 
-<div id="finance" class="section">
-<span id="daily"></span>
-<span id="monthly"></span>
-</div>
+<hr>
 
-<script type="module" src="admin.js"></script>
+<h2>📋 Siparişler</h2>
+<div id="orders"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="app.js"></script>
+<script src="admin.js"></script>
+
 </body>
+</html>
