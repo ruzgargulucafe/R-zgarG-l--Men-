@@ -1,34 +1,44 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<title>Admin Panel</title>
-<link rel="stylesheet" href="css/admin.css">
-</head>
-
 <body>
 
-<h2>Ürün Ekle</h2>
+<h2>ADMIN PANEL</h2>
 
-<form id="productForm">
-  <input type="text" id="name" placeholder="Ürün adı" required><br><br>
+<button onclick="show('products')">Ürün</button>
+<button onclick="show('categories')">Kategori</button>
+<button onclick="show('tables')">Masa</button>
+<button onclick="show('orders')">Sipariş</button>
+<button onclick="show('finance')">Ciro</button>
+<button onclick="logout()">Çıkış</button>
 
-  <input type="number" id="price" placeholder="Fiyat" required><br><br>
+<div id="products" class="section">
+<input id="pName">
+<input id="pPrice">
+<input id="pCategory">
+<input id="pKdv">
+<input type="file" id="pImage">
+<button id="addProductBtn">Ekle</button>
+<div id="productList"></div>
+</div>
 
-  <input type="text" id="category" placeholder="Kategori" required><br><br>
+<div id="categories" class="section">
+<input id="cName">
+<button id="addCategoryBtn">Ekle</button>
+<div id="categoryList"></div>
+</div>
 
-  <input type="number" id="kdv" placeholder="KDV (%)" required><br><br>
+<div id="tables" class="section">
+<input id="tableName">
+<button id="addTableBtn">Ekle</button>
+<div id="tableList"></div>
+</div>
 
-  <textarea id="description" placeholder="Açıklama"></textarea><br><br>
+<div id="orders" class="section">
+<div id="ordersList"></div>
+</div>
 
-  <input type="file" id="image"><br><br>
-
-  <button type="submit">EKLE</button>
-</form>
-
-<p id="status"></p>
+<div id="finance" class="section">
+<span id="daily"></span>
+<span id="monthly"></span>
+</div>
 
 <script type="module" src="admin.js"></script>
-
 </body>
-</html>
