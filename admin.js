@@ -6,6 +6,7 @@ addDoc,
 getDocs,
 onSnapshot,
 query,
+orderBy,
 doc,
 updateDoc,
 deleteDoc
@@ -16,269 +17,208 @@ onAuthStateChanged,
 signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-/* =========================
-   AUTH
-========================= */
-
-onAuthStateChanged(auth, user => {
-
-    if (!user) {
-        location.href = "login.html";
-        return;
-    }
-
-    console.log("Giriş yapıldı:", user.email);
-
-    start();
+/* AUTH */
+onAuthStateChanged(auth, user=>{
+if(!user){
+location.href="login.html";
+}else{
+start();
+}
 });
 
-/* =========================
-   LOGOUT
-========================= */
-
-window.logout = async () => {
-    await signOut(auth);
-    location.href = "login.html";
+/* LOGOUT */
+window.logout = async ()=>{
+await signOut(auth);
+location.href="login.html";
 };
 
-/* =========================
-   BAŞLAT
-========================= */
+/* SAYFA GEÇİŞ */
+window.show = (id)=>{
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+};
 
-function start() {
-    watchOrders();
-    loadProducts();
-    loadTables();
-    loadFinance();
-    loadDebts();
+/* BAŞLAT */
+function start(){
+watchOrders();
+loadProducts();
+loadCategories();
+loadTables();
+loadFinance();
 }
 
 /* =========================
    SİPARİŞ
 ========================= */
 
-function watchOrders() {
+function watchOrders(){
+const q=query(collection(db,"orders"),orderBy("createdAt","desc"));
 
-    const q = query(collection(db, "orders")); // ❗ orderBy kaldırıldı
+onSnapshot(q,snap=>{
+let html="";
 
-    onSnapshot(q, snap => {
+snap.forEach(d=>{
+const o=d.data();
 
-        let html = "";
+html+=`
+<div class="card p-3 mb-2">
+<h5>${o.table}</h5>
+<p>₺${o.total}</p>
+<button onclick="updateStatus('${d.id}','Hazırlanıyor')" class="btn btn-warning btn-sm">Hazırla</button>
+<button onclick="updateStatus('${d.id}','Teslim Edildi')" class="btn btn-success btn-sm">Teslim</button>
+</div>
+`;
+});
 
-        snap.forEach(d => {
-
-            const o = d.data();
-
-            html += `
-            <div class="card p-3 mb-2">
-                <h5>${o.table || "-"}</h5>
-                <p>₺${o.total || 0}</p>
-
-                <button onclick="updateStatus('${d.id}','Hazırlanıyor')" class="btn btn-warning btn-sm">Hazırla</button>
-
-                <button onclick="updateStatus('${d.id}','Teslim Edildi')" class="btn btn-success btn-sm">Teslim</button>
-            </div>
-            `;
-        });
-
-        const el = document.getElementById("ordersList");
-        if (el) el.innerHTML = html;
-    });
+document.getElementById("ordersList").innerHTML=html;
+});
 }
 
-window.updateStatus = async (id, status) => {
-    await updateDoc(doc(db, "orders", id), { status });
+window.updateStatus=async(id,status)=>{
+await updateDoc(doc(db,"orders",id),{status});
 };
 
 /* =========================
    ÜRÜN
 ========================= */
 
-window.addProduct = async () => {
+window.addProduct=async()=>{
+const name=document.getElementById("pName").value;
+const price=Number(document.getElementById("pPrice").value);
 
-    const name = document.getElementById("pName")?.value;
-    const price = Number(document.getElementById("pPrice")?.value);
+await addDoc(collection(db,"products"),{
+name,price,active:true
+});
 
-    if (!name || !price) {
-        alert("Ürün adı ve fiyat gir");
-        return;
-    }
-
-    await addDoc(collection(db, "products"), {
-        name,
-        price,
-        active: true
-    });
-
-    loadProducts();
+loadProducts();
 };
 
-async function loadProducts() {
+async function loadProducts(){
+const snap=await getDocs(collection(db,"products"));
 
-    const snap = await getDocs(collection(db, "products"));
+let html="";
 
-    let html = "";
+snap.forEach(d=>{
+const p=d.data();
 
-    snap.forEach(d => {
+html+=`
+<div class="card p-2 d-flex justify-content-between mb-2">
+${p.name} - ₺${p.price}
+<button onclick="deleteProduct('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+</div>
+`;
+});
 
-        const p = d.data();
-
-        html += `
-        <div class="card p-2 mb-2 d-flex justify-content-between">
-            ${p.name} - ₺${p.price}
-
-            <button onclick="deleteProduct('${d.id}')" class="btn btn-danger btn-sm">
-                Sil
-            </button>
-        </div>
-        `;
-    });
-
-    const el = document.getElementById("productList");
-    if (el) el.innerHTML = html;
+document.getElementById("productList").innerHTML=html;
 }
 
-window.deleteProduct = async (id) => {
-    await deleteDoc(doc(db, "products", id));
-    loadProducts();
+window.deleteProduct=async(id)=>{
+await deleteDoc(doc(db,"products",id));
+loadProducts();
 };
+
+/* =========================
+   KATEGORİ
+========================= */
+
+window.addCategory=async()=>{
+const name=document.getElementById("cName").value;
+
+await addDoc(collection(db,"categories"),{
+name,
+active:true,
+order:Date.now()
+});
+
+loadCategories();
+};
+
+async function loadCategories(){
+const snap=await getDocs(collection(db,"categories"));
+
+let html="";
+
+snap.forEach(d=>{
+const c=d.data();
+
+html+=`
+<div class="card p-2 mb-2">
+${c.name}
+</div>
+`;
+});
+
+document.getElementById("categoryList").innerHTML=html;
+}
 
 /* =========================
    MASA
 ========================= */
 
-window.addTable = async () => {
+window.addTable=async()=>{
+const name=document.getElementById("tableName").value;
 
-    const name = document.getElementById("tableName")?.value;
+await addDoc(collection(db,"tables"),{name});
 
-    if (!name) {
-        alert("Masa adı gir");
-        return;
-    }
-
-    await addDoc(collection(db, "tables"), { name });
-
-    loadTables();
+loadTables();
 };
 
-async function loadTables() {
+async function loadTables(){
+const snap=await getDocs(collection(db,"tables"));
 
-    const snap = await getDocs(collection(db, "tables"));
+let html="";
 
-    let html = "";
+snap.forEach(d=>{
+const t=d.data();
 
-    snap.forEach(d => {
+const qr=`https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.name}`;
 
-        const t = d.data();
+html+=`
+<div class="card p-2 mb-2">
+${t.name}
+<br>
+<a target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qr}">QR</a>
+<button onclick="deleteTable('${d.id}')" class="btn btn-danger btn-sm">Sil</button>
+</div>
+`;
+});
 
-        const qrLink = `https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.name}`;
-
-        html += `
-        <div class="card p-2 mb-2">
-            ${t.name}
-            <br>
-
-            <a href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrLink}" target="_blank">
-                QR Gör
-            </a>
-
-            <button onclick="deleteTable('${d.id}')" class="btn btn-danger btn-sm">
-                Sil
-            </button>
-        </div>
-        `;
-    });
-
-    const el = document.getElementById("tableList");
-    if (el) el.innerHTML = html;
+document.getElementById("tableList").innerHTML=html;
 }
 
-window.deleteTable = async (id) => {
-    await deleteDoc(doc(db, "tables", id));
-    loadTables();
+window.deleteTable=async(id)=>{
+await deleteDoc(doc(db,"tables",id));
+loadTables();
 };
 
 /* =========================
    CİRO
 ========================= */
 
-async function loadFinance() {
+async function loadFinance(){
+const snap=await getDocs(collection(db,"orders"));
 
-    const snap = await getDocs(collection(db, "orders"));
+let daily=0;
+let monthly=0;
 
-    let daily = 0;
-    let monthly = 0;
+const today=new Date().toDateString();
+const month=new Date().getMonth();
 
-    const today = new Date().toDateString();
-    const month = new Date().getMonth();
+snap.forEach(d=>{
+const o=d.data();
+if(!o.createdAt)return;
 
-    snap.forEach(d => {
+const date=o.createdAt.toDate();
 
-        const o = d.data();
-
-        if (!o.createdAt) return;
-
-        const date = o.createdAt.toDate();
-
-        if (date.toDateString() === today) {
-            daily += o.total || 0;
-        }
-
-        if (date.getMonth() === month) {
-            monthly += o.total || 0;
-        }
-    });
-
-    const dEl = document.getElementById("daily");
-    const mEl = document.getElementById("monthly");
-
-    if (dEl) dEl.innerText = "₺" + daily;
-    if (mEl) mEl.innerText = "₺" + monthly;
+if(date.toDateString()===today){
+daily+=o.total;
 }
 
-/* =========================
-   BORÇ
-========================= */
+if(date.getMonth()===month){
+monthly+=o.total;
+}
+});
 
-window.addDebt = async () => {
-
-    const name = document.getElementById("dName")?.value;
-    const amount = Number(document.getElementById("dAmount")?.value);
-    const date = document.getElementById("dDate")?.value;
-
-    if (!name || !amount) {
-        alert("Eksik bilgi");
-        return;
-    }
-
-    await addDoc(collection(db, "debts"), {
-        name,
-        amount,
-        date
-    });
-
-    loadDebts();
-};
-
-async function loadDebts() {
-
-    const snap = await getDocs(collection(db, "debts"));
-
-    let html = "";
-
-    snap.forEach(d => {
-
-        const debt = d.data();
-
-        html += `
-        <div class="card p-2 mb-2">
-            ${debt.name} - ₺${debt.amount}
-            <br>
-            Vade: ${debt.date || "-"}
-        </div>
-        `;
-    });
-
-    const el = document.getElementById("debtList");
-    if (el) el.innerHTML = html;
+document.getElementById("daily").innerText="₺"+daily;
+document.getElementById("monthly").innerText="₺"+monthly;
 }
