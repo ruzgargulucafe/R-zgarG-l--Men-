@@ -1,32 +1,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-
-
-// 🔥 Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
+  apiKey: "SENİN KEY",
   authDomain: "ruzgarguluqr.firebaseapp.com",
   projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.firebasestorage.app",
+  storageBucket: "ruzgarguluqr.appspot.com",
   messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
+  appId: "APP_ID"
 };
 
-
-// 🔥 APP BAŞLAT
 const app = initializeApp(firebaseConfig);
 
-
-// 🔥 SERVİSLER
-const db = getFirestore(app);
-const storage = getStorage(app);
-const auth = getAuth(app); // ⚠️ EN KRİTİK SATIR
-
-
-// 🔥 EXPORT (ÇOK ÖNEMLİ)
-export { db, storage, auth };
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const storage = getStorage(app);
