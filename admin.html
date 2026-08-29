@@ -1,155 +1,90 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
 
-<title>Rüzgar Gülü Yönetim Paneli</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-    background:#f4f6f9;
-    padding:20px;
-}
-
-h1{
-    text-align:center;
-    margin-bottom:25px;
-    color:#222;
-}
-
-#orders{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-}
-
-/* ======================
-   ORDER CARD
-====================== */
-
-.order{
-    background:#fff;
-    border-radius:15px;
-    padding:18px;
-    box-shadow:0 5px 18px rgba(0,0,0,.12);
-    transition:.3s;
-}
-
-.order:hover{
-    transform:translateY(-2px);
-}
-
-.order h2{
-    margin-bottom:10px;
-}
-
-.order ul{
-    margin:10px 0 15px 20px;
-}
-
-.order li{
-    margin:5px 0;
-}
-
-.order p{
-    margin:6px 0;
-}
-
-/* ======================
-   BUTTON
-====================== */
-
-.durumBtn{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:bold;
-    margin-top:15px;
-    background:#1976d2;
-    color:white;
-}
-
-.durumBtn:hover{
-    opacity:.9;
-}
-
-/* ======================
-   STATUS COLORS
-====================== */
-
-.order.yeni{
-    background:#ffebee;
-    border-left:8px solid #e53935;
-}
-
-.order.hazirlaniyor{
-    background:#fff3e0;
-    border-left:8px solid #fb8c00;
-}
-
-.order.teslim{
-    background:#e8f5e9;
-    border-left:8px solid #43a047;
-}
-
-/* ======================
-   EMPTY
-====================== */
-
-#bos{
-    text-align:center;
-    padding:50px;
-    font-size:20px;
-    color:#666;
-}
-
-/* ======================
-   MOBILE
-====================== */
-
-@media(max-width:700px){
-
-    body{
-        padding:12px;
-    }
-
-    .order{
-        padding:15px;
-    }
-
-}
-
+body{background:#f4f6f9;padding:20px;}
+.card{margin-bottom:20px;}
 </style>
 
 </head>
 
 <body>
 
-<h1>📋 Gelen Siparişler</h1>
+<h2 class="text-center mb-4">🔥 Rüzgar Gülü Admin</h2>
 
-<div id="orders">
-    <div id="bos">
-        Henüz sipariş yok...
-    </div>
+<button onclick="logout()" class="btn btn-danger mb-3">Çıkış Yap</button>
+
+<!-- SEKME MENÜ -->
+<ul class="nav nav-tabs mb-4">
+<li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#orders">Sipariş</button></li>
+<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#products">Ürün</button></li>
+<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tables">Masalar</button></li>
+<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#finance">Ciro</button></li>
+<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#debts">Borç</button></li>
+</ul>
+
+<div class="tab-content">
+
+<!-- SİPARİŞ -->
+<div class="tab-pane fade show active" id="orders">
+<div id="ordersList"></div>
 </div>
 
-<!-- Firebase / Admin JS -->
+<!-- ÜRÜN -->
+<div class="tab-pane fade" id="products">
+
+<input id="pName" placeholder="Ürün adı" class="form-control mb-2">
+<input id="pPrice" placeholder="Fiyat" class="form-control mb-2">
+
+<button onclick="addProduct()" class="btn btn-success mb-3">Ürün Ekle</button>
+
+<div id="productList"></div>
+
+</div>
+
+<!-- MASA -->
+<div class="tab-pane fade" id="tables">
+
+<input id="tableName" placeholder="Masa adı" class="form-control mb-2">
+
+<button onclick="addTable()" class="btn btn-primary mb-3">Masa Ekle</button>
+
+<div id="tableList"></div>
+
+</div>
+
+<!-- CİRO -->
+<div class="tab-pane fade" id="finance">
+
+<h4>Günlük Ciro</h4>
+<div id="daily"></div>
+
+<h4>Aylık Ciro</h4>
+<div id="monthly"></div>
+
+</div>
+
+<!-- BORÇ -->
+<div class="tab-pane fade" id="debts">
+
+<input id="dName" placeholder="Firma" class="form-control mb-2">
+<input id="dAmount" placeholder="Tutar" class="form-control mb-2">
+<input id="dDate" type="date" class="form-control mb-2">
+
+<button onclick="addDebt()" class="btn btn-warning">Borç Ekle</button>
+
+<div id="debtList"></div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="admin.js"></script>
 
 </body>
