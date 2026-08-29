@@ -77,50 +77,98 @@ console.log("Masa Adı:", tableName);
 
 async function loadCategories() {
 
-    const snapshot = await getDocs(
-        query(
-            collection(db, "categories"),
-            orderBy("order")
-        )
-    );
+    try {
 
-    categories = [];
+        const snapshot = await getDocs(
+            query(
+                collection(db, "categories"),
+                orderBy("order")
+            )
+        );
 
-    snapshot.forEach(doc => {
+        categories = [];
 
-        categories.push({
-            id: doc.id,
-            ...doc.data()
+        snapshot.forEach(docSnap => {
+
+            const data = docSnap.data();
+
+            // 🔴 Güvenlik: veri yoksa atla
+            if (!data) return;
+
+            // 🔴 ACTIVE kontrolü (en kritik nokta)
+            if (data.active === false) return;
+
+            categories.push({
+                id: docSnap.id,
+                name: data.name || "",
+                order: data.order || 0,
+                active: data.active !== false
+            });
+
         });
 
-    });
+        // 🔍 DEBUG (çok önemli)
+        console.log("KATEGORİLER YÜKLENDİ:", categories);
+
+    } catch (error) {
+
+        console.error("Kategori yükleme hatası:", error);
+        alert("Kategoriler yüklenemedi ❌");
+
+    }
 
 }
-
 /* ===========================
    ÜRÜNLER
 =========================== */
 
 async function loadProducts() {
 
-    const snapshot = await getDocs(
-        collection(db, "products")
-    );
+    try {
 
-    products = [];
+        const snapshot = await getDocs(
+            collection(db, "products")
+        );
 
-    snapshot.forEach(doc => {
+        products = [];
 
-        const product = {
-            id: doc.id,
-            ...doc.data()
-        };
+        snapshot.forEach(docSnap => {
 
-        if (product.active !== false) {
-    products.push(product);
-}
+            const data = docSnap.data();
 
-    });
+            // 🔴 veri yoksa atla
+            if (!data) return;
+
+            // 🔴 ACTIVE kontrolü (kritik)
+            if (data.active === false) return;
+
+            products.push({
+                id: docSnap.id,
+
+                name: data.name || "",
+                description: data.description || "",
+                price: Number(data.price) || 0,
+
+                // 🔥 EN KRİTİK DÜZELTME
+                category: (data.category || "").trim(),
+
+                image: data.image || "",
+                vat: Number(data.vat) || 20,
+
+                active: data.active !== false
+            });
+
+        });
+
+        // 🔍 DEBUG
+        console.log("ÜRÜNLER YÜKLENDİ:", products);
+
+    } catch (error) {
+
+        console.error("Ürün yükleme hatası:", error);
+        alert("Ürünler yüklenemedi ❌");
+
+    }
 
 }
 /* ===========================
@@ -133,12 +181,20 @@ function renderMenu() {
 
     categories.forEach(category => {
 
-        if (!category.active) return;
+        // 🔴 kategori aktif değilse gösterme
+        if (category.active === false) return;
 
-        const categoryProducts = products.filter(product =>
-            product.category === category.name
-        );
+        // 🔥 EN KRİTİK DÜZELTME
+        const categoryProducts = products.filter(product => {
 
+            if (!product.category || !category.name) return false;
+
+            return product.category.toLowerCase().trim() ===
+                   category.name.toLowerCase().trim();
+
+        });
+
+        // 🔴 ürün yoksa kategoriyi gösterme
         if (categoryProducts.length === 0) return;
 
         let html = `
@@ -215,22 +271,23 @@ function renderMenu() {
         });
 
         html += `
-
             </div>
-
         </div>
-
         `;
 
         menuContainer.innerHTML += html;
 
     });
 
+    // 🔍 DEBUG
+    console.log("MENU RENDER:", {
+        categories,
+        products
+    });
+
     bindCartButtons();
 
-}
-
-/* ===========================
+}/* ===========================
    SEPET BUTONLARI
 =========================== */
 
