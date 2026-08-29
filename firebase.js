@@ -1,19 +1,24 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+// Firebase importları (CDN üzerinden)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+// Firebase config (SENİN VERDİĞİN DOĞRU)
 const firebaseConfig = {
-  apiKey: "SENİN KEY",
+  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
   projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.appspot.com",
+  storageBucket: "ruzgarguluqr.firebasestorage.app",
   messagingSenderId: "1034312304751",
-  appId: "APP_ID"
+  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
 };
 
+// Firebase başlat
 const app = initializeApp(firebaseConfig);
 
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+// Servisleri al
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Dışarı aktar (EN ÖNEMLİ KISIM)
+export { db, auth };
