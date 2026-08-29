@@ -1,88 +1,81 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rüzgar Gülü Cafe & Beach Restaurant</title>
-
-    <link rel="stylesheet" href="css/index.css">
+<meta charset="UTF-8">
+<title>Rüzgar Gülü Menü</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="hero">
+<h1>🍽️ Menü</h1>
 
-    <!-- 🔥 Overlay (DÜZELTİLDİ) -->
-    <div class="hero-overlay"></div>
+<div id="categories"></div>
+<div id="menu"></div>
 
-    <!-- Logo -->
-    <img
-        src="675B9CDF-DC08-47B5-BCD7-E128110CBB5E.png"
-        class="logo"
-        alt="Logo">
+<h2>🧾 Sepet</h2>
+<div id="cart"></div>
+<button onclick="sendOrder()">Sipariş Ver</button>
 
-    <!-- Başlık -->
-    <h1>Rüzgar Gülü</h1>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    <h3>Cafe & Beach Restaurant</h3>
+<script src="app.js"></script>
 
-    <!-- Yıldız -->
-    <div class="stars">
-        ⭐⭐⭐⭐⭐
-        <span>4.9</span>
-    </div>
+<script>
+let cart = [];
 
-    <!-- Açıklama -->
-    <p>
-        Denizin, lezzetin ve huzurun buluşma noktası.
-    </p>
+function loadMenu() {
+    db.collection("products").onSnapshot(snapshot => {
+        const menu = document.getElementById("menu");
+        menu.innerHTML = "";
 
-    <!-- Menü Butonu -->
-    <a href="menu.html" class="menuButton">
-        🍽️ Menüye Başla
-    </a>
+        snapshot.forEach(doc => {
+            const p = doc.data();
 
-</header>
+            menu.innerHTML += `
+                <div class="card">
+                    <h3>${p.name}</h3>
+                    <p>${p.price} ₺</p>
+                    <button onclick="addToCart('${p.name}', ${p.price})">Ekle</button>
+                </div>
+            `;
+        });
+    });
+}
 
-<!-- BUTONLAR -->
-<div class="card">
+function addToCart(name, price) {
+    cart.push({name, price});
+    renderCart();
+}
 
-    <a href="menu.html" class="btn">🍽️ MENÜYÜ GÖR</a>
+function renderCart() {
+    const cartDiv = document.getElementById("cart");
+    cartDiv.innerHTML = "";
 
-    <a href="https://maps.google.com" target="_blank" class="btn">
-        📍 YOL TARİFİ
-    </a>
+    cart.forEach(item => {
+        cartDiv.innerHTML += `<p>${item.name} - ${item.price} ₺</p>`;
+    });
+}
 
-    <a href="tel:+905555555555" class="btn">
-        📞 BİZİ ARAYIN
-    </a>
+function sendOrder() {
+    const table = prompt("Masa numarası gir:");
 
-    <a href="https://instagram.com" target="_blank" class="btn">
-        📷 INSTAGRAM
-    </a>
+    db.collection("orders").add({
+        table,
+        items: cart,
+        status: "hazırlanıyor",
+        time: new Date()
+    });
 
-</div>
+    alert("Sipariş gönderildi");
+    cart = [];
+    renderCart();
+}
 
-<!-- BİLGİ -->
-<div class="card info">
-
-    <b>📍 Adres</b><br>
-    Umurbey Merkez Mah.<br>
-    Çiftlikovası 6. Sk. No:52<br>
-    Lapseki / Çanakkale
-
-    <br><br>
-
-    <b>🕗 Çalışma Saatleri</b><br>
-    08:00 - 01:00
-
-</div>
-
-<!-- FOOTER -->
-<footer>
-    © 2026 Rüzgar Gülü Cafe & Beach Restaurant
-</footer>
+loadMenu();
+</script>
 
 </body>
 </html>
