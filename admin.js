@@ -1,127 +1,72 @@
-import { db, auth, storage } from "./firebase.js";
+let currentUser = null;
 
-import {
-collection, addDoc, getDocs, doc, deleteDoc,
-onSnapshot, query, orderBy, updateDoc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+    auth.signInWithEmailAndPassword(email, password)
+    .then(res => {
+        currentUser = res.user;
 
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+        if(currentUser.email !== "caferuzgargulu@gmail.com"){
+            alert("Yetkisiz!");
+            return;
+        }
 
-/* AUTH */
-onAuthStateChanged(auth,u=>{
-if(!u) location.href="login.html";
-else start();
-});
-
-/* LOGOUT */
-window.logout=()=>signOut(auth);
-
-/* NAV */
-window.show=id=>{
-document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-document.getElementById(id).style.display="block";
-};
-
-/* START */
-function start(){
-show("products");
-loadProducts();
-loadCategories();
-loadTables();
-watchOrders();
+        alert("Giriş başarılı");
+        loadProducts();
+        loadOrders();
+    })
+    .catch(err => alert(err.message));
 }
 
-/* ÜRÜN EKLE */
-addProductBtn.onclick=async()=>{
-let url="";
-if(pImage.files[0]){
-const r=ref(storage,"products/"+Date.now());
-await uploadBytes(r,pImage.files[0]);
-url=await getDownloadURL(r);
+function addProduct() {
+    const name = document.getElementById("name").value;
+    const price = document.getElementById("price").value;
+
+    db.collection("products").add({
+        name,
+        price
+    });
 }
 
-await addDoc(collection(db,"products"),{
-name:pName.value,
-price:Number(pPrice.value),
-category:pCategory.value,
-vat:Number(pKdv.value),
-image:url,
-active:true
-});
-
-loadProducts();
-};
-
-/* ÜRÜN LİSTE */
-async function loadProducts(){
-const snap=await getDocs(collection(db,"products"));
-let html="";
-snap.forEach(d=>{
-const p=d.data();
-html+=`<div>${p.name} ₺${p.price}</div>`;
-});
-productList.innerHTML=html;
+function deleteProduct(id) {
+    db.collection("products").doc(id).delete();
 }
 
-/* KATEGORİ */
-addCategoryBtn.onclick=async()=>{
-await addDoc(collection(db,"categories"),{
-name:cName.value,
-active:true
-});
-loadCategories();
-};
+function loadProducts() {
+    db.collection("products").onSnapshot(snapshot => {
+        const div = document.getElementById("products");
+        div.innerHTML = "";
 
-async function loadCategories(){
-const snap=await getDocs(collection(db,"categories"));
-let html="";
-snap.forEach(d=>{
-html+=`<div>${d.data().name}</div>`;
-});
-categoryList.innerHTML=html;
+        snapshot.forEach(doc => {
+            const p = doc.data();
+
+            div.innerHTML += `
+                <div>
+                    ${p.name} - ${p.price} ₺
+                    <button onclick="deleteProduct('${doc.id}')">Sil</button>
+                </div>
+            `;
+        });
+    });
 }
 
-/* MASA */
-addTableBtn.onclick=async()=>{
-await addDoc(collection(db,"tables"),{
-name:tableName.value
-});
-loadTables();
-};
+function loadOrders() {
+    db.collection("orders").onSnapshot(snapshot => {
+        const div = document.getElementById("orders");
+        div.innerHTML = "";
 
-async function loadTables(){
-const snap=await getDocs(collection(db,"tables"));
-let html="";
-snap.forEach(d=>{
-const t=d.data();
-const qr=`menu.html?table=${t.name}`;
-html+=`<div>${t.name} <a href="https://api.qrserver.com/v1/create-qr-code/?data=${qr}" target="_blank">QR</a></div>`;
-});
-tableList.innerHTML=html;
+        snapshot.forEach(doc => {
+            const o = doc.data();
+
+            div.innerHTML += `
+                <div class="order">
+                    Masa: ${o.table} <br>
+                    ${o.items.map(i => i.name).join(", ")} <br>
+                    Durum: ${o.status}
+                </div>
+            `;
+        });
+    });
 }
-
-/* SİPARİŞ */
-function watchOrders(){
-const q=query(collection(db,"orders"),orderBy("createdAt","desc"));
-
-onSnapshot(q,snap=>{
-let html="";
-snap.forEach(d=>{
-const o=d.data();
-html+=`
-<div>
-${o.table} ₺${o.total}
-<button onclick="updateStatus('${d.id}','Hazır')">Hazır</button>
-<button onclick="updateStatus('${d.id}','Teslim')">Teslim</button>
-</div>
-`;
-});
-ordersList.innerHTML=html;
-});
-}
-
-window.updateStatus=async(id,s)=>{
-await updateDoc(doc(db,"orders",id),{status:s});
-};
