@@ -77,45 +77,20 @@ console.log("Masa Adı:", tableName);
 
 async function loadCategories() {
 
-    try {
+    const snapshot = await getDocs(
+        collection(db, "categories")
+    );
 
-        const snapshot = await getDocs(
-            query(
-                collection(db, "categories"),
-                orderBy("order")
-            )
-        );
+    categories = [];
 
-        categories = [];
+    snapshot.forEach(doc => {
 
-        snapshot.forEach(docSnap => {
-
-            const data = docSnap.data();
-
-            // 🔴 Güvenlik: veri yoksa atla
-            if (!data) return;
-
-            // 🔴 ACTIVE kontrolü (en kritik nokta)
-            if (data.active === false) return;
-
-            categories.push({
-                id: docSnap.id,
-                name: data.name || "",
-                order: data.order || 0,
-                active: data.active !== false
-            });
-
+        categories.push({
+            id: doc.id,
+            ...doc.data()
         });
 
-        // 🔍 DEBUG (çok önemli)
-        console.log("KATEGORİLER YÜKLENDİ:", categories);
-
-    } catch (error) {
-
-        console.error("Kategori yükleme hatası:", error);
-        alert("Kategoriler yüklenemedi ❌");
-
-    }
+    });
 
 }
 /* ===========================
