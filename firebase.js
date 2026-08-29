@@ -1,28 +1,32 @@
-import { auth } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
-import {
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-document.getElementById("loginBtn").onclick = async () => {
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-  if (!email || !password) {
-    alert("Email ve şifre gir!");
-    return;
-  }
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-
-    alert("Giriş başarılı ✅");
-    window.location.href = "admin.html";
-
-  } catch (error) {
-    console.log(error);
-    alert(error.code); // 👈 NET hata gör
-  }
-
+// 🔥 Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
+  authDomain: "ruzgarguluqr.firebaseapp.com",
+  projectId: "ruzgarguluqr",
+  storageBucket: "ruzgarguluqr.firebasestorage.app",
+  messagingSenderId: "1034312304751",
+  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
 };
+
+
+// 🔥 APP BAŞLAT
+const app = initializeApp(firebaseConfig);
+
+
+// 🔥 SERVİSLER
+const db = getFirestore(app);
+const storage = getStorage(app);
+const auth = getAuth(app); // ⚠️ EN KRİTİK SATIR
+
+
+// 🔥 EXPORT (ÇOK ÖNEMLİ)
+export { db, storage, auth };
