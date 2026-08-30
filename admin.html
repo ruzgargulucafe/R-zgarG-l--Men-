@@ -2,331 +2,291 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
 <style>
-body { margin:0; font-family:Arial; display:flex; }
-.sidebar { width:220px; background:#111; color:white; height:100vh; padding:20px; }
-.sidebar button { width:100%; margin-bottom:10px; padding:10px; border:none; background:#333; color:white; cursor:pointer; }
-.content { flex:1; padding:20px; }
-input, select { padding:8px; margin:5px 0; width:100%; }
-button.action { padding:10px; background:green; color:white; border:none; margin-top:10px; cursor:pointer; }
-img { max-width:100px; }
+body{margin:0;font-family:Arial;display:flex;background:#f4f6f9}
+.sidebar{width:220px;background:#111;color:#fff;height:100vh;padding:15px}
+.sidebar button{width:100%;margin:5px 0;padding:10px;background:#333;border:none;color:#fff}
+.content{flex:1;padding:20px}
+.card{background:#fff;padding:15px;margin-bottom:10px;border-radius:10px}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h3>Admin</h3>
-  <button onclick="showPage('masa')">Masalar</button>
-  <button onclick="showPage('kategori')">Kategoriler</button>
-  <button onclick="showPage('urun')">Ürünler</button>
-  <button onclick="showPage('siparis')">Siparişler</button>
-  <button onclick="showPage('ciro')">Ciro</button>
-  <button onclick="logout()">Çıkış</button>
+<h3>Admin</h3>
+<button onclick="page('masa')">Masalar</button>
+<button onclick="page('kategori')">Kategoriler</button>
+<button onclick="page('urun')">Ürünler</button>
+<button onclick="page('siparis')">Siparişler</button>
+<button onclick="page('garson')">Garson</button>
+<button onclick="page('ciro')">Ciro</button>
+<button onclick="logout()">Çıkış</button>
 </div>
 
 <div class="content">
-<h2 id="title">Masalar</h2>
-<div id="page"></div>
+<h2 id="title"></h2>
+<div id="app"></div>
 </div>
 
 <script type="module">
 
-// 🔥 FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+onSnapshot,
+updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.appspot.com",
-  messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
+  projectId: "ruzgarguluqr"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const appF = initializeApp(firebaseConfig);
+const db = getFirestore(appF);
 const auth = getAuth();
 
-// LOGIN
-onAuthStateChanged(auth, user => {
-  if (!user) window.location.href = "index.html";
+onAuthStateChanged(auth,u=>{
+if(!u) location="index.html";
 });
 
-// LOGOUT
-window.logout = () => signOut(auth);
+window.logout = ()=> signOut(auth);
 
 // SAYFA
-window.showPage = (p) => {
-  document.getElementById("title").innerText = p.toUpperCase();
-  if (p==="masa") loadMasa();
-  if (p==="kategori") loadKategori();
-  if (p==="urun") loadUrun();
-  if (p==="siparis") loadSiparis();
-  if (p==="ciro") loadCiro();
+window.page = (p)=>{
+title.innerText = p.toUpperCase();
+
+if(p==="masa") masa();
+if(p==="kategori") kategori();
+if(p==="urun") urun();
+if(p==="siparis") siparis();
+if(p==="garson") garson();
+if(p==="ciro") ciro();
 };
 
 // ================= MASA =================
-async function loadMasa() {
+async function masa(){
+app.innerHTML=`
+<input id="m" placeholder="Masa adı">
+<button onclick="ekleMasa()">Ekle</button>
+<div id="list"></div>
+`;
 
-  document.getElementById("page").innerHTML = `
-    <input id="masaAd" placeholder="Masa adı">
-    <button id="masaBtn" class="action">Ekle</button>
-    <hr>
-    <div id="masaList"></div>
-  `;
+const snap = await getDocs(collection(db,"tables"));
+let h="";
 
-  document.getElementById("masaBtn").addEventListener("click", masaEkle);
+snap.forEach(d=>{
+const t=d.data();
+const qr=`https://ruzgargulucafe.github.io/menu.html?table=${t.name}`;
 
-  const snap = await getDocs(collection(db, "tables"));
+h+=`
+<div class="card">
+${t.name}<br>
+<a target="_blank" href="${qr}">QR Aç</a><br>
+<button onclick="silMasa('${d.id}')">Sil</button>
+</div>`;
+});
 
-  let html = "";
-
-  snap.forEach(docu => {
-    const t = docu.data();
-
-    html += `
-      <div style="margin-bottom:20px;">
-        <b>${t.name}</b>
-        <button onclick="masaSil('${docu.id}')">Sil</button>
-        <div id="qr-${docu.id}"></div>
-      </div>
-    `;
-  });
-
-  document.getElementById("masaList").innerHTML = html;
-
-  snap.forEach(docu => {
-    const t = docu.data();
-
-    const link = `https://ruzgargulucafe.github.io/menu.html?table=${encodeURIComponent(t.name)}`;
-
-    QRCode.toCanvas(link, function (err, canvas) {
-      document.getElementById(`qr-${docu.id}`).appendChild(canvas);
-    });
-  });
+list.innerHTML=h;
 }
 
-window.masaEkle = async () => {
-  const masa = document.getElementById("masaAd").value;
-
-  if (!masa) return alert("Masa adı gir");
-
-  await addDoc(collection(db, "tables"), { name: masa });
-
-  loadMasa();
+window.ekleMasa = async()=>{
+if(!m.value) return alert("Masa adı gir");
+await addDoc(collection(db,"tables"),{name:m.value});
+masa();
 };
 
-window.masaSil = async (id) => {
-  await deleteDoc(doc(db, "tables", id));
-  loadMasa();
+window.silMasa = async(id)=>{
+await deleteDoc(doc(db,"tables",id));
+masa();
 };
 
 // ================= KATEGORİ =================
-async function loadKategori() {
-  let html = `
-    <input id="katAd" placeholder="Kategori adı">
-    <button id="katBtn" class="action">Ekle</button>
-    <hr>
-  `;
+async function kategori(){
+app.innerHTML=`
+<input id="k">
+<button onclick="ekleKat()">Ekle</button>
+<div id="list"></div>
+`;
 
-  const snap = await getDocs(collection(db, "categories"));
-
-  snap.forEach(d => {
-    html += `
-      <div>
-        ${d.data().name}
-        <button onclick="kategoriSil('${d.id}')">Sil</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("page").innerHTML = html;
-
-  document.getElementById("katBtn").onclick = kategoriEkle;
+const snap=await getDocs(collection(db,"categories"));
+let h="";
+snap.forEach(d=>{
+h+=`${d.data().name} <button onclick="silKat('${d.id}')">Sil</button><br>`;
+});
+list.innerHTML=h;
 }
 
-window.kategoriEkle = async () => {
-  const name = document.getElementById("katAd").value;
-  if (!name) return;
-  await addDoc(collection(db, "categories"), { name });
-  loadKategori();
+window.ekleKat=async()=>{
+await addDoc(collection(db,"categories"),{name:k.value});
+kategori();
 };
 
-window.kategoriSil = async (id) => {
-  await deleteDoc(doc(db, "categories", id));
-  loadKategori();
+window.silKat=async(id)=>{
+await deleteDoc(doc(db,"categories",id));
+kategori();
 };
 
 // ================= ÜRÜN =================
-async function loadUrun() {
-  let html = `
-    <input id="urunAd" placeholder="Ürün adı">
-    <input id="fiyat" placeholder="Fiyat">
-    <input id="kdv" placeholder="KDV %">
-    <input id="resim" placeholder="Resim URL">
-    <select id="kdvTip">
-      <option value="dahil">KDV Dahil</option>
-      <option value="haric">KDV Hariç</option>
-    </select>
-    <button id="urunBtn" class="action">Ekle</button>
-    <hr>
-  `;
+async function urun(){
+app.innerHTML=`
+<input id="u" placeholder="Ad">
+<input id="f" placeholder="Fiyat">
+<input id="aciklama" placeholder="Açıklama">
+<input id="resim" placeholder="Resim URL">
+<input id="kdv" placeholder="KDV %">
+<select id="kdvTip">
+<option value="dahil">KDV Dahil</option>
+<option value="haric">KDV Hariç</option>
+</select>
+<button onclick="ekleUrun()">Ekle</button>
+<div id="list"></div>
+`;
 
-  const snap = await getDocs(collection(db, "products"));
+const snap=await getDocs(collection(db,"products"));
+let h="";
 
-  snap.forEach(d => {
-    const p = d.data();
-    html += `
-      <div>
-        <img src="${p.image}">
-        ${p.name} - ${p.price}₺
-        <button onclick="urunSil('${d.id}')">Sil</button>
-      </div>
-    `;
-  });
+snap.forEach(d=>{
+const p=d.data();
+h+=`
+<div class="card">
+<img src="${p.image || ''}" width="80"><br>
+<b>${p.name}</b><br>
+${p.price}₺<br>
+<button onclick="silUrun('${d.id}')">Sil</button>
+</div>`;
+});
 
-  document.getElementById("page").innerHTML = html;
-
-  document.getElementById("urunBtn").onclick = urunEkle;
+list.innerHTML=h;
 }
 
-window.urunEkle = async () => {
-  await addDoc(collection(db, "products"), {
-    name: document.getElementById("urunAd").value,
-    price: Number(document.getElementById("fiyat").value),
-    kdv: Number(document.getElementById("kdv").value),
-    type: document.getElementById("kdvTip").value,
-    image: document.getElementById("resim").value
-  });
-
-  loadUrun();
+window.ekleUrun=async()=>{
+await addDoc(collection(db,"products"),{
+name:u.value,
+price:Number(f.value),
+description:aciklama.value,
+image:resim.value,
+kdv:Number(kdv.value),
+kdvType:kdvTip.value
+});
+urun();
 };
 
-window.urunSil = async (id) => {
-  await deleteDoc(doc(db, "products", id));
-  loadUrun();
+window.silUrun=async(id)=>{
+await deleteDoc(doc(db,"products",id));
+urun();
 };
 
 // ================= SİPARİŞ =================
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<title>Menü</title>
-</head>
-<body>
+function siparis(){
 
-<h2>Menü</h2>
-<div id="urunler"></div>
+onSnapshot(collection(db,"orders"),snap=>{
 
-<button onclick="siparisGonder()">Siparişi Gönder</button>
+let h="";
 
-<script type="module">
+snap.forEach(d=>{
+const o=d.data();
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+h+=`
+<div class="card">
+<b>${o.table}</b><br>
+${o.items?.map(i=>i.name+" x"+i.qty).join("<br>")}
+<br>${o.total}₺
+</div>`;
+});
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
-  authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.appspot.com",
-  messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
-};
+app.innerHTML=h;
+});
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// 📌 MASA PARAMETRESİ
-const params = new URLSearchParams(window.location.search);
-const masa = params.get("table");
-
-// ürünleri çek
-let secilenler = [];
-
-async function yukle() {
-  const snap = await getDocs(collection(db, "products"));
-  let html = "";
-
-  snap.forEach(d => {
-    const p = d.data();
-
-    html += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <b>${p.name}</b><br>
-        ${p.price}₺
-        <br>
-        <button onclick="ekle('${p.name}', ${p.price})">Ekle</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("urunler").innerHTML = html;
 }
 
-window.ekle = (name, price) => {
-  const varMi = secilenler.find(x => x.name === name);
+// ================= GARSON =================
+function garson(){
 
-  if (varMi) {
-    varMi.qty++;
-  } else {
-    secilenler.push({ name, price, qty: 1 });
-  }
+onSnapshot(collection(db,"calls"),snap=>{
 
-  alert(name + " eklendi");
+let h="<h3>Garson</h3>";
+
+snap.forEach(d=>{
+h+=`
+<div class="card">
+Masa ${d.data().table}
+<button onclick="silCall('${d.id}')">Temizle</button>
+</div>`;
+});
+
+app.innerHTML=h;
+});
+
+onSnapshot(collection(db,"billRequests"),snap=>{
+
+let h="<h3>Hesap</h3>";
+
+snap.forEach(d=>{
+h+=`
+<div class="card">
+Masa ${d.data().table}
+<button onclick="silBill('${d.id}')">Temizle</button>
+</div>`;
+});
+
+app.innerHTML+=h;
+});
+}
+
+window.silCall=async(id)=>{
+await deleteDoc(doc(db,"calls",id));
 };
 
-// sipariş gönder
-window.siparisGonder = async () => {
-
-  if (secilenler.length === 0) {
-    alert("Ürün seç");
-    return;
-  }
-
-  let total = 0;
-  secilenler.forEach(i => total += i.price * i.qty);
-
-  await addDoc(collection(db, "orders"), {
-    table: masa,
-    items: secilenler,
-    total: total,
-    time: new Date()
-  });
-
-  alert("Sipariş gönderildi");
-  secilenler = [];
+window.silBill=async(id)=>{
+await deleteDoc(doc(db,"billRequests",id));
 };
 
-yukle();
-
-</script>
-
-</body>
-</html>
 // ================= CİRO =================
-async function loadCiro() {
-  let total = 0;
+async function ciro(){
 
-  const snap = await getDocs(collection(db, "orders"));
+let daily=0;
+let monthly=0;
 
-  snap.forEach(d => {
-    total += d.data().total || 0;
-  });
+const snap=await getDocs(collection(db,"orders"));
 
-  document.getElementById("page").innerHTML = `<h3>Toplam Ciro: ${total}₺</h3>`;
+const today=new Date().toDateString();
+const month=new Date().getMonth();
+
+snap.forEach(d=>{
+const o=d.data();
+if(!o.createdAt) return;
+
+const t=new Date(o.createdAt.seconds*1000);
+
+if(t.toDateString()==today) daily+=o.total;
+if(t.getMonth()==month) monthly+=o.total;
+});
+
+app.innerHTML=`
+<h3>Günlük: ${daily}₺</h3>
+<h3>Aylık: ${monthly}₺</h3>
+`;
 }
 
-// BAŞLAT
-showPage("masa");
+// START
+page("masa");
 
 </script>
 
