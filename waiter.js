@@ -1,4 +1,5 @@
-import { db } from "./firebase.js";
+// 🔥 FIREBASE
+import { db } from "./app.js"; // ❗ firebase.js değil app.js ile uyumlu
 
 import {
     collection,
@@ -10,19 +11,19 @@ import {
     where,
     getDocs,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"; // ❗ versiyon sabitlendi
 
-// Bildirim sesi
+// 🔊 Bildirim sesi
 const notificationSound = new Audio("./assets/notification.mp3");
 
 // Sayaçlar
 let lastCallCount = 0;
 let lastBillCount = 0;
 
-// Sayfa elemanları
-const waitingCount = document.getElementById("waitingCount");
-const callCount = document.getElementById("callCount");
-const billCount = document.getElementById("billCount");
+// ELEMENTLER (boşsa hata vermesin)
+const waitingCount = document.getElementById("waitingCount") || { innerText: 0 };
+const callCount = document.getElementById("callCount") || { innerText: 0 };
+const billCount = document.getElementById("billCount") || { innerText: 0 };
 
 const callsDiv = document.getElementById("calls");
 const billsDiv = document.getElementById("bills");
@@ -47,7 +48,7 @@ let selectedTable = null;
 let selectedOrders = [];
 let selectedTotal = 0;
 
-console.log("✅ waiter.js başarıyla yüklendi.");
+console.log("✅ waiter.js yüklendi");
 
 // ===================================================
 // GARSON ÇAĞRILARI
@@ -80,39 +81,23 @@ onSnapshot(callQuery, (snapshot) => {
 
         callsDiv.innerHTML += `
             <div class="card">
-
-                <h2>🔔 ${call.table}</h2>
-
-                <p>Garson çağırıyor.</p>
-
-                <button
-                    class="callDone"
-                    data-id="${docSnap.id}">
-
+                <h3>🔔 ${call.table}</h3>
+                <p>Garson çağırıyor</p>
+                <button class="callDone" data-id="${docSnap.id}">
                     ✅ Tamamlandı
-
                 </button>
-
             </div>
         `;
-
     });
 
     callCount.innerText = activeCalls;
 
-    document.querySelectorAll(".callDone").forEach((btn) => {
-
+    document.querySelectorAll(".callDone").forEach(btn => {
         btn.onclick = async () => {
-
-            await updateDoc(
-                doc(db, "calls", btn.dataset.id),
-                {
-                    status: "Tamamlandı"
-                }
-            );
-
+            await updateDoc(doc(db, "calls", btn.dataset.id), {
+                status: "Tamamlandı"
+            });
         };
-
     });
 
 });
@@ -148,47 +133,35 @@ onSnapshot(billQuery, (snapshot) => {
 
         billsDiv.innerHTML += `
             <div class="card">
-
-                <h2>💳 ${bill.table}</h2>
-
-                <p>Hesap istiyor.</p>
-
-                <button
-                    class="openBill"
+                <h3>💳 ${bill.table}</h3>
+                <p>Hesap istiyor</p>
+                <button class="openBill"
                     data-id="${docSnap.id}"
                     data-table="${bill.table}">
-
-                    👁 Adisyonu Aç
-
+                    👁 Aç
                 </button>
-
             </div>
         `;
-
     });
 
     billCount.innerText = activeBills;
 
-    document.querySelectorAll(".openBill").forEach((btn) => {
-
+    document.querySelectorAll(".openBill").forEach(btn => {
         btn.onclick = async () => {
-
             selectedBillId = btn.dataset.id;
             selectedTable = btn.dataset.table;
 
             billModal.style.display = "flex";
-
             modalTable.innerText = selectedTable;
+
             await loadBill(selectedTable);
-
         };
-
     });
 
 });
 
 // ===================================================
-// ADİSYONU YÜKLE
+// ADİSYON YÜKLE
 // ===================================================
 
 async function loadBill(tableName) {
@@ -205,205 +178,59 @@ async function loadBill(tableName) {
     );
 
     selectedOrders = [];
-
     let total = 0;
 
-    const grouped = {};
-    const vatGroups = {};
-
-    orders.forEach((docSnap) => {
+    orders.forEach(docSnap => {
 
         const order = docSnap.data();
-
         selectedOrders.push(docSnap);
 
-        (order.items || []).forEach((item) => {
+        (order.items || []).forEach(item => {
+            total += item.price * item.qty;
 
-            if (!grouped[item.name]) {
-
-                grouped[item.name] = {
-    qty: 0,
-    price: item.price,
-    vat: item.vat || 20
-};
-
-            }
-
-            grouped[item.name].qty += item.qty;
-
-total += item.price * item.qty;
-
-const lineTotal = item.price * item.qty;
-
-const vatAmount =
-    lineTotal - (lineTotal / (1 + (item.vat || 20) / 100));
-
-if (!vatGroups[item.vat || 20]) {
-    vatGroups[item.vat || 20] = 0;
-}
-
-vatGroups[item.vat || 20] += vatAmount;
-
+            modalItems.innerHTML += `
+                <div>
+                    ${item.name} x${item.qty} = ₺${(item.price * item.qty).toFixed(2)}
+                </div>
+            `;
         });
 
     });
 
-    Object.keys(grouped).forEach((name) => {
-
-        const item = grouped[name];
-
-        modalItems.innerHTML += `
-
-            <div style="
-                display:flex;
-                justify-content:space-between;
-                padding:10px 0;
-                border-bottom:1px solid #444;">
-
-                <span>${item.qty} x ${name}</span>
-
-                <strong>
-                    ₺${(item.qty * item.price).toFixed(2)}
-                </strong>
-
-            </div>
-
-        `;
-
-    });
-
-    modalItems.innerHTML += `
-<hr>
-<h4 style="margin-top:15px;">KDV Dağılımı</h4>
-`;
-
-Object.keys(vatGroups).sort().forEach(rate => {
-
-    modalItems.innerHTML += `
-    <div style="
-        display:flex;
-        justify-content:space-between;
-        padding:6px 0;">
-
-        <span>KDV %${rate}</span>
-
-        <strong>₺${vatGroups[rate].toFixed(2)}</strong>
-
-    </div>
-    `;
-
-});
-
     selectedTotal = total;
-
     modalTotal.innerText = "₺" + total.toFixed(2);
-
 }
 
 // ===================================================
-// HESABI KAPAT
+// HESAP KAPAT
 // ===================================================
 
 cancelBillBtn.onclick = () => {
-
     billModal.style.display = "none";
-
-    selectedBillId = null;
-    selectedTable = null;
-    selectedOrders = [];
-    selectedTotal = 0;
-
-    modalItems.innerHTML = "";
-    modalTotal.innerText = "₺0";
-
-    document.querySelector("input[value='Nakit']").checked = true;
-splitArea.style.display = "none";
-cashAmount.value = "";
-cardAmount.value = "";
-    
 };
-
-document.querySelectorAll("input[name='payment']").forEach(radio => {
-
-    radio.addEventListener("change", () => {
-
-        splitArea.style.display =
-            radio.value === "Split" && radio.checked
-                ? "block"
-                : "none";
-
-    });
-
-});
 
 closeBillBtn.onclick = async () => {
 
-    if (!selectedBillId || !selectedTable) return;
+    if (!selectedBillId) return;
 
-    const paymentType =
-        document.querySelector("input[name='payment']:checked").value;
+    await updateDoc(doc(db, "billRequests", selectedBillId), {
+        status: "Tamamlandı"
+    });
 
-    if (paymentType === "Split") {
-
-    const cash = Number(document.getElementById("cashAmount").value || 0);
-    const card = Number(document.getElementById("cardAmount").value || 0);
-
-    if (cash + card !== selectedTotal) {
-
-        alert("Nakit + Kart toplamı hesap tutarı ile aynı olmalıdır.");
-
-        return;
-
-    }
-
-}
-    
-    // Bill isteğini kapat
-    await updateDoc(
-        doc(db, "billRequests", selectedBillId),
-        {
-            status: "Tamamlandı"
-        }
-    );
-
-    // Açık siparişleri kapat
-
-    console.log("selectedOrders:", selectedOrders);
-    
     for (const orderDoc of selectedOrders) {
-
         await updateDoc(orderDoc.ref, {
-
             closed: true,
-
-            paymentType,
-
             paidAt: serverTimestamp()
-
         });
-
     }
 
     billModal.style.display = "none";
 
-    alert(`${selectedTable} hesabı kapatıldı.`);
-selectedBillId = null;
-selectedTable = null;
-selectedOrders = [];
-selectedTotal = 0;
-
-modalItems.innerHTML = "";
-modalTotal.innerText = "₺0";
-
-    document.querySelector("input[value='Nakit']").checked = true;
-splitArea.style.display = "none";
-cashAmount.value = "";
-cardAmount.value = "";
-    
+    alert("Hesap kapatıldı");
 };
 
 // ===================================================
-// MASALAR
+// MASALAR (AKTİF)
 // ===================================================
 
 const ordersQuery = query(
@@ -417,78 +244,35 @@ onSnapshot(ordersQuery, (snapshot) => {
 
     const tables = {};
 
-    snapshot.forEach((docSnap) => {
+    snapshot.forEach(docSnap => {
 
-        const order = docSnap.data();
+        const o = docSnap.data();
 
-        if (!tables[order.table]) {
-
-            tables[order.table] = {
-
-                total: 0,
-                status: order.status,
-                orderCount: 0
-
-            };
-
+        if (!tables[o.table]) {
+            tables[o.table] = { total: 0, count: 0 };
         }
 
-        tables[order.table].status = order.status;
-        tables[order.table].orderCount++;
+        tables[o.table].count++;
 
-        (order.items || []).forEach(item => {
-
-    tables[order.table].total +=
-        item.price * item.qty;
-
-});
+        (o.items || []).forEach(i => {
+            tables[o.table].total += i.price * i.qty;
+        });
 
     });
 
     tablesDiv.innerHTML = "";
 
-    Object.keys(tables)
-        .sort()
-        .forEach((table) => {
+    Object.keys(tables).forEach(t => {
 
-            const info = tables[table];
+        const info = tables[t];
 
-            let color = "#28a745";
-
-            if (info.status === "Bekliyor")
-                color = "#ff9800";
-
-            if (info.status === "Hazırlanıyor")
-                color = "#2196f3";
-
-            tablesDiv.innerHTML += `
-
-            <div
-                class="table"
-                style="
-                    background:${color};
-                    padding:18px;
-                    border-radius:12px;
-                ">
-
-                <h3>${table}</h3>
-
-                <div>
-                    ${info.orderCount} Sipariş
-                </div>
-
-                <div style="margin-top:8px;font-weight:bold;">
-                    ₺${info.total.toFixed(2)}
-                </div>
-
-                <div style="margin-top:8px;font-size:14px;">
-                    ${info.status}
-                </div>
-
+        tablesDiv.innerHTML += `
+            <div class="card">
+                <h3>${t}</h3>
+                <div>${info.count} sipariş</div>
+                <strong>₺${info.total.toFixed(2)}</strong>
             </div>
-
-            `;
-
-        });
+        `;
+    });
 
 });
