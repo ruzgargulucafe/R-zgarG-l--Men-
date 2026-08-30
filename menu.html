@@ -5,33 +5,15 @@
 <title>Menü</title>
 
 <style>
-body {
-  font-family: Arial;
-  padding: 20px;
-}
-
-h2 {
-  border-bottom: 2px solid black;
-}
-
-.product {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px 0;
-}
-
-img {
-  width: 100px;
-}
+body { font-family: Arial; padding:20px; }
+.item { border-bottom:1px solid #ccc; padding:10px; }
+button { padding:8px; background:green; color:white; border:none; }
 </style>
-
 </head>
 
 <body>
 
-<h1>Menü</h1>
-<h3 id="masa"></h3>
-
+<h2 id="masa"></h2>
 <div id="menu"></div>
 
 <script type="module">
@@ -39,57 +21,52 @@ img {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔥 Firebase config (senin)
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.appspot.com",
-  messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
+  projectId: "ruzgarguluqr"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🪑 MASA AL
-const params = new URLSearchParams(window.location.search);
-const masa = params.get("table");
+// MASA AL
+const url = new URLSearchParams(window.location.search);
+const masa = url.get("table");
 
 document.getElementById("masa").innerText = "Masa: " + masa;
 
-// 📦 ÜRÜNLERİ GETİR
-const menuDiv = document.getElementById("menu");
-
+// MENÜ YÜKLE
 const snap = await getDocs(collection(db, "products"));
 
-snap.forEach(doc => {
-  const p = doc.data();
+let html = "";
 
-  const div = document.createElement("div");
-  div.className = "product";
+snap.forEach(docu => {
+  const p = docu.data();
 
-  div.innerHTML = `
-    <img src="${p.image}">
-    <h3>${p.name}</h3>
-    <p>${p.price}₺</p>
-    <button onclick="siparis('${p.name}', ${p.price})">Sipariş Ver</button>
+  html += `
+    <div class="item">
+      <b>${p.name}</b><br>
+      ${p.price}₺<br>
+      <button onclick="siparisVer('${p.name}', ${p.price})">Sipariş Ver</button>
+    </div>
   `;
-
-  menuDiv.appendChild(div);
 });
 
-// 🧾 SİPARİŞ
-window.siparis = async (urun, fiyat) => {
+document.getElementById("menu").innerHTML = html;
+
+// SİPARİŞ
+window.siparisVer = async (name, price) => {
 
   await addDoc(collection(db, "orders"), {
     table: masa,
-    product: urun,
-    total: fiyat,
+    product: name,
+    price: price,
+    total: price,
     time: new Date()
   });
 
-  alert("Sipariş gönderildi!");
+  alert("Sipariş gönderildi");
 };
 
 </script>
