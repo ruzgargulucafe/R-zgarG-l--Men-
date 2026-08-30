@@ -3,30 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>QR Menü</title>
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f6f9; }
-
-.top { background:#111; color:white; padding:15px; text-align:center; }
-
-.actions { display:flex; gap:10px; padding:10px; }
-.actions button {
-  flex:1; padding:12px; border:none; border-radius:8px;
-  color:white; font-weight:bold;
-}
-.call { background:#ff9800; }
-.bill { background:#444; }
-
-.products { padding:10px; }
-
-.card {
-  background:white; padding:15px; border-radius:10px;
-  margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f9;
 }
 
-.card button {
+.top{
+  background:#111;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  padding:10px;
+}
+
+.actions button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+}
+
+.call{ background:#ff9800; }
+.bill{ background:#444; }
+
+.products{ padding:10px; }
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card button{
   margin-top:10px;
   background:#28a745;
   color:white;
@@ -36,14 +57,14 @@ body { font-family: Arial; margin:0; background:#f4f6f9; }
   border-radius:6px;
 }
 
-.hesap {
+.hesap{
   background:#fff;
   padding:10px;
   margin:10px;
   border-radius:10px;
 }
 
-.cart {
+.cart{
   position:fixed;
   bottom:0;
   left:0;
@@ -53,7 +74,7 @@ body { font-family: Arial; margin:0; background:#f4f6f9; }
   padding:10px;
 }
 
-.send {
+.send{
   background:#007bff;
   color:white;
   width:100%;
@@ -91,8 +112,16 @@ body { font-family: Arial; margin:0; background:#f4f6f9; }
 
 <script type="module">
 
+// 🔥 FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
@@ -103,15 +132,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// MASA
+// 🔐 MASA KONTROL
 const masa = new URLSearchParams(location.search).get("table");
+
+if(!masa){
+  document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px'>QR ile giriş yapın</h2>";
+  throw new Error("Masa yok");
+}
+
 document.getElementById("masa").innerText = "Masa: " + masa;
 
-// SEPET
+// 🛒 SEPET
 let sepet = [];
 
-// 🔥 ÜRÜNLERİ YÜKLE (FIX)
-async function loadMenu() {
+// 🔥 MENÜ YÜKLE
+async function loadMenu(){
   const snap = await getDocs(collection(db,"products"));
 
   let html = "";
@@ -123,7 +158,9 @@ async function loadMenu() {
       <div class="card">
         <b>${p.name}</b><br>
         <span>${p.price}₺</span>
-        <button onclick="ekle('${p.name}', ${p.price})">Sepete Ekle</button>
+        <button onclick="ekle('${d.id}','${p.name}',${p.price})">
+          Sepete Ekle
+        </button>
       </div>
     `;
   });
@@ -131,21 +168,23 @@ async function loadMenu() {
   document.getElementById("menu").innerHTML = html;
 }
 
-// SEPETE EKLE
-window.ekle = (name, price) => {
-  const item = sepet.find(x=>x.name===name);
+// ➕ SEPET
+window.ekle = (id,name,price)=>{
+
+  const item = sepet.find(x=>x.id===id);
 
   if(item){
     item.qty++;
   }else{
-    sepet.push({name,price,qty:1});
+    sepet.push({id,name,price,qty:1});
   }
 
   guncelle();
 };
 
-// SEPET GÜNCELLE
+// 🔄 SEPET GÜNCELLE
 function guncelle(){
+
   let html="";
   let total=0;
 
@@ -158,8 +197,8 @@ function guncelle(){
   document.getElementById("total").innerText = "Toplam: " + total + "₺";
 }
 
-// SİPARİŞ
-window.siparis = async () => {
+// 📦 SİPARİŞ
+window.siparis = async ()=>{
 
   if(sepet.length===0){
     alert("Sepet boş");
@@ -173,7 +212,7 @@ window.siparis = async () => {
     table: masa,
     items: sepet,
     total: total,
-    createdAt: new Date()
+    createdAt: serverTimestamp()
   });
 
   alert("Sipariş gönderildi");
@@ -182,33 +221,36 @@ window.siparis = async () => {
   guncelle();
 };
 
-// GARSON
-window.garson = async () => {
+// 🛎 GARSON
+window.garson = async ()=>{
   await addDoc(collection(db,"calls"),{
     table: masa,
-    createdAt: new Date()
+    createdAt: serverTimestamp()
   });
 
   alert("Garson geliyor");
 };
 
-// HESAP İSTE
-window.hesap = async () => {
+// 💳 HESAP
+window.hesap = async ()=>{
   await addDoc(collection(db,"billRequests"),{
     table: masa,
-    createdAt: new Date()
+    createdAt: serverTimestamp()
   });
 
   alert("Hesap istendi");
 };
 
-// CANLI HESAP
+// 🔥 CANLI HESAP
 function hesapYukle(){
+
   onSnapshot(collection(db,"orders"), (snap)=>{
+
     let html = "";
     let total = 0;
 
     snap.forEach(d=>{
+
       const o = d.data();
 
       if(o.table !== masa) return;
@@ -217,14 +259,16 @@ function hesapYukle(){
         html += `${i.name} x${i.qty}<br>`;
         total += i.price * i.qty;
       });
+
     });
 
     document.getElementById("hesapList").innerHTML = html;
     document.getElementById("hesapTotal").innerText = "Toplam: " + total + "₺";
+
   });
 }
 
-// 🔥 BAŞLAT
+// 🚀 START
 loadMenu();
 hesapYukle();
 
