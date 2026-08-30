@@ -1,128 +1,3 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>QR Menü</title>
-
-<style>
-
-body {
-  font-family: Arial;
-  margin:0;
-  background:#f4f6f9;
-}
-
-/* ÜST BAR */
-.top {
-  background:#111;
-  color:white;
-  padding:15px;
-  text-align:center;
-}
-
-/* BUTONLAR */
-.actions {
-  display:flex;
-  gap:10px;
-  padding:10px;
-}
-
-.actions button {
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  color:white;
-  font-weight:bold;
-}
-
-.call { background:#ff9800; }
-.bill { background:#444; }
-
-/* ÜRÜNLER */
-.products {
-  padding:10px;
-}
-
-.card {
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:10px;
-  box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.card button {
-  margin-top:10px;
-  background:#28a745;
-  color:white;
-  border:none;
-  padding:10px;
-  width:100%;
-  border-radius:6px;
-}
-
-/* HESAP */
-.hesap {
-  background:#fff;
-  padding:10px;
-  margin:10px;
-  border-radius:10px;
-}
-
-/* SEPET */
-.cart {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:white;
-  border-top:2px solid #ccc;
-  padding:10px;
-}
-
-.send {
-  background:#007bff;
-  color:white;
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:6px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="top">
-  <h3 id="masa"></h3>
-</div>
-
-<div class="actions">
-  <button class="call" onclick="garson()">🛎 Garson</button>
-  <button class="bill" onclick="hesap()">💳 Hesap İste</button>
-</div>
-
-<!-- HESAP EKRANI -->
-<div class="hesap">
-  <h3>🧾 Hesabım</h3>
-  <div id="hesapList"></div>
-  <h3 id="hesapTotal">Toplam: 0₺</h3>
-</div>
-
-<!-- ÜRÜNLER -->
-<div class="products" id="menu"></div>
-
-<!-- SEPET -->
-<div class="cart">
-  <div id="cartList"></div>
-  <h3 id="total">Toplam: 0₺</h3>
-  <button class="send" onclick="siparis()">Siparişi Gönder</button>
-</div>
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -137,14 +12,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// MASA
-const masa = new URLSearchParams(location.search).get("table");
+// 🔥 MASA (normalize edildi)
+const masa = (new URLSearchParams(location.search).get("table") || "")
+  .trim()
+  .toLowerCase();
+
 document.getElementById("masa").innerText = "Masa: " + masa;
 
 // SEPET
 let sepet = [];
 
-// ÜRÜNLERİ YÜKLE
+// ÜRÜNLER
 const snap = await getDocs(collection(db,"products"));
 
 let html = "";
@@ -204,7 +82,7 @@ window.siparis = async () => {
   sepet.forEach(i=> total += i.price*i.qty);
 
   await addDoc(collection(db,"orders"),{
-    table: masa,
+    table: masa, // 🔥 normalize edilmiş hali
     items: sepet,
     total: total,
     createdAt: new Date()
@@ -216,7 +94,7 @@ window.siparis = async () => {
   guncelle();
 };
 
-// GARSON ÇAĞIR
+// GARSON
 window.garson = async () => {
   await addDoc(collection(db,"calls"),{
     table: masa,
@@ -226,7 +104,7 @@ window.garson = async () => {
   alert("Garson geliyor");
 };
 
-// HESAP İSTE
+// HESAP
 window.hesap = async () => {
   await addDoc(collection(db,"billRequests"),{
     table: masa,
@@ -236,7 +114,7 @@ window.hesap = async () => {
   alert("Hesap istendi");
 };
 
-// 🔥 CANLI HESAP
+// 🔥 CANLI HESAP (FIXLİ)
 function hesapYukle(){
 
   onSnapshot(collection(db,"orders"), (snap)=>{
@@ -248,7 +126,8 @@ function hesapYukle(){
 
       const o = d.data();
 
-      if(o.table !== masa) return;
+      // 🔥 KRİTİK FIX
+      if((o.table || "").trim().toLowerCase() !== masa) return;
 
       o.items.forEach(i=>{
         html += `${i.name} x${i.qty}<br>`;
@@ -267,6 +146,3 @@ function hesapYukle(){
 hesapYukle();
 
 </script>
-
-</body>
-</html>
