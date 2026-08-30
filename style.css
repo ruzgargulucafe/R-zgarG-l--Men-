@@ -1,21 +1,180 @@
+/* =========================
+GENEL
+========================= */
+
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
+  margin: 0;
   padding: 20px;
+  background: #f4f6f9;
 }
 
-input, button {
+/* =========================
+INPUT & BUTTON
+========================= */
+
+input, select {
   padding: 10px;
-  margin: 5px;
+  margin: 5px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
 }
+
+button {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* =========================
+KARTLAR
+========================= */
 
 .card {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
+/* =========================
+ÜRÜNLER
+========================= */
+
+.product {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.product h3 {
+  margin: 0;
+}
+
+.product button {
+  background: #28a745;
+  color: white;
+}
+
+/* =========================
+SEPET
+========================= */
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cartButtons button {
+  margin-left: 5px;
+  padding: 5px 10px;
+}
+
+/* =========================
+SİPARİŞ KARTI
+========================= */
+
 .order {
-  border: 2px solid orange;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* DURUM RENKLERİ */
+
+.order.yeni {
+  background: #ffebee;
+  border-left: 6px solid #e53935;
+}
+
+.order.hazirlaniyor {
+  background: #fff3e0;
+  border-left: 6px solid #fb8c00;
+}
+
+.order.teslim {
+  background: #e8f5e9;
+  border-left: 6px solid #43a047;
+}
+
+/* =========================
+KATEGORİ
+========================= */
+
+.categoryHeader {
+  background: #111;
+  color: white;
   padding: 10px;
-  margin: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.categoryBody {
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* =========================
+SEPET PANEL
+========================= */
+
+#cartPanel {
+  position: fixed;
+  right: -100%;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: white;
+  padding: 15px;
+  box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+#cartPanel.active {
+  right: 0;
+}
+
+/* =========================
+TOPLAM
+========================= */
+
+#cartTotal {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+  body {
+    padding: 10px;
+  }
+
+  .product {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #cartPanel {
+    width: 100%;
+  }
+
 }
