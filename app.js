@@ -1,13 +1,32 @@
+// 🔥 FIREBASE IMPORT
+import { initializeApp, getApps, getApp } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { getFirestore } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { getAuth } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// 🔥 CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
-  storageBucket: "ruzgarguluqr.firebasestorage.app",
-  messagingSenderId: "1034312304751",
-  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
+  projectId: "ruzgarguluqr"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 🔥 INIT (TEK SEFER GARANTİ)
+const app = !getApps().length 
+  ? initializeApp(firebaseConfig) 
+  : getApp();
 
-const db = firebase.firestore();
-const auth = firebase.auth();
+// 🔥 SERVİSLER
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// 🔥 GLOBAL (çok önemli)
+window.db = db;
+window.auth = auth;
+
+// 🔥 EXPORT
+export { db, auth };
