@@ -42,8 +42,7 @@ addDoc,
 getDocs,
 deleteDoc,
 doc,
-onSnapshot,
-updateDoc
+onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -70,7 +69,7 @@ window.logout = ()=> signOut(auth);
 
 // SAYFA
 window.page = (p)=>{
-title.innerText = p.toUpperCase();
+document.getElementById("title").innerText = p.toUpperCase();
 
 if(p==="masa") masa();
 if(p==="kategori") kategori();
@@ -82,7 +81,7 @@ if(p==="ciro") ciro();
 
 // ================= MASA =================
 async function masa(){
-app.innerHTML=`
+document.getElementById("app").innerHTML=`
 <input id="m" placeholder="Masa adı">
 <button onclick="ekleMasa()">Ekle</button>
 <div id="list"></div>
@@ -93,22 +92,28 @@ let h="";
 
 snap.forEach(d=>{
 const t=d.data();
-const qr=`https://ruzgargulucafe.github.io/menu.html?table=${t.name}`;
+const qr=`https://ruzgargulucafe.github.io/RuzgarGuluMenu/menu.html?table=${t.name}`;
 
 h+=`
 <div class="card">
-${t.name}<br>
+<b>${t.name}</b><br>
 <a target="_blank" href="${qr}">QR Aç</a><br>
 <button onclick="silMasa('${d.id}')">Sil</button>
 </div>`;
 });
 
-list.innerHTML=h;
+document.getElementById("list").innerHTML=h;
 }
 
 window.ekleMasa = async()=>{
-if(!m.value) return alert("Masa adı gir");
-await addDoc(collection(db,"tables"),{name:m.value});
+const val = document.getElementById("m").value.trim();
+
+if(val==="") return alert("Masa adı gir");
+
+await addDoc(collection(db,"tables"),{name:val});
+
+document.getElementById("m").value="";
+
 masa();
 };
 
@@ -119,7 +124,7 @@ masa();
 
 // ================= KATEGORİ =================
 async function kategori(){
-app.innerHTML=`
+document.getElementById("app").innerHTML=`
 <input id="k">
 <button onclick="ekleKat()">Ekle</button>
 <div id="list"></div>
@@ -130,11 +135,14 @@ let h="";
 snap.forEach(d=>{
 h+=`${d.data().name} <button onclick="silKat('${d.id}')">Sil</button><br>`;
 });
-list.innerHTML=h;
+document.getElementById("list").innerHTML=h;
 }
 
 window.ekleKat=async()=>{
-await addDoc(collection(db,"categories"),{name:k.value});
+const val = document.getElementById("k").value.trim();
+if(val==="") return alert("Kategori boş olamaz");
+
+await addDoc(collection(db,"categories"),{name:val});
 kategori();
 };
 
@@ -145,7 +153,7 @@ kategori();
 
 // ================= ÜRÜN =================
 async function urun(){
-app.innerHTML=`
+document.getElementById("app").innerHTML=`
 <input id="u" placeholder="Ad">
 <input id="f" placeholder="Fiyat">
 <input id="aciklama" placeholder="Açıklama">
@@ -173,17 +181,22 @@ ${p.price}₺<br>
 </div>`;
 });
 
-list.innerHTML=h;
+document.getElementById("list").innerHTML=h;
 }
 
 window.ekleUrun=async()=>{
+const name = document.getElementById("u").value.trim();
+const price = Number(document.getElementById("f").value);
+
+if(name==="" || !price) return alert("Eksik bilgi");
+
 await addDoc(collection(db,"products"),{
-name:u.value,
-price:Number(f.value),
-description:aciklama.value,
-image:resim.value,
-kdv:Number(kdv.value),
-kdvType:kdvTip.value
+name:name,
+price:price,
+description:document.getElementById("aciklama").value,
+image:document.getElementById("resim").value,
+kdv:Number(document.getElementById("kdv").value),
+kdvType:document.getElementById("kdvTip").value
 });
 urun();
 };
@@ -211,7 +224,7 @@ ${o.items?.map(i=>i.name+" x"+i.qty).join("<br>")}
 </div>`;
 });
 
-app.innerHTML=h;
+document.getElementById("app").innerHTML=h;
 });
 
 }
@@ -219,19 +232,20 @@ app.innerHTML=h;
 // ================= GARSON =================
 function garson(){
 
-onSnapshot(collection(db,"calls"),snap=>{
+let html="";
 
-let h="<h3>Garson</h3>";
+onSnapshot(collection(db,"calls"),snap=>{
+html="<h3>Garson</h3>";
 
 snap.forEach(d=>{
-h+=`
+html+=`
 <div class="card">
 Masa ${d.data().table}
 <button onclick="silCall('${d.id}')">Temizle</button>
 </div>`;
 });
 
-app.innerHTML=h;
+document.getElementById("app").innerHTML=html;
 });
 
 onSnapshot(collection(db,"billRequests"),snap=>{
@@ -246,7 +260,7 @@ Masa ${d.data().table}
 </div>`;
 });
 
-app.innerHTML+=h;
+document.getElementById("app").innerHTML+=h;
 });
 }
 
@@ -279,7 +293,7 @@ if(t.toDateString()==today) daily+=o.total;
 if(t.getMonth()==month) monthly+=o.total;
 });
 
-app.innerHTML=`
+document.getElementById("app").innerHTML=`
 <h3>Günlük: ${daily}₺</h3>
 <h3>Aylık: ${monthly}₺</h3>
 `;
