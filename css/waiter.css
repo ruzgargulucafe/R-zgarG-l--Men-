@@ -1,1 +1,214 @@
+/* =========================================
+GENEL
+========================================= */
 
+body{
+    margin:0;
+    font-family:"Poppins", Arial, sans-serif;
+    background:linear-gradient(180deg,#eef7ff,#dff1ff);
+    padding:20px;
+    color:#222;
+}
+
+/* =========================================
+BAŞLIK
+========================================= */
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+/* =========================================
+ÜST İSTATİSTİK KARTLARI
+========================================= */
+
+.stats{
+    display:flex;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat{
+    flex:1;
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.stat h2{
+    margin:0;
+    font-size:28px;
+    color:#0077b6;
+}
+
+.stat span{
+    font-size:14px;
+    color:#666;
+}
+
+/* =========================================
+KART GENEL
+========================================= */
+
+.card{
+    background:white;
+    padding:18px;
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,.10);
+    margin-bottom:15px;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+}
+
+/* =========================================
+GARSON ÇAĞRI KARTI
+========================================= */
+
+#calls .card{
+    border-left:6px solid #ff9800;
+}
+
+#calls h2{
+    color:#ff9800;
+}
+
+/* =========================================
+HESAP KARTI
+========================================= */
+
+#bills .card{
+    border-left:6px solid #0077b6;
+}
+
+#bills h2{
+    color:#0077b6;
+}
+
+/* =========================================
+BUTONLAR
+========================================= */
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    margin-top:10px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.25s;
+}
+
+/* tamamlandı */
+.callDone{
+    background:#00a651;
+    color:white;
+}
+
+.callDone:hover{
+    background:#008f44;
+}
+
+/* hesap aç */
+.openBill{
+    background:#0077b6;
+    color:white;
+}
+
+.openBill:hover{
+    background:#005f99;
+}
+
+/* =========================================
+MASA GRID
+========================================= */
+
+#tables{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:15px;
+    margin-top:20px;
+}
+
+.table{
+    color:white;
+    text-align:center;
+    padding:15px;
+    border-radius:15px;
+    font-weight:bold;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+/* =========================================
+MODAL (HESAP)
+========================================= */
+
+#billModal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.modalContent{
+    background:#111;
+    color:white;
+    width:90%;
+    max-width:500px;
+    padding:20px;
+    border-radius:18px;
+}
+
+.modalContent h2{
+    text-align:center;
+}
+
+.modalItems{
+    margin-top:15px;
+    max-height:300px;
+    overflow:auto;
+}
+
+.modalFooter{
+    margin-top:20px;
+}
+
+/* =========================================
+ÖDEME
+========================================= */
+
+.paymentOptions{
+    margin-top:15px;
+}
+
+.paymentOptions label{
+    margin-right:15px;
+    cursor:pointer;
+}
+
+/* split */
+#splitArea{
+    margin-top:10px;
+}
+
+/* =========================================
+SCROLL
+========================================= */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#0099cc;
+    border-radius:20px;
+}
