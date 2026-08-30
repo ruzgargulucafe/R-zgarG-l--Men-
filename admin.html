@@ -215,19 +215,103 @@ window.urunSil = async (id) => {
 };
 
 // ================= SİPARİŞ =================
-async function loadSiparis() {
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Menü</title>
+</head>
+<body>
+
+<h2>Menü</h2>
+<div id="urunler"></div>
+
+<button onclick="siparisGonder()">Siparişi Gönder</button>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
+  authDomain: "ruzgarguluqr.firebaseapp.com",
+  projectId: "ruzgarguluqr",
+  storageBucket: "ruzgarguluqr.appspot.com",
+  messagingSenderId: "1034312304751",
+  appId: "1:1034312304751:web:3b0e15ba06a937455a659a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 📌 MASA PARAMETRESİ
+const params = new URLSearchParams(window.location.search);
+const masa = params.get("table");
+
+// ürünleri çek
+let secilenler = [];
+
+async function yukle() {
+  const snap = await getDocs(collection(db, "products"));
   let html = "";
 
-  const snap = await getDocs(collection(db, "orders"));
-
   snap.forEach(d => {
-    const o = d.data();
-    html += `<div>Masa: ${o.table} - ${o.total}₺</div>`;
+    const p = d.data();
+
+    html += `
+      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <b>${p.name}</b><br>
+        ${p.price}₺
+        <br>
+        <button onclick="ekle('${p.name}', ${p.price})">Ekle</button>
+      </div>
+    `;
   });
 
-  document.getElementById("page").innerHTML = html;
+  document.getElementById("urunler").innerHTML = html;
 }
 
+window.ekle = (name, price) => {
+  const varMi = secilenler.find(x => x.name === name);
+
+  if (varMi) {
+    varMi.qty++;
+  } else {
+    secilenler.push({ name, price, qty: 1 });
+  }
+
+  alert(name + " eklendi");
+};
+
+// sipariş gönder
+window.siparisGonder = async () => {
+
+  if (secilenler.length === 0) {
+    alert("Ürün seç");
+    return;
+  }
+
+  let total = 0;
+  secilenler.forEach(i => total += i.price * i.qty);
+
+  await addDoc(collection(db, "orders"), {
+    table: masa,
+    items: secilenler,
+    total: total,
+    time: new Date()
+  });
+
+  alert("Sipariş gönderildi");
+  secilenler = [];
+};
+
+yukle();
+
+</script>
+
+</body>
+</html>
 // ================= CİRO =================
 async function loadCiro() {
   let total = 0;
