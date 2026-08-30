@@ -1,1 +1,54 @@
+/* 🔥 Fade In */
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* 🔥 Buton basma efekti */
+.btn-press:active {
+  transform: scale(0.95);
+}
+
+/* 🔥 Kart hover */
+.card-hover {
+  transition: 0.3s;
+}
+.card-hover:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* 🔥 Bildirim blink */
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { background: #ff5252; }
+  50% { background: #ff0000; }
+  100% { background: #ff5252; }
+}
+
+/* 🔥 Sepet açılma */
+.slide-up {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 🔥 Başarı efekti */
+.success {
+  animation: successPop 0.4s ease;
+}
+
+@keyframes successPop {
+  0% { transform: scale(0.7); opacity:0; }
+  100% { transform: scale(1); opacity:1; }
+}
