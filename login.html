@@ -1,36 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-<title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Giriş</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+    width:300px;
+    text-align:center;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#0d6efd;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0b5ed7;
+}
+</style>
+
 </head>
 
 <body>
 
-<h2>Admin Login</h2>
+<div class="box">
+
+<h2>Admin Giriş</h2>
 
 <input id="email" placeholder="Email">
 <input id="password" type="password" placeholder="Şifre">
 
 <button onclick="login()">Giriş</button>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+</div>
 
-<script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// 🔥 CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
   authDomain: "ruzgarguluqr.firebaseapp.com",
-  projectId: "ruzgarguluqr",
+  projectId: "ruzgarguluqr"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// 🔥 INIT
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-function login(){
-auth.signInWithEmailAndPassword(email.value,password.value)
-.then(()=>location.href="admin.html")
-.catch(e=>alert(e.message));
-}
+// 🔐 LOGIN
+window.login = async () => {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try{
+
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+
+    // 🔒 ADMIN KONTROL
+    if(userCred.user.email !== "caferuzgargulu@gmail.com"){
+      alert("Yetkisiz kullanıcı");
+      return;
+    }
+
+    alert("Giriş başarılı");
+    window.location.href = "admin.html";
+
+  }catch(err){
+    alert(err.message);
+  }
+
+};
+
 </script>
 
 </body>
