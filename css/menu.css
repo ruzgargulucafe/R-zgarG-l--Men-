@@ -1,10 +1,8 @@
 /*==================================================
-RÜZGAR GÜLÜ MENU V2
-PREMIUM BEACH EDITION
+RÜZGAR GÜLÜ MENU V2 - FINAL PRO
 ==================================================*/
 
 :root{
-
     --primary:#0077b6;
     --primary-light:#00b4d8;
     --secondary:#0099cc;
@@ -18,763 +16,286 @@ PREMIUM BEACH EDITION
     --white:#ffffff;
 
     --radius:24px;
-
     --shadow:0 12px 30px rgba(0,0,0,.08);
-
 }
 
 *{
-
 margin:0;
 padding:0;
 box-sizing:border-box;
-
 font-family:"Poppins",Arial,sans-serif;
-
-}
-
-html{
-
-scroll-behavior:smooth;
-
 }
 
 body{
-
-background:
-linear-gradient(
-180deg,
-#f4fcff 0%,
-#e6f8ff 35%,
-#d4f2ff 100%
-);
-
+background:linear-gradient(180deg,#f4fcff 0%,#e6f8ff 35%,#d4f2ff 100%);
 color:#222;
-
 min-height:100vh;
-
 overflow-x:hidden;
-
 }
 
 /*======================================
 CONTAINER
 ======================================*/
-
 .container{
-
 max-width:1300px;
-
 margin:auto;
-
 padding:20px;
-
 }
 
 /*======================================
 HERO
 ======================================*/
-
 .hero{
-
 position:relative;
-
-height:300px;
-
-overflow:hidden;
-
+height:260px;
 border-radius:30px;
-
-margin-bottom:35px;
-
-box-shadow:
-0 20px 45px rgba(0,0,0,.18);
-
+overflow:hidden;
+margin-bottom:25px;
+box-shadow:0 20px 45px rgba(0,0,0,.18);
 display:flex;
-
 justify-content:center;
-
 align-items:center;
-
 text-align:center;
-
 }
 
-.hero-image{
-
+.hero img{
 position:absolute;
-
-top:0;
-
-left:0;
-
 width:100%;
-
 height:100%;
-
 object-fit:cover;
-
-display:block;
-    
-z-index:0;
-
 }
 
-.hero-overlay{
-
-position:relative;
-
+.hero h1{
 z-index:2;
-
 color:white;
-
-text-shadow:0 2px 15px rgba(0,0,0,.45);
-    
-}
-
-.hero-overlay h1{
-
-font-size:54px;
-
-font-weight:800;
-
-margin-bottom:10px;
-
-text-shadow:0 6px 20px rgba(0,0,0,.35);
-
-}
-
-.hero-overlay h4{
-
-font-size:28px;
-
-font-weight:300;
-
-margin-bottom:15px;
-
-}
-
-.hero-overlay p{
-
-font-size:20px;
-
-opacity:.95;
-
+font-size:40px;
+text-shadow:0 5px 15px rgba(0,0,0,.4);
 }
 
 /*======================================
-MENU
+KATEGORİ
 ======================================*/
-
-#menuContainer{
-
-margin-top:20px;
-
-}
-/*==================================================
-KATEGORİLER
-==================================================*/
-
 .category{
-
-margin-bottom:30px;
-
+margin-bottom:25px;
 }
 
 .categoryHeader{
-
 background:linear-gradient(135deg,#00b4d8,#0077b6);
-
 color:white;
-
-padding:20px 25px;
-
-border-radius:22px;
-
-font-size:26px;
-
+padding:18px;
+border-radius:20px;
+font-size:22px;
 font-weight:700;
-
-box-shadow:0 12px 30px rgba(0,119,182,.25);
-
 cursor:pointer;
-
-transition:.30s;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-.categoryHeader:hover{
-
-transform:translateY(-3px);
-
-box-shadow:0 20px 40px rgba(0,119,182,.35);
-
+box-shadow:0 10px 25px rgba(0,119,182,.25);
 }
 
 .categoryBody{
-
 display:none;
-
-margin-top:18px;
-
+margin-top:15px;
 }
 
-/*==================================================
-ÜRÜN KARTI
-==================================================*/
-
+/*======================================
+ÜRÜN
+======================================*/
 .product{
-
 display:flex;
-
-gap:18px;
-
+gap:15px;
+background:white;
+padding:15px;
+border-radius:20px;
+margin-bottom:15px;
+box-shadow:var(--shadow);
 align-items:center;
-
-background:rgba(255,255,255,.92);
-
-backdrop-filter:blur(15px);
-
-border-radius:24px;
-
-padding:18px;
-
-margin-bottom:18px;
-
-box-shadow:0 12px 30px rgba(0,0,0,.08);
-
-transition:.30s;
-
-animation:productUp .45s ease;
-
+transition:.3s;
 }
 
 .product:hover{
-
-transform:translateY(-4px);
-
-box-shadow:0 20px 40px rgba(0,0,0,.14);
-
+transform:translateY(-3px);
 }
 
-/*==================================================
-ÜRÜN FOTOĞRAFI
-==================================================*/
-
-.productImage{
-
-width:120px;
-
-height:120px;
-
+.product img{
+width:100px;
+height:100px;
 object-fit:cover;
-
-border-radius:18px;
-
-flex-shrink:0;
-
-box-shadow:0 8px 20px rgba(0,0,0,.15);
-
-transition:.35s;
-  
+border-radius:15px;
 }
-
-/*==================================================
-ÜRÜN BİLGİLERİ
-==================================================*/
 
 .productLeft{
-
 flex:1;
-
 }
 
 .productLeft h3{
-
-font-size:24px;
-
-margin-bottom:8px;
-
+font-size:20px;
 }
 
 .productLeft p{
-
-font-size:15px;
-
+font-size:14px;
 color:#666;
-
-line-height:24px;
-
+margin-top:5px;
 }
 
-/*==================================================
-FİYAT
-==================================================*/
-
-.fiyat{
-
-display:inline-block;
-
-margin-top:12px;
-
-padding:8px 16px;
-
-border-radius:40px;
-
-background:#00a651;
-
-color:white;
-
-font-size:22px;
-
+.price{
+margin-top:8px;
 font-weight:bold;
-
+color:var(--success);
+font-size:18px;
 }
-/*==================================================
-ÜRÜN SAĞ TARAF
-==================================================*/
-
-.productRight{
-
-display:flex;
-
-flex-direction:column;
-
-justify-content:center;
-
-align-items:flex-end;
-
-min-width:170px;
-
-}
-
-/*==================================================
-SEPETE EKLE
-==================================================*/
 
 .productRight button{
-
-width:170px;
-
-padding:15px;
-
-margin-top:15px;
-
+padding:12px 15px;
 border:none;
-
-border-radius:16px;
-
-background:
-linear-gradient(
-135deg,
-#00c853,
-#00a651
-);
-
+border-radius:12px;
+background:var(--success);
 color:white;
-
-font-size:17px;
-
-font-weight:700;
-
+font-weight:bold;
 cursor:pointer;
-
-transition:.30s;
-
-box-shadow:0 10px 25px rgba(0,166,81,.30);
-
+transition:.3s;
 }
 
 .productRight button:hover{
-
-transform:translateY(-3px);
-
-background:
-linear-gradient(
-135deg,
-#00b248,
-#008f44
-);
-
-box-shadow:0 18px 35px rgba(0,166,81,.45);
-
+background:#008f44;
 }
 
-/*==================================================
-ÜRÜN KDV
-==================================================*/
-
-.kdvBadge{
-
-display:inline-block;
-
-margin-top:10px;
-
-padding:5px 12px;
-
-border-radius:30px;
-
-background:#f1f5f9;
-
-color:#555;
-
-font-size:13px;
-
-font-weight:600;
-
-}
-
-/*==================================================
-ÜRÜN AÇIKLAMA
-==================================================*/
-
-.productDescription{
-
-margin-top:8px;
-
-color:#666;
-
-line-height:24px;
-
-font-size:15px;
-
-}
-
-/*==================================================
-ÜRÜN RESMİ HOVER
-==================================================*/
-
-.product:hover .productImage{
-
-transform:scale(1.06);
-
-}
-/*==================================================
-RÜZGAR GÜLÜ MENU V2
-FINAL
-==================================================*/
-
-@keyframes productUp{
-
-from{
-
-opacity:0;
-
-transform:translateY(25px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
-
-/* Kategori animasyonu */
-
-.category{
-
-animation:fadeCategory .6s ease;
-
-}
-
-@keyframes fadeCategory{
-
-from{
-
-opacity:0;
-
-transform:translateY(35px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
-
-/* Mobil */
-
-@media(max-width:768px){
-
-.hero{
-
-height:230px;
-
-border-radius:22px;
-
-}
-
-.hero-overlay h1{
-
-font-size:34px;
-
-}
-
-.hero-overlay h4{
-
+/*======================================
+SEPET BUTONU (FLOAT)
+======================================*/
+#cartButton{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#0099cc;
+color:white;
+border:none;
+padding:15px 18px;
+border-radius:50%;
 font-size:20px;
-
+box-shadow:0 10px 25px rgba(0,0,0,.3);
+cursor:pointer;
+z-index:999;
 }
 
-.hero-overlay p{
-
-font-size:15px;
-
+#cartCount{
+position:absolute;
+top:-5px;
+right:-5px;
+background:red;
+color:white;
+font-size:12px;
+padding:3px 6px;
+border-radius:50%;
 }
 
-.product{
-
-flex-direction:column;
-
-text-align:center;
-
+/*======================================
+SEPET PANELİ
+======================================*/
+#cartPanel{
+position:fixed;
+top:0;
+right:-400px;
+width:350px;
+height:100%;
+background:white;
+box-shadow:-10px 0 25px rgba(0,0,0,.2);
+padding:20px;
+transition:.4s;
+z-index:9999;
+overflow-y:auto;
 }
 
-.productImage{
+#cartPanel.active{
+right:0;
+}
 
+.cartItem{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+border-bottom:1px solid #eee;
+padding-bottom:8px;
+}
+
+.cartButtons button{
+margin-left:5px;
+border:none;
+background:#eee;
+padding:5px 8px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cartButtons button:hover{
+background:#ddd;
+}
+
+/*======================================
+TOPLAM
+======================================*/
+#cartTotal{
+font-size:20px;
+font-weight:bold;
+margin-top:10px;
+}
+
+/*======================================
+SİPARİŞ BUTONU
+======================================*/
+#finishOrder{
 width:100%;
-
-height:220px;
-
-max-width:100%;
-
+padding:15px;
+margin-top:15px;
+background:#00a651;
+color:white;
+border:none;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
 }
 
-.productRight{
+#finishOrder:hover{
+background:#008f44;
+}
 
+/*======================================
+INPUTLAR
+======================================*/
+input,textarea{
 width:100%;
-
-align-items:center;
-
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+border:1px solid #ddd;
 }
 
-.productRight button{
-
-width:100%;
-
-}
-
-.categoryHeader{
-
-font-size:22px;
-
-}
-
-}
-
-/* Scroll */
-
+/*======================================
+SCROLL
+======================================*/
 ::-webkit-scrollbar{
-
 width:8px;
-
 }
 
 ::-webkit-scrollbar-thumb{
-
 background:#00a6d6;
-
-border-radius:30px;
-
-}
-
-::-webkit-scrollbar-track{
-
-background:#eaf8ff;
-
-}
-
-/* Seçim */
-
-::selection{
-
-background:#00a6d6;
-
-color:white;
-
-}
-/*=========================================
-FLOATING ACTION MENU
-=========================================*/
-
-.fabMenu{
-
-position:fixed;
-
-right:25px;
-
-bottom:25px;
-
-z-index:9999;
-
-}
-
-.fabMain{
-
-width:70px;
-
-height:70px;
-
-border:none;
-
-border-radius:50%;
-
-background:#0099cc;
-
-color:white;
-
-font-size:30px;
-
-cursor:pointer;
-
-box-shadow:0 15px 30px rgba(0,0,0,.25);
-
-transition:.3s;
-
-}
-
-.fabMain:hover{
-
-transform:rotate(90deg);
-
-}
-
-.fabItems{
-
-display:flex;
-
-flex-direction:column-reverse;
-
-gap:12px;
-
-margin-bottom:15px;
-
-opacity:0;
-
-pointer-events:none;
-
-transform:translateY(20px);
-
-transition:.35s;
-
-}
-
-.fabItems.active{
-
-opacity:1;
-
-pointer-events:auto;
-
-transform:translateY(0);
-
-}
-
-.fabBtn{
-
-width:60px;
-
-height:60px;
-
-border:none;
-
-border-radius:50%;
-
-background:white;
-
-font-size:24px;
-
-cursor:pointer;
-
-box-shadow:0 10px 25px rgba(0,0,0,.20);
-
-position:relative;
-
-transition:.25s;
-
-}
-
-.fabBtn:hover{
-
-transform:scale(1.08);
-
-}
-
-/*=========================================
-FAB YAZILARI
-=========================================*/
-
-.fabLabel{
-
-position:absolute;
-
-right:75px;
-
-white-space:nowrap;
-
-background:rgba(0,0,0,.82);
-
-color:#fff;
-
-padding:6px 12px;
-
 border-radius:20px;
-
-font-size:13px;
-
-font-weight:500;
-
-opacity:1;
-
-transform:none;
-
-pointer-events:none;
-
 }
 
-.fabBadge{
+/*======================================
+MOBİL
+======================================*/
+@media(max-width:768px){
 
-position:absolute;
+.product{
+flex-direction:column;
+text-align:center;
+}
 
-top:-5px;
+.product img{
+width:100%;
+height:200px;
+}
 
-right:-5px;
-
-background:#e53935;
-
-color:#fff;
-
-font-size:11px;
-
-font-weight:700;
-
-min-width:18px;
-
-height:18px;
-
-padding:0 5px;
-
-border-radius:999px;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
+#cartPanel{
+width:100%;
+}
 
 }
