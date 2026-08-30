@@ -2,19 +2,61 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Menü</title>
+<title>QR Menü</title>
 
 <style>
-body { font-family: Arial; padding:20px; }
-.item { border-bottom:1px solid #ccc; padding:10px; }
-button { padding:8px; background:green; color:white; border:none; }
+body { font-family: Arial; padding:20px; background:#f5f5f5; }
+
+h2 { margin-bottom:10px; }
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+}
+
+button {
+  padding:10px;
+  margin-top:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.add { background:green; color:white; }
+.action { background:#333; color:white; }
+.send { background:orange; color:white; width:100%; margin-top:15px; }
+
+#sepet {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:white;
+  padding:15px;
+  border-top:2px solid #ccc;
+}
 </style>
 </head>
 
 <body>
 
 <h2 id="masa"></h2>
+
+<button class="action" onclick="garson()">🛎 Garson Çağır</button>
+<button class="action" onclick="hesap()">💳 Hesap İste</button>
+
+<hr>
+
 <div id="menu"></div>
+
+<div id="sepet">
+  <b>Sepet:</b>
+  <div id="liste"></div>
+  <h3 id="toplam">Toplam: 0₺</h3>
+  <button class="send" onclick="siparis()">Siparişi Gönder</button>
+</div>
 
 <script type="module">
 
@@ -30,43 +72,102 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// MASA AL
-const url = new URLSearchParams(window.location.search);
-const masa = url.get("table");
+// MASA
+const masaParam = new URLSearchParams(location.search).get("table");
+document.getElementById("masa").innerText = "Masa: " + masaParam;
 
-document.getElementById("masa").innerText = "Masa: " + masa;
+// SEPET
+let sepet = [];
 
-// MENÜ YÜKLE
+// ÜRÜNLERİ YÜKLE
 const snap = await getDocs(collection(db, "products"));
 
 let html = "";
 
-snap.forEach(docu => {
-  const p = docu.data();
+snap.forEach(d => {
+  const p = d.data();
 
   html += `
-    <div class="item">
+    <div class="card">
       <b>${p.name}</b><br>
       ${p.price}₺<br>
-      <button onclick="siparisVer('${p.name}', ${p.price})">Sipariş Ver</button>
+      <button class="add" onclick="ekle('${p.name}', ${p.price})">Ekle</button>
     </div>
   `;
 });
 
 document.getElementById("menu").innerHTML = html;
 
-// SİPARİŞ
-window.siparisVer = async (name, price) => {
+// ÜRÜN EKLE
+window.ekle = (name, price) => {
+
+  const urun = sepet.find(x => x.name === name);
+
+  if (urun) {
+    urun.qty++;
+  } else {
+    sepet.push({ name, price, qty: 1 });
+  }
+
+  guncelle();
+};
+
+// SEPET GÜNCELLE
+function guncelle() {
+  let html = "";
+  let toplam = 0;
+
+  sepet.forEach(i => {
+    html += `${i.name} x ${i.qty}<br>`;
+    toplam += i.price * i.qty;
+  });
+
+  document.getElementById("liste").innerHTML = html;
+  document.getElementById("toplam").innerText = "Toplam: " + toplam + "₺";
+}
+
+// SİPARİŞ GÖNDER
+window.siparis = async () => {
+
+  if (sepet.length === 0) {
+    alert("Sepet boş");
+    return;
+  }
+
+  let toplam = 0;
+  sepet.forEach(i => toplam += i.price * i.qty);
 
   await addDoc(collection(db, "orders"), {
-    table: masa,
-    product: name,
-    price: price,
-    total: price,
-    time: new Date()
+    table: masaParam,
+    items: sepet,
+    total: toplam,
+    createdAt: new Date()
   });
 
   alert("Sipariş gönderildi");
+
+  sepet = [];
+  guncelle();
+};
+
+// GARSON
+window.garson = async () => {
+  await addDoc(collection(db, "calls"), {
+    table: masaParam,
+    createdAt: new Date()
+  });
+
+  alert("Garson geliyor");
+};
+
+// HESAP
+window.hesap = async () => {
+  await addDoc(collection(db, "billRequests"), {
+    table: masaParam,
+    createdAt: new Date()
+  });
+
+  alert("Hesap istendi");
 };
 
 </script>
