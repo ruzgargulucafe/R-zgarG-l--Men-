@@ -1,258 +1,175 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Garson Paneli</title>
 
 <style>
 
 body{
-
-margin:0;
-padding:20px;
-font-family:Arial,Helvetica,sans-serif;
-background:#1f1f1f;
-color:white;
-
+    font-family: Arial;
+    background:#f4f6f9;
+    padding:20px;
 }
 
 h1{
-
-text-align:center;
-margin-bottom:25px;
-
-}
-#stats{
-
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:15px;
-margin-bottom:30px;
-
+    text-align:center;
 }
 
-.stat{
-
-padding:18px;
-border-radius:12px;
-text-align:center;
-font-size:18px;
-font-weight:bold;
-
-}
-
-.waiting{
-
-background:#ff9800;
-
-}
-
-.calls{
-
-background:#2196f3;
-
-}
-
-.bills{
-
-background:#e91e63;
-
-}
-
-.stat strong{
-
-display:block;
-font-size:32px;
-margin-top:8px;
-
-}
-#calls,
-#bills{
-
-display:flex;
-flex-direction:column;
-gap:20px;
-
-}
+/* KART */
 
 .card{
-
-background:#2c2c2c;
-padding:20px;
-border-radius:15px;
-border-left:8px solid orange;
-
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* BAŞLIKLAR */
+
+.section{
+    margin-top:20px;
+}
+
+/* BUTON */
 
 button{
-
-width:100%;
-padding:15px;
-font-size:18px;
-border:none;
-border-radius:10px;
-background:#28a745;
-color:white;
-cursor:pointer;
-margin-top:15px;
-
-}
-#tables{
-
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-gap:15px;
-
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-.table{
-
-background:#333;
-padding:18px;
-border-radius:12px;
-text-align:center;
-font-size:18px;
-font-weight:bold;
-
+.btn-call{
+    background:#ff9800;
+    color:white;
 }
+
+.btn-bill{
+    background:#444;
+    color:white;
+}
+
+.btn-clear{
+    background:#dc3545;
+    color:white;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h1>👨‍💼 Garson Paneli</h1>
-<div id="stats">
+<h1>🛎 Garson Paneli</h1>
 
-<div class="stat waiting">
-<span>🍽 Bekleyen Sipariş</span>
-<strong id="waitingCount">0</strong>
+<div class="section">
+    <h2>Garson Çağrıları</h2>
+    <div id="calls"></div>
 </div>
 
-<div class="stat calls">
-<span>🔔 Çağrı</span>
-<strong id="callCount">0</strong>
+<div class="section">
+    <h2>Hesap İstekleri</h2>
+    <div id="bills"></div>
 </div>
 
-<div class="stat bills">
-<span>💳 Hesap</span>
-<strong id="billCount">0</strong>
-</div>
+<script type="module">
 
-</div>
-<h2>🔔 Garson Çağrıları</h2>
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-<div id="calls"></div>
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  doc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<hr style="margin:40px 0;">
+const firebaseConfig = {
+  apiKey: "AIzaSyCj4F_8WOwLzVoREs-gRZDXfgYEkLtNvig",
+  authDomain: "ruzgarguluqr.firebaseapp.com",
+  projectId: "ruzgarguluqr"
+};
 
-<h2>💳 Hesap İstekleri</h2>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<div id="bills"></div>
+// =========================
+// GARSON ÇAĞIR
+// =========================
 
-  <hr style="margin:40px 0;">
+onSnapshot(collection(db,"calls"), snap=>{
 
-<h2>🪑 Masalar</h2>
+  let html="";
 
-<div id="tables"></div>
+  snap.forEach(d=>{
 
-  <!-- Adisyon Modal -->
-<div id="billModal"
-     style="display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,.75);
-            z-index:9999;
-            justify-content:center;
-            align-items:center;">
+    const c = d.data();
 
-    <div style="
-        background:#2b2b2b;
-        width:min(700px,95%);
-        max-height:90vh;
-        overflow:auto;
-        border-radius:18px;
-        padding:25px;">
-
-        <h2 id="modalTable">Masa</h2>
-
-        <div id="modalItems"></div>
-
-        <hr>
-
-        <h2 style="text-align:right">
-            Toplam:
-            <span id="modalTotal">₺0</span>
-        </h2>
-
-        <hr>
-
-        <h3>Ödeme Şekli</h3>
-
-        <label>
-            <input type="radio"
-                   name="payment"
-                   value="Nakit"
-                   checked>
-            Nakit
-        </label>
-
-        <br><br>
-
-        <label>
-            <input type="radio"
-                   name="payment"
-                   value="Kart">
-            Kredi Kartı
-        </label>
-
-        <br><br>
-
-        <label>
-            <input type="radio"
-                   name="payment"
-                   value="Split">
-            Split
-        </label>
-
-        <div id="splitArea" style="display:none;margin-top:20px;">
-
-            <input
-                id="cashAmount"
-                type="number"
-                placeholder="Nakit"
-                style="width:100%;padding:12px;margin-bottom:10px;">
-
-            <input
-                id="cardAmount"
-                type="number"
-                placeholder="Kart"
-                style="width:100%;padding:12px;">
-
-        </div>
-
-        <br>
-
-        <button id="closeBillBtn"
-                style="background:#28a745">
-            💰 Hesabı Kapat
+    html += `
+      <div class="card">
+        <b>Masa: ${c.table}</b><br>
+        Garson çağırıyor
+        <button class="btn-clear"
+        onclick="silCall('${d.id}')">
+        Temizle
         </button>
+      </div>
+    `;
+  });
 
-        <button id="cancelBillBtn"
-                style="background:#666">
-            İptal
+  document.getElementById("calls").innerHTML =
+    html || "Çağrı yok";
+
+});
+
+// =========================
+// HESAP İSTE
+// =========================
+
+onSnapshot(collection(db,"billRequests"), snap=>{
+
+  let html="";
+
+  snap.forEach(d=>{
+
+    const b = d.data();
+
+    html += `
+      <div class="card">
+        <b>Masa: ${b.table}</b><br>
+        Hesap istiyor
+        <button class="btn-clear"
+        onclick="silBill('${d.id}')">
+        Temizle
         </button>
+      </div>
+    `;
+  });
 
-    </div>
+  document.getElementById("bills").innerHTML =
+    html || "İstek yok";
 
-</div>
-  
-<script type="module" src="waiter.js"></script>
+});
+
+// =========================
+// SİL
+// =========================
+
+window.silCall = async(id)=>{
+  await deleteDoc(doc(db,"calls",id));
+};
+
+window.silBill = async(id)=>{
+  await deleteDoc(doc(db,"billRequests",id));
+};
+
+</script>
 
 </body>
-
 </html>
