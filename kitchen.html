@@ -10,51 +10,63 @@
 <style>
 
 body{
-
-background:#202124;
-color:white;
-font-family:Arial;
-margin:0;
-padding:20px;
-
+  background:#202124;
+  color:white;
+  font-family:Arial;
+  margin:0;
+  padding:20px;
 }
 
 h1{
-
-text-align:center;
-margin-bottom:30px;
-
+  text-align:center;
+  margin-bottom:30px;
 }
 
+/* LİSTE */
 #orders{
-
-display:flex;
-flex-direction:column;
-gap:20px;
-
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }
 
+/* KART */
 .card{
-
-background:#2d2f31;
-border-radius:15px;
-padding:20px;
-border-left:8px solid orange;
-
+  background:#2d2f31;
+  border-radius:15px;
+  padding:20px;
+  border-left:8px solid orange;
 }
 
+/* DURUMLAR */
+.card.yeni { border-left:8px solid red; }
+.card.hazirlaniyor { border-left:8px solid orange; }
+.card.hazir { border-left:8px solid green; }
+
+/* ÜRÜNLER */
+.item{
+  padding:5px 0;
+  border-bottom:1px solid #444;
+}
+
+/* BUTON */
 button{
+  width:100%;
+  padding:16px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  margin-top:10px;
+  cursor:pointer;
+  background:#00a651;
+  color:white;
+}
 
-width:100%;
-padding:18px;
-font-size:20px;
-border:none;
-border-radius:10px;
-margin-top:15px;
-cursor:pointer;
-background:#00a651;
-color:white;
+button.secondary{
+  background:#ff9800;
+}
 
+button.done{
+  background:#28a745;
 }
 
 </style>
@@ -67,7 +79,101 @@ color:white;
 
 <div id="orders"></div>
 
-<script type="module" src="kitchen.js"></script>
+<script type="module">
+
+import { db } from "./app.js";
+
+import {
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// =========================
+// SİPARİŞLERİ ÇEK
+// =========================
+
+const ordersDiv = document.getElementById("orders");
+
+onSnapshot(collection(db,"orders"), (snapshot)=>{
+
+  ordersDiv.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+
+    const o = docSnap.data();
+
+    if(o.closed) return; // kapalıları gösterme
+
+    let durum = o.status || "Bekliyor";
+
+    let className = "yeni";
+    if(durum === "Hazırlanıyor") className = "hazirlaniyor";
+    if(durum === "Hazır") className = "hazir";
+
+    let itemsHTML = "";
+
+    (o.items || []).forEach(i=>{
+      itemsHTML += `<div class="item">${i.name} x${i.qty}</div>`;
+    });
+
+    ordersDiv.innerHTML += `
+      <div class="card ${className}">
+
+        <h2>🍽 Masa: ${o.table}</h2>
+
+        ${itemsHTML}
+
+        <h3>₺${o.total}</h3>
+
+        ${
+          durum === "Bekliyor"
+          ? `<button onclick="baslat('${docSnap.id}')">Hazırlamaya Başla</button>`
+          : ""
+        }
+
+        ${
+          durum === "Hazırlanıyor"
+          ? `<button class="secondary" onclick="hazir('${docSnap.id}')">Hazır Yap</button>`
+          : ""
+        }
+
+        ${
+          durum === "Hazır"
+          ? `<button class="done" onclick="teslim('${docSnap.id}')">Teslim Edildi</button>`
+          : ""
+        }
+
+      </div>
+    `;
+  });
+
+});
+
+// =========================
+// DURUM GÜNCELLE
+// =========================
+
+window.baslat = async(id)=>{
+  await updateDoc(doc(db,"orders",id),{
+    status:"Hazırlanıyor"
+  });
+};
+
+window.hazir = async(id)=>{
+  await updateDoc(doc(db,"orders",id),{
+    status:"Hazır"
+  });
+};
+
+window.teslim = async(id)=>{
+  await updateDoc(doc(db,"orders",id),{
+    status:"Teslim"
+  });
+};
+
+</script>
 
 </body>
 </html>
